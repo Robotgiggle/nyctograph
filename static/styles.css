@@ -1,0 +1,17 @@
+.flash-info {
+    color: dodgerblue;
+    background-color: paleturquoise;
+    padding: 8px;
+    width: fit-content;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.flash-warn {
+    color: red;
+    background-color: pink;
+    padding: 8px;
+    width: fit-content;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

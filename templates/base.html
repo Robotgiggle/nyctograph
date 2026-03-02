@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Nyctograph</title>
+        <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    </head>
+    <body>
+        {% for msg, type in flash %}
+            {% if type == "info" %}
+                <p class="flash-info">{{msg}}</p>
+            {% endif %}
+            {% if type == "warn" %}
+                <p class="flash-warn">{{msg}}</p>
+            {% endif %}
+        {% endfor %}
+        {% block body %}{% endblock %}
+    </body>
+</html>
