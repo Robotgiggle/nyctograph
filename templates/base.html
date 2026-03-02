@@ -5,6 +5,28 @@
         <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
     </head>
     <body>
+        <header style="display: flex; justify-content: space-between;">
+            <span>
+                Nyctograph |
+                <a href="/">Record a dream</a> |
+                {% if uname %}
+                    <a href="/my-dreams">My dreams</a> |
+                    <a href="/global-stats">Global stats</a> |
+                {% endif %}
+                <a href="/about-us">About us</a>
+            </span>
+            {% if uname %}
+                <span>
+                    Logged in as {{uname}} 
+                    (<a href="/logout">Log out</a>)
+                </span>
+            {% else %}
+                <span>
+                    <a href="/login">Log in</a> | 
+                    <a href="/signup">Sign up</a>
+                </span>
+            {% endif %}
+        </header>
         {% for msg, type in flash %}
             {% if type == "info" %}
                 <p class="flash-info">{{msg}}</p>

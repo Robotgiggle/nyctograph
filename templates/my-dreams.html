@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>My dreams</h1>
+    {% for entry in entries %}
+        <div>
+            <h2>{{ entry[0] }}</h2>
+            <p style="white-space: pre-line;">{{ entry[1] }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}

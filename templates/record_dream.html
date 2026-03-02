@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Record a dream</h1>
+    <form action="" method="post">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" value="{{ entry[0] if entry }}">
+        <br>
+        <label for="description">Describe your dream:</label>
+        <br>
+        <textarea rows="10" cols="50" id="description" name="description">{{ entry[1] if entry }}</textarea>
+        <br><br>
+        <input type="submit">
+    </form>
+{% endblock %}
