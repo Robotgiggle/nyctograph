@@ -1,3 +1,4 @@
+from argon2 import PasswordHasher
 from typing import Annotated
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
@@ -6,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from .database import engine
 from .models import User
+
+# Hasher object used throughout the app
+ph = PasswordHasher()
 
 # Creates a database session, then closes it once the path operation finishes (to be used as a dependency)
 def get_db_ses():

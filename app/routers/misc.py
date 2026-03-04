@@ -11,10 +11,13 @@ router = APIRouter()
 def about_us(request: Request):
     return not_implemented_yet(request)
 
-# Page listing our privacy policy
-@router.get("/privacy")
-def privacy(request: Request):
-    return not_implemented_yet(request)
+# Route that logs you out when visited
+@router.get("/logout")
+def logout_action(request: Request):
+    response = RedirectResponse("/", status_code=303)
+    request.session.pop("user_id", None)
+    request.session.pop("username", None)
+    return response
 
 # Page for configuring account settings
 @router.get("/account")

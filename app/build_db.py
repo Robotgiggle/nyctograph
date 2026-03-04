@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from .models import *
 from .database import Base, engine
-from .routers.login_signup import ph
+from .utils import ph
 
 # Run this with 'python -m app.build_db' from outside the app folder to avoid relative import errors
 
