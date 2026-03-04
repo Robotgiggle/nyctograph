@@ -1,29 +1,26 @@
-from argon2 import PasswordHasher
-from fastapi import Request
+from typing import Annotated
+from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-# Object used throughout the app for hashing
-ph = PasswordHasher()
+from .database import engine
+from .models import User
 
-# Minimal database representation until we set up the real one
-fake_db_users = {
-    "user1": {
-        "username": "user1",
-        "pwhash": ph.hash("pw123"),
-        "entries": []
-    },
-    "user2": {
-        "username": "user2",
-        "pwhash": ph.hash("pw456"),
-        "entries": []
-    }
-}
+# Creates a database session, then closes it once the path operation finishes (to be used as a dependency)
+def get_db_ses():
+    db = Session(engine)
+    try:
+        yield db
+    finally:
+        db.close()
+# Type alias for the dependency
+DbSesDep = Annotated[Session, Depends(get_db_ses)]
 
-# Returns a data structure representing the logged-in user
-# Returns None if not logged in
-def get_user(request: Request):
-    uname = request.session.get("uname")
-    if uname: return fake_db_users.get(uname)
+# Returns the logged-in user, or None if not logged in
+def get_user(request: Request, db: Session):
+    id = request.session.get("user_id")
+    if id: return db.get(User, id)
     else: return None
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded
@@ -31,13 +28,6 @@ def flash(request: Request, message: str, type: str):
     if "flashMessages" not in request.session:
         request.session["flashMessages"] = []
     request.session["flashMessages"].append((message, type))
-
-# Returns True if the specified account exists, and False otherwise
-def validate_user(uname: str, pword: str):
-    for user in fake_db_users.values():
-        if user["username"] == uname and ph.verify(user["pwhash"], pword):
-            return True
-    return False
 
 # Return this from a path operation if the actual functionality hasn't been implemented yet
 def not_implemented_yet(request: Request):

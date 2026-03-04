@@ -2,7 +2,8 @@ from typing import Annotated
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 
-from ..utils import get_user, flash
+from ..models import DreamEntry
+from ..utils import *
 from ..jinja import templates
 
 router = APIRouter()
@@ -10,13 +11,15 @@ router = APIRouter()
 @router.get("/")
 def record_dream_form(request: Request):
     storedEntry = request.session.get("storedEntry")
-    return templates.TemplateResponse(request, "record_dream.html", {"entry": storedEntry})
+    return templates.TemplateResponse(request, "record-dream.html", {"entry": storedEntry})
 
 @router.post("/")
-def record_dream_action(request: Request, title: Annotated[str, Form()], description: Annotated[str, Form()]):
-    user = get_user(request)
+def record_dream_action(request: Request, dbSes: DbSesDep, title: Annotated[str, Form()], description: Annotated[str, Form()]):
+    user = get_user(request, dbSes)
     if user:
-        user["entries"].append((title, description))
+        user.dream_entries.append(DreamEntry(title=title, description=description, public=False))
+        dbSes.add(user)
+        dbSes.commit()
         flash(request, "Dream entry saved", "info")
         return RedirectResponse("/", status_code=303)
     else:
