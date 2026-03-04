@@ -11,7 +11,7 @@ from .models import User
 # Hasher object used throughout the app
 ph = PasswordHasher()
 
-# Creates a database session, then closes it once the path operation finishes (to be used as a dependency)
+# [DEPENDENCY] Creates a database session, then closes it once the path operation finishes
 def get_db_ses():
     db = Session(engine)
     try:
@@ -21,11 +21,13 @@ def get_db_ses():
 # Type alias for the dependency
 DbSesDep = Annotated[Session, Depends(get_db_ses)]
 
-# Returns the logged-in user, or None if not logged in
-def get_user(request: Request, db: Session):
+# [DEPENDENCY] Provides the logged-in user, or None if not logged in
+def get_user(request: Request, dbSes: DbSesDep):
     id = request.session.get("user_id")
-    if id: return db.get(User, id)
+    if id: return dbSes.get(User, id)
     else: return None
+# Type alias for the dependency
+UserDep = Annotated[User, Depends(get_user)]
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):

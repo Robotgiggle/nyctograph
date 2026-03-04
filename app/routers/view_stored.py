@@ -8,8 +8,7 @@ router = APIRouter()
 
 # Page listing stored dream entries and local stats
 @router.get("/my-dreams")
-def list_dream_entries(request: Request, dbSes: DbSesDep):
-    user = get_user(request, dbSes)
+def list_dream_entries(request: Request, dbSes: DbSesDep, user: UserDep):
     if not user:
         flash(request, "This page or method requires an account!", "warn")
         return RedirectResponse("/login", status_code=303)

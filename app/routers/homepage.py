@@ -14,8 +14,7 @@ def record_dream_form(request: Request):
     return templates.TemplateResponse(request, "record-dream.html", {"entry": storedEntry})
 
 @router.post("/")
-def record_dream_action(request: Request, dbSes: DbSesDep, title: Annotated[str, Form()], description: Annotated[str, Form()]):
-    user = get_user(request, dbSes)
+def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:
         user.dream_entries.append(DreamEntry(title=title, description=description, public=False))
         dbSes.add(user)
