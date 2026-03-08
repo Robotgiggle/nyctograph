@@ -1,4 +1,5 @@
 import asyncio
+from os.path import dirname
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -18,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=dirname(__file__)+"/static"), name="static")
 
 app.add_middleware(SessionMiddleware, secret_key=COOKIE_SECRET_KEY)
 
