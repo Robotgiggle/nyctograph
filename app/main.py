@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
-from .routers import homepage, login, signup, view_stored, global_stats, misc
+from .routers import homepage, login, my_dreams, signup, global_stats, misc
 
 # ===== CORE APP SETUP =====
 
@@ -23,7 +23,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=COOKIE_SECRET_KEY)
 
 app.include_router(homepage.router)
-app.include_router(view_stored.router)
+app.include_router(my_dreams.router)
 app.include_router(global_stats.router)
 app.include_router(login.router)
 app.include_router(signup.router)
