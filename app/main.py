@@ -8,6 +8,8 @@ from .routers import homepage, login, signup, view_stored, global_stats, misc
 
 # ===== CORE APP SETUP =====
 
+COOKIE_SECRET_KEY = "correcthorsebatterystaple"
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # pre-startup handlers go here
@@ -18,7 +20,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-app.add_middleware(SessionMiddleware, secret_key="correcthorsebatterystaple")
+app.add_middleware(SessionMiddleware, secret_key=COOKIE_SECRET_KEY)
 
 app.include_router(homepage.router)
 app.include_router(view_stored.router)
