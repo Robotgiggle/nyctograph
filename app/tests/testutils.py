@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from ..main import app, COOKIE_SECRET_KEY
 
-# Provides the fastapi TestClient at runtime to allow mocks to work
+# Fixture that creates the fastapi TestClient at runtime to allow mocks to work
 @pytest.fixture(scope='module')
 def client() -> TestClient:
     return TestClient(app)

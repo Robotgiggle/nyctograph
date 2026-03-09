@@ -22,6 +22,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, title:
         flash(request, "Dream entry saved", "info")
         return RedirectResponse("/", status_code=303)
     else:
+        # TODO: use something other than a tuple here (probably a dict? maybe a whole DreamEntry?)
         request.session["storedEntry"] = (title, description)
         flash(request, "Dream entry temporarily stored - create an account to save it!", "info")
         return RedirectResponse("/signup", status_code=303)
