@@ -1,8 +1,9 @@
 from typing import Annotated
+from datetime import datetime
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 
-from ..models import DreamEntry
+from ..models import DreamEntry, Tag
 from ..utils import *
 from ..jinja import templates
 
@@ -16,7 +17,13 @@ def record_dream_form(request: Request):
 @router.post("/")
 def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:
-        user.dream_entries.append(DreamEntry(title=title, description=description, public=False))
+        new_entry = DreamEntry(
+            title=title, 
+            description=description, 
+            created_at=datetime.now(), 
+            public=False
+        )
+        user.dream_entries.append(new_entry)
         dbSes.add(user)
         dbSes.commit()
         flash(request, "Dream entry saved", "info")

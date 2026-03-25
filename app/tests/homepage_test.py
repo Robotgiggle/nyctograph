@@ -1,5 +1,6 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from fastapi.testclient import TestClient
+from datetime import datetime
 from pytest import xfail
 
 from ..models import User
@@ -32,7 +33,12 @@ class TestHomepage:
         # login check
         db_instance.get.assert_called_with(User, 3)
         # adding new entry
-        entry_class.assert_called_with(title=entryData["title"], description=entryData["description"], public=False)
+        entry_class.assert_called_with(
+            title=entryData["title"], 
+            description=entryData["description"], 
+            created_at=ANY,
+            public=False
+        )
         user_instance.dream_entries.append.assert_called_with(entry_class.return_value)
         # saving new entry
         db_instance.add.assert_called_with(user_instance)

@@ -18,3 +18,5 @@ def set_session(client: TestClient, sessionDict: dict):
         b64encode(json.dumps(sessionDict).encode('utf-8')),
     ).decode('utf-8')
     client.cookies = {'session': sessionCookie}
+
+# TODO: implement get_session

@@ -10,7 +10,7 @@ def main():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     with Session(engine) as ses:
-        ses.add(User(username="admin", pw_hash=ph.hash("dream"), public_enabled=True))
+        ses.add(User(username="admin", pw_hash=ph.hash("dream"), email="fake@fake.com", public_enabled=True))
         ses.commit()
 
 if __name__ == "__main__":
