@@ -6,10 +6,32 @@ from .utils import ph
 
 # Run this with 'python -m app.build_db' from outside the app folder to avoid relative import errors
 
+content = [
+    "Flying", "Falling", "Paralysis", "Chase", "Embarrassment", "Driving", "School", "Teeth", "Disaster",
+    "Searching", "Monster", "Family", "Romance", "Death", "Sex", "Food", "Betrayal", "Lateness", "Water",
+    "Fire", "Money", "Naked", "Unprepared", "Lost", "Bathroom", "Abstract", "Adventure", "Hospital", "Workplace",
+    "Revenge", "Video Game", "Transformation"
+]
+
+types = ["Nightmare", "Recurring", "Lucid", "False Awakening", "Sleep Paralysis"]
+
+contexts = [
+    "High Stress", "Illness (Self)", "Illness (Other)", "Pregnancy", "Upcoming Deadline", "Political Change", 
+    "Vacation", "Graduation", "Job Interview", "Daytime Nap", "Scary Media", "New Relationship", "New Job",
+    "New Child", "New Living Place", "Recent Argument", "Recent Breakup", "Lost Job", "Recent Death", 
+    "Natural Disaster", "Major Injury"
+]
+
 def main():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     with Session(engine) as ses:
+        for item in content:
+            ses.add(Tag(category="dream_content", value=item))
+        for item in types:
+            ses.add(Tag(category="dream_type", value=item))
+        for item in contexts:
+            ses.add(Tag(category="irl_context", value=item))
         ses.add(User(username="admin", pw_hash=ph.hash("dream"), email="fake@fake.com", public_enabled=True))
         ses.commit()
 

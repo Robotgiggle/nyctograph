@@ -21,7 +21,7 @@ class DreamEntry(Base):
     title: Mapped[str]
     description: Mapped[str]
     created_at: Mapped[datetime]
-    public: Mapped[bool]
+    public: Mapped[bool] = mapped_column(index=True)
     # additional optional details
     involved_sight: Mapped[bool|None]
     involved_sound: Mapped[bool|None]
