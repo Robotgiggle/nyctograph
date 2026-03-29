@@ -16,4 +16,4 @@ class DownloadRecord(Base):
     downloaded_at: Mapped[datetime]
     filters_used: Mapped[str]
 
-    researcher: Mapped[Researcher] = relationship(back_populates="downloads")
+    researcher: Mapped["Researcher"] = relationship(back_populates="downloads")

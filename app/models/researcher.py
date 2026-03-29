@@ -16,4 +16,4 @@ class Researcher(Base):
     ror_id: Mapped[str]
     data_filters: Mapped[str]
 
-    downloads: Mapped[List[DownloadRecord]] = relationship(back_populates="researcher")
+    downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")

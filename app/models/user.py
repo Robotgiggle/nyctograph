@@ -23,7 +23,7 @@ class User(Base):
     state: Mapped[str|None]
     city: Mapped[str|None]
 
-    dream_entries: Mapped[List[DreamEntry]] = relationship(back_populates="user")
+    dream_entries: Mapped[List["DreamEntry"]] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
         return f"User(id: {self.id}, uname: {self.username})"

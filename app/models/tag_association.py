@@ -17,5 +17,5 @@ class TagAssociation(Base):
     association_month: Mapped[float] = mapped_column(index=True)
     association_all: Mapped[float] = mapped_column(index=True)
 
-    tag_a: Mapped[Tag] = relationship(foreign_keys=[tag_id_a])
-    tag_b: Mapped[Tag] = relationship(foreign_keys=[tag_id_b])
+    tag_a: Mapped["Tag"] = relationship(foreign_keys=[tag_id_a])
+    tag_b: Mapped["Tag"] = relationship(foreign_keys=[tag_id_b])

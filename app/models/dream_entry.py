@@ -40,8 +40,8 @@ class DreamEntry(Base):
     rfln_timestamp: Mapped[datetime|None]
 
     # relations
-    user: Mapped[User] = relationship(back_populates="dream_entries")
-    tags: Mapped[List[Tag]] = relationship(back_populates="entries", secondary=entry_tag_association_table)
+    user: Mapped["User"] = relationship(back_populates="dream_entries")
+    tags: Mapped[List["Tag"]] = relationship(back_populates="entries", secondary=entry_tag_association_table)
 
     def __repr__(self) -> str:
         return f"DreamEntry(id: {self.id}, user_id: {self.user_id}, title: {self.title}, desc: {self.description[:30]+'...'})"
