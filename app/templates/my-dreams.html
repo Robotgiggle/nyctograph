@@ -3,7 +3,7 @@
     <h1>My dreams</h1>
     {% for entry in entries %}
         <div>
-            <h2>{{ entry.title }}</h2>
+            <h2><a href="/my-dreams/{{ entry.id }}">{{ entry.title }}</a></h2>
             <p style="white-space: pre-line;">{{ entry.description }}</p>
         </div>
     {% endfor %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>{{ entry.title }}</h1>
+    
+    <section>
+        <h2>Description</h2>
+        <p style="white-space: pre-line;">{{ entry.description }}</p>
+    </section>
+
+    <section>
+        <h2>Basic Information</h2>
+        <p><strong>Created:</strong> {{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p><strong>Author:</strong> {{ entry.user.username }}</p>
+        <p><strong>Visibility:</strong> {{ "Public" if entry.public else "Private" }}</p>
+    </section>
+
+    {% if entry.involved_sight is not none or entry.involved_sound is not none or entry.involved_touch is not none or entry.involved_smell is not none or entry.involved_taste is not none or entry.involved_pain is not none %}
+    <section>
+        <h2>Sensory Experiences</h2>
+        <ul>
+            {% if entry.involved_sight is not none %}<li>Sight: {{ "Yes" if entry.involved_sight else "No" }}</li>{% endif %}
+            {% if entry.involved_sound is not none %}<li>Sound: {{ "Yes" if entry.involved_sound else "No" }}</li>{% endif %}
+            {% if entry.involved_touch is not none %}<li>Touch: {{ "Yes" if entry.involved_touch else "No" }}</li>{% endif %}
+            {% if entry.involved_smell is not none %}<li>Smell: {{ "Yes" if entry.involved_smell else "No" }}</li>{% endif %}
+            {% if entry.involved_taste is not none %}<li>Taste: {{ "Yes" if entry.involved_taste else "No" }}</li>{% endif %}
+            {% if entry.involved_pain is not none %}<li>Pain: {{ "Yes" if entry.involved_pain else "No" }}</li>{% endif %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if entry.context or entry.bed_time or entry.wake_time or entry.country or entry.state or entry.city %}
+    <section>
+        <h2>Context & Location</h2>
+        {% if entry.context %}<p><strong>Context:</strong> {{ entry.context }}</p>{% endif %}
+        {% if entry.bed_time %}<p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
+        {% if entry.wake_time %}<p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
+        {% if entry.city or entry.state or entry.country %}
+            <p><strong>Location:</strong> 
+                {% if entry.city %}{{ entry.city }}{% endif %}
+                {% if entry.state %}{% if entry.city %}, {% endif %}{{ entry.state }}{% endif %}
+                {% if entry.country %}{% if entry.city or entry.state %}, {% endif %}{{ entry.country }}{% endif %}
+            </p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if entry.tags %}
+    <section>
+        <h2>Tags</h2>
+        <ul>
+            {% for tag in entry.tags %}
+                <li>{{ tag.value }} ({{ tag.category }})</li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if entry.reflection %}
+    <section>
+        <h2>Reflection</h2>
+        <p style="white-space: pre-line;">{{ entry.reflection }}</p>
+        {% if entry.rfln_timestamp %}<p><strong>Reflected on:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
+    </section>
+    {% endif %}
+
+    <p><a href="/my-dreams">← Back to My Dreams</a></p>
+{% endblock %}
