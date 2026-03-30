@@ -2,13 +2,86 @@
 {% block body %}
     <h1>Record a dream</h1>
     <form action="" method="post">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" value="{{ entry[0] if entry }}">
+        <div id="basics">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ entry.title if entry }}" required>
+            <br>
+            <label for="description">Describe your dream:</label>
+            <br>
+            <textarea rows="10" cols="50" id="description" name="description" required>{{ entry.description if entry }}</textarea>
+            <br>
+            <label for="content_tags">Select one or more dream content tags:</label>
+            <!-- TODO: use something better to make this form element work -->
+            <!-- https://www.jqueryscript.net/blog/best-multiple-select.html -->
+            <!-- https://www.jqueryscript.net/demo/jQuery-Multiple-Select-Plugin-For-Bootstrap-Bootstrap-Multiselect/ -->
+            <select id="content_tags" name="content_tags" multiple size="1">
+                {% for tag in contentTags %}
+                    <option {{'selected' if tag in entry.content_tags else ''}}>{{tag}}</option>
+                {% endfor %}
+            </select>
+        </div>
         <br>
-        <label for="description">Describe your dream:</label>
+        <div id="senses">
+            <label>Check any sensations that were involved in the dream:</label>
+            <br>
+            {% for sense in senses %}
+                <label for="{{'sense_'+sense}}">{{sense.capitalize()}}</label>
+                <input type="checkbox" id="{{'sense_'+sense}}" name="{{'sense_'+sense}}" {{'checked' if entry['sense_'+sense] else ''}}>
+            {% endfor %}
+        </div>
         <br>
-        <textarea rows="10" cols="50" id="description" name="description">{{ entry[1] if entry }}</textarea>
-        <br><br>
-        <input type="submit">
+        <div id="types">
+            <label>Check any relevant dream types:</label>
+            <br>
+            {% for tag in typeTags %}
+                <label for="{{tag}}">{{tag}}</label>
+                <input type="checkbox" id="{{tag}}" name="type_tags", value="{{tag}}" {{'checked' if tag in entry.type_tags else ''}}>
+            {% endfor %}
+        </div>
+        <br>
+        <div id="context">
+            <label for="context">Describe any real-world context that may have inspired the dream:</label>
+            <br>
+            <textarea rows="10" cols="50" id="context" name="context">{{ entry.context if entry }}</textarea>
+            <br>
+            <label for="context_tags">Select one or more real-world context tags:</label>
+            <select id="context_tags" name="context_tags" multiple size="1">
+                {% for tag in contextTags %}
+                    <option {{'selected' if tag in entry.context_tags else ''}}>{{tag}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+        <div id="sleep_times">
+            <label for="bed_time">When did you go to bed?</label>
+            <input type="time" id="bed_time" name="bed_time" value="{{ entry.bed_time.strftime('%H:%M') if entry }}">
+            <br>
+            <label for="wake_time">When did you wake up?</label>
+            <input type="time" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry }}">
+        </div>
+        <br>
+        <div id="location">
+            <label>Where were you when you had the dream?</label>
+            <br>
+            <label for="country">Country:</label>
+            <input type="text" id="country" name="country" value="{{defaultLocation[0]}}">
+            <br>
+            <label for="state">State:</label>
+            <input type="text" id="state" name="state" value="{{defaultLocation[1]}}">
+            <br>
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" value="{{defaultLocation[2]}}">
+        </div>
+        <br>
+        <div id="public">
+            <label>Allow this entry to be included in global statistics and made available to researchers?</label>
+            <br>
+            <input type="radio" id="public-yes" name="public" value="True" required {{'checked' if entry.public else ''}}>
+            <label for="public-yes">Yes</label>
+            <input type="radio" id="public-no" name="public" value="False" required {{'checked' if entry and not entry.public else ''}}>
+            <label for="public-no">No</label>
+        </div>
+        <br>
+        <input type="submit" value="Save Dream Entry">
     </form>
 {% endblock %}
