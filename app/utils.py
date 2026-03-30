@@ -11,6 +11,14 @@ from .models import User
 # Hasher object used throughout the app
 ph = PasswordHasher()
 
+# Returns t/f based on whether the password matches
+def verify_pw(hashed_pw, input_pw):
+    try:
+        ph.verify(hashed_pw, input_pw)
+        return True
+    except:
+        return False
+
 # [DEPENDENCY] Creates a database session, then closes it once the path operation finishes
 def get_db_ses():
     db = Session(engine)

@@ -7,7 +7,7 @@ To set up the project:
 
 To set up the database:
 - The app currently expects to find a PostgreSQL database running locally on port 5432. You can download and install PostgreSQL [here](https://www.postgresql.org/download/).
-- Once you have a PostgreSQL server running, you'll need to create a database named `nyctograph`, and ensure that it has a user named `postgresql` with the password `opensesame`.
+- Once you have a PostgreSQL server running, you'll need to create a database named `nyctograph`, and ensure that it has a user named `postgres` with the password `opensesame`.
 - Assuming the above conditions are met, the app should be able to connect to the database. To set up the tables (and create an admin user account), run `python -m app.build_db`. You can also run the same script to reset the database if you don't want to manually remove testing data.
 
 To start the server:

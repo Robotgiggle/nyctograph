@@ -17,9 +17,11 @@ def login_form(request: Request):
 # Login handler method
 @router.post("/login")
 def login_action(request: Request, dbSes: DbSesDep, uname: Annotated[str, Form()], pword: Annotated[str, Form()]):    
+    # check user table for an entry matching the specified username
     result = dbSes.execute(select(User.id, User.pw_hash).where(User.username == uname)).first()
     
-    if result and ph.verify(result[1], pword):
+    # verify that the password on the returned entry matches the password the user entered
+    if result and verify_pw(result[1], pword):
         request.session["user_id"] = result[0]
         request.session["username"] = uname
         response = RedirectResponse("/", status_code=303)
