@@ -31,14 +31,14 @@
     {% if entry.context or entry.bed_time or entry.wake_time or entry.country or entry.state or entry.city %}
     <section>
         <h2>Context & Location</h2>
-        {% if entry.context %}<p><strong>Context:</strong> {{ entry.context }}</p>{% endif %}
-        {% if entry.bed_time %}<p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
-        {% if entry.wake_time %}<p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
+        {% if entry.context %}<strong>General context:</strong><p style="white-space:pre-line;margin-top:0">{{ entry.context }}</p>{% endif %}
+        {% if entry.bed_time %}<p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%I:%M %p') }}</p>{% endif %}
+        {% if entry.wake_time %}<p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%I:%M %p') }}</p>{% endif %}
         {% if entry.city or entry.state or entry.country %}
             <p><strong>Location:</strong> 
-                {% if entry.city %}{{ entry.city }}{% endif %}
-                {% if entry.state %}{% if entry.city %}, {% endif %}{{ entry.state }}{% endif %}
-                {% if entry.country %}{% if entry.city or entry.state %}, {% endif %}{{ entry.country }}{% endif %}
+                {% if entry.city %}{{ entry.city }}{% endif %}{% if entry.state %}, {% endif %}
+                {% if entry.state %}{{ entry.state }}{% endif %}{% if entry.country %}, {% endif %}
+                {% if entry.country %}{{ entry.country }}{% endif %}
             </p>
         {% endif %}
     </section>
