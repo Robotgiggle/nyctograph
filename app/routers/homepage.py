@@ -61,7 +61,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, formDa
         request.session.pop("storedEntry", None)
 
         # Return to homepage with success message
-        flash(request, "Dream entry saved", "info")
+        flash(request, "Dream entry saved", "success")
         return RedirectResponse("/", status_code=303)
     else:
         # Store a representation of the form data into the session for later use
