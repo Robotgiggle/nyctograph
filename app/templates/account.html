@@ -20,10 +20,12 @@
         <br><br>
 
         <h2>Profile Details</h2>
-        <label for="public_enabled">
-            <input type="checkbox" id="public_enabled" name="public_enabled" value="true" {{ "checked" if user.public_enabled }}>
-            Allow my dream data to appear in global stats
-        </label>
+        <label for="public_enabled">Allow my dream data to be included in global statistics and made available to researchers</label>
+        <br>
+        <input type="radio" id="public-yes" name="public_enabled" value="True" required {%if user.public_enabled%}checked{%endif%}>
+        <label for="public-yes">Yes</label>
+        <input type="radio" id="public-no" name="public_enabled" value="False" required {%if not user.public_enabled%}checked{%endif%}>
+        <label for="public-no">No</label>
         <br><br>
         <label for="age">Age:</label>
         <input type="number" id="age" name="age" min="1" max="120" value="{{ user.age if user.age is not none }}">

@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 
 from ..utils import UserDep, DbSesDep, flash, verify_pw, ph, not_implemented_yet
 from ..jinja import templates
+from ..forms import AccountConfigForm
 
 router = APIRouter()
 
@@ -30,53 +31,38 @@ def account_config_page(request: Request, user: UserDep):
 
 # Account config handler method
 @router.post("/account")
-def account_config_action(
-    request: Request,
-    user: UserDep,
-    dbSes: DbSesDep,
-    email: Annotated[str | None, Form()] = None,
-    new_username: Annotated[str | None, Form()] = None,
-    current_password: Annotated[str | None, Form()] = None,
-    new_password: Annotated[str | None, Form()] = None,
-    public_enabled: Annotated[bool | None, Form()] = None,
-    age: Annotated[int | None, Form()] = None,
-    gender: Annotated[str | None, Form()] = None,
-    med_conditions: Annotated[str | None, Form()] = None,
-    country: Annotated[str | None, Form()] = None,
-    state: Annotated[str | None, Form()] = None,
-    city: Annotated[str | None, Form()] = None,
-):
+def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, formData: Annotated[AccountConfigForm, Form()]):
     if not user:
         flash(request, "You must be logged in to update account settings.", "warn")
         return RedirectResponse("/login", status_code=303)
 
     # Handle password change. Requires current password to be verified first
-    if new_password:
-        if not current_password or not verify_pw(user.pw_hash, current_password):
+    if formData.new_password:
+        if not formData.current_password or not verify_pw(user.pw_hash, formData.current_password):
             flash(request, "Current password is incorrect.", "warn")
             return RedirectResponse("/account", status_code=303)
-        user.pw_hash = ph.hash(new_password)
+        user.pw_hash = ph.hash(formData.new_password)
 
     # Update each field if it was submitted; empty string clears optional text fields
-    if email is not None:
-        user.email = email
-    if new_username is not None and new_username != "":
-        user.username = new_username
-        request.session["username"] = new_username
-    if public_enabled is not None:
-        user.public_enabled = public_enabled
-    if age is not None:
-        user.age = age
-    if gender is not None:
-        user.gender = gender or None
-    if med_conditions is not None:
-        user.med_conditions = med_conditions or None
-    if country is not None:
-        user.country = country or None
-    if state is not None:
-        user.state = state or None
-    if city is not None:
-        user.city = city or None
+    if formData.email is not None:
+        user.email = formData.email
+    if formData.new_username is not None:
+        user.username = formData.new_username
+        request.session["username"] = formData.new_username
+    if formData.public_enabled is not None:
+        user.public_enabled = formData.public_enabled
+    if formData.age is not None:
+        user.age = formData.age
+    if formData.gender is not None:
+        user.gender = formData.gender or None
+    if formData.med_conditions is not None:
+        user.med_conditions = formData.med_conditions or None
+    if formData.country is not None:
+        user.country = formData.country or None
+    if formData.state is not None:
+        user.state = formData.state or None
+    if formData.city is not None:
+        user.city = formData.city or None
 
     dbSes.commit()
     flash(request, "Account settings updated.", "success")

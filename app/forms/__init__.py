@@ -1,1 +1,2 @@
 from .dream_entry_form import DreamEntryForm
+from .account_config_form import AccountConfigForm
