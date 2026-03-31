@@ -17,8 +17,8 @@
             </span>
             {% if uname %}
                 <span>
-                    Logged in as {{uname}} 
-                    (<a href="/logout">Log out</a>)
+                    Logged in as {{uname}}
+                    (<a href="/account">Account</a> | <a href="/logout">Log out</a>)
                 </span>
             {% else %}
                 <span>
@@ -33,6 +33,9 @@
             {% endif %}
             {% if type == "warn" %}
                 <p class="flash-warn">{{msg}}</p>
+            {% endif %}
+            {% if type == "success" %}
+                <p class="flash-success">{{msg}}</p>
             {% endif %}
         {% endfor %}
         {% block body %}{% endblock %}
