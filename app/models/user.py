@@ -11,7 +11,7 @@ class User(Base):
 
     # core account info
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(index=True)
+    username: Mapped[str] = mapped_column(index=True, unique=True)
     pw_hash: Mapped[str]
     email: Mapped[str]
     public_enabled: Mapped[bool]
