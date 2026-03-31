@@ -8,9 +8,9 @@ from .utils import ph
 
 content = [
     "Flying", "Falling", "Paralysis", "Chase", "Embarrassment", "Driving", "School", "Teeth", "Disaster",
-    "Searching", "Monster", "Family", "Romance", "Death", "Sex", "Food", "Betrayal", "Lateness", "Water",
-    "Fire", "Money", "Naked", "Unprepared", "Lost", "Bathroom", "Abstract", "Adventure", "Hospital", "Workplace",
-    "Revenge", "Video Game", "Transformation"
+    "Monster", "Family", "Romance", "Death", "Sex", "Food", "Betrayal", "Revenge", "Transformation",
+    "Naked", "Lost", "Unprepared", "Searching", "Lateness", "Wealth", "Water", "Fire", "Bathroom", 
+    "Hospital", "Workplace", "Adventure", "Video Game", "Abstract"
 ]
 
 types = ["Nightmare", "Recurring", "Lucid", "False Awakening", "Sleep Paralysis"]

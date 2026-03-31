@@ -1,5 +1,5 @@
 from typing import List, TYPE_CHECKING
-from datetime import datetime
+from datetime import datetime, time
 from sqlalchemy import ForeignKey, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -23,15 +23,16 @@ class DreamEntry(Base):
     created_at: Mapped[datetime]
     public: Mapped[bool] = mapped_column(index=True)
     # additional optional details
-    involved_sight: Mapped[bool|None]
-    involved_sound: Mapped[bool|None]
-    involved_touch: Mapped[bool|None]
-    involved_smell: Mapped[bool|None]
-    involved_taste: Mapped[bool|None]
-    involved_pain: Mapped[bool|None]
+    sense_sight: Mapped[bool|None]
+    sense_sound: Mapped[bool|None]
+    sense_touch: Mapped[bool|None]
+    sense_smell: Mapped[bool|None]
+    sense_taste: Mapped[bool|None]
+    sense_pain: Mapped[bool|None]
+    sense_other: Mapped[bool|None]
     context: Mapped[str|None]
-    bed_time: Mapped[datetime|None]
-    wake_time: Mapped[datetime|None]
+    bed_time: Mapped[time|None]
+    wake_time: Mapped[time|None]
     country: Mapped[str|None]
     state: Mapped[str|None]
     city: Mapped[str|None]
