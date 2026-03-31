@@ -36,5 +36,6 @@ app.include_router(misc.router)
 @app.exception_handler(RequestValidationError)
 def validation_error_handler(request: Request, exc: RequestValidationError):
     for error in exc.errors():
-        flash(request, f"Validation error for '{error["loc"][1]}': {error['msg']}", "warn")
+        field = error["loc"][1] if len(error["loc"]) > 1 else error["loc"][0]
+        flash(request, f"Validation error for '{field}': {error['msg']}", "warn")
     return RedirectResponse(request['path'], status_code=303)

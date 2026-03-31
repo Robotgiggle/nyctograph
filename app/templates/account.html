@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Account Settings</h1>
+
+    <form action="" method="post">
+        <h2>Basic Info</h2>
+        <label for="new_username">Username:</label>
+        <input type="text" id="new_username" name="new_username" value="{{ user.username }}">
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}">
+        <br><br>
+
+        <h2>Change Password</h2>
+        <label for="current_password">Current password:</label>
+        <input type="password" id="current_password" name="current_password">
+        <br>
+        <label for="new_password">New password:</label>
+        <input type="password" id="new_password" name="new_password">
+        <br><br>
+
+        <h2>Profile Details</h2>
+        <label for="public_enabled">
+            <input type="checkbox" id="public_enabled" name="public_enabled" value="true" {{ "checked" if user.public_enabled }}>
+            Allow my dream data to appear in global stats
+        </label>
+        <br><br>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" min="1" max="120" value="{{ user.age if user.age is not none }}">
+        <br>
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" name="gender" value="{{ user.gender if user.gender is not none }}">
+        <br>
+        <label for="med_conditions">Medical conditions:</label>
+        <br>
+        <textarea rows="3" cols="50" id="med_conditions" name="med_conditions">{{ user.med_conditions if user.med_conditions is not none }}</textarea>
+        <br><br>
+        <label for="country">Country:</label>
+        <input type="text" id="country" name="country" value="{{ user.country if user.country is not none }}">
+        <br>
+        <label for="state">State/Province:</label>
+        <input type="text" id="state" name="state" value="{{ user.state if user.state is not none }}">
+        <br>
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" value="{{ user.city if user.city is not none }}">
+        <br><br>
+
+        <input type="submit" value="Save changes">
+    </form>
+{% endblock %}

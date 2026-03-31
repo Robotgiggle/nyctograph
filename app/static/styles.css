@@ -15,3 +15,12 @@
     margin-top: 8px;
     margin-bottom: 8px;
 }
+
+.flash-success {
+    color: green;
+    background-color: palegreen;
+    padding: 8px;
+    width: fit-content;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
