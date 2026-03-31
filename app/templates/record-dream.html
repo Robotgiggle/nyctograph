@@ -54,10 +54,10 @@
         <br>
         <div id="sleep_times">
             <label for="bed_time">When did you go to bed?</label>
-            <input type="time" id="bed_time" name="bed_time" value="{{ entry.bed_time.strftime('%H:%M') if entry }}">
+            <input type="time" id="bed_time" name="bed_time" value="{{ entry.bed_time.strftime('%H:%M') if entry.bed_time }}">
             <br>
             <label for="wake_time">When did you wake up?</label>
-            <input type="time" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry }}">
+            <input type="time" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry.bed_time }}">
         </div>
         <br>
         <div id="location">

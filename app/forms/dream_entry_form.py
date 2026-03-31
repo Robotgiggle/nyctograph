@@ -18,14 +18,21 @@ class DreamEntryForm(BaseModel):
     sense_pain: bool|None = False
     sense_other: bool|None = False
     type_tags: List[str] = []
-    context: str|None
+    context: str|None = None
     context_tags: List[str] = []
-    bed_time: time|None
-    wake_time: time|None
-    country: str|None
-    state: str|None
-    city: str|None
+    bed_time: time|None = None
+    wake_time: time|None = None
+    country: str|None = None
+    state: str|None = None
+    city: str|None = None
     public: bool
+
+    @field_validator("title", "description")
+    @classmethod
+    def string_must_exist(cls, input: str):
+        if input: return input
+        else: raise ValueError("This field cannot be empty!")
+
 
     @field_validator("bed_time", "wake_time", mode="before")
     @classmethod
@@ -44,18 +51,11 @@ class DreamEntryForm(BaseModel):
             self.sense_sight = self.sense_sound = self.sense_touch = self.sense_smell = self.sense_taste = self.sense_pain = self.sense_other = None
         return self
     
-    # This method creates a DreamEntry based on the form data, creates all the Tag objects it needs,
-    # and links them to it. The returned DreamEntry is ready to be linked to a User and saved.
     def createDreamEntry(self) -> DreamEntry:
         entry = DreamEntry(**self.model_dump(exclude={'content_tags', 'type_tags', 'context_tags'}))
-        entry.created_at = datetime.now()
-        for tag in self.content_tags:
-            newTag = Tag(category="dream_content", value=tag)
-            entry.tags.append(newTag)
-        for tag in self.type_tags:
-            newTag = Tag(category="dream_type", value=tag)
-            entry.tags.append(newTag)
-        for tag in self.context_tags:
-            newTag = Tag(category="irl_context", value=tag)
-            entry.tags.append(newTag)
+        entry.created_at = datetime.now()   
         return entry
+    
+    @property
+    def all_tags(self):
+        return self.content_tags + self.type_tags + self.context_tags

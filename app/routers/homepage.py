@@ -39,14 +39,22 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
 @router.post("/")
 def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, formDataModel: Annotated[DreamEntryForm, Form()]):#, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:
-        # Create and save a new DreamEntry based on form data
+        # Create and save a new DreamEntry based on form data, and link any necessary tags
         newEntry = formDataModel.createDreamEntry()
         user.dream_entries.append(newEntry)
-        dbSes.add(user)
+        badTags = []
+        for tagName in formDataModel.all_tags:
+            tagObj = dbSes.get(Tag, tagName)
+            if tagObj is None: badTags.append(tagName)
+            else: newEntry.tags.append(tagObj)
+        if badTags:
+            for tag in badTags: flash(request, f"'{tag}' is not a valid tag!", "warn")
+            return RedirectResponse("/", status_code=303)
+        dbSes.add(newEntry)
         dbSes.commit()
 
         # Now that the entry is saved, clear it out of the session if it's there
-        del request.session["storedEntry"]
+        request.session.pop("storedEntry", None)
 
         # Return to homepage with success message
         flash(request, "Dream entry saved", "info")
