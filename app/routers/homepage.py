@@ -30,7 +30,8 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
             storedEntry.country if storedEntry else (user.country or '' if user else ''), 
             storedEntry.state if storedEntry else (user.state or '' if user else ''), 
             storedEntry.city if storedEntry else (user.city or '' if user else '')
-        )
+        ),
+        "publicDisabled": not user.public_enabled if user else False
     }
 
     # Display the dream entry creation form
@@ -41,6 +42,9 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, formDa
     if user:
         # Create and save a new DreamEntry based on form data, and link any necessary tags
         newEntry = formDataModel.createDreamEntry()
+        if newEntry.public and not user.public_enabled:
+            newEntry.public = False
+            flash(request, "Entry marked as non-public to match your account settings", "info")
         user.dream_entries.append(newEntry)
         badTags = []
         for tagName in formDataModel.all_tags:
