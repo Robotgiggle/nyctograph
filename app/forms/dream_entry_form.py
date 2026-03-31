@@ -1,14 +1,14 @@
 from typing import List
 from datetime import datetime, time
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..models import DreamEntry, Tag
 
 # This is a Pydantic model that recieves raw form data from the user and processes it into a DreamEntry
 # The JSON-ified version of this is also used to store the data in the session if the user was not logged in
 class DreamEntryForm(BaseModel):
-    title: str
-    description: str
+    title: str = Field(min_length=1)
+    description: str = Field(min_length=1)
     content_tags: List[str] = []
     sense_sight: bool|None = False
     sense_sound: bool|None = False
@@ -26,13 +26,6 @@ class DreamEntryForm(BaseModel):
     state: str|None = None
     city: str|None = None
     public: bool
-
-    @field_validator("title", "description")
-    @classmethod
-    def string_must_exist(cls, input: str):
-        if input: return input
-        else: raise ValueError("This field cannot be empty!")
-
 
     @field_validator("bed_time", "wake_time", mode="before")
     @classmethod
