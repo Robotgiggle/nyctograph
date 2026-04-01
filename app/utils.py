@@ -43,7 +43,7 @@ def get_researcher(request: Request, dbSes: DbSesDep):
     if rid is None:
         return None
     return dbSes.get(Researcher, rid)
-
+# Type alias for the dependency
 ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded

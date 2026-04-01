@@ -9,7 +9,7 @@
             <span>
                 Nyctograph |
                 <a href="/">Record a dream</a> |
-                {% if standard_user_id %}
+                {% if login_status == 1 %}
                     <a href="/my-dreams">My dreams</a> |
                 {% endif %}
                 {% if uname %}
@@ -19,8 +19,8 @@
             </span>
             {% if uname %}
                 <span>
-                    Logged in as {{uname}}{% if is_researcher %} (research){% endif %}
-                    ({% if standard_user_id %}<a href="/account">Account</a> | {% endif %}<a href="/logout">Log out</a>)
+                    Logged in as {{uname}}{% if login_status == 2 %} (research){% endif %}
+                    ({% if login_status == 1 %}<a href="/account">Account</a> | {% endif %}<a href="/logout">Log out</a>)
                 </span>
             {% else %}
                 <span>

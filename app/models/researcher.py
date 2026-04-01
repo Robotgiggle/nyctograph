@@ -14,6 +14,6 @@ class Researcher(Base):
     pw_hash: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     ror_id: Mapped[str]
-    data_filters: Mapped[str]
+    data_filters: Mapped[str|None]
 
     downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")

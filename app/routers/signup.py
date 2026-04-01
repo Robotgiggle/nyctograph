@@ -30,11 +30,7 @@ def signup_form(request: Request):
 
 
 @router.post("/signup")
-def signup_action(
-    request: Request,
-    dbSes: DbSesDep,
-    form: Annotated[StandardSignupForm, Form()],
-):
+def signup_action(request: Request, dbSes: DbSesDep, form: Annotated[StandardSignupForm, Form()]):
     if _username_taken(dbSes, form.username):
         flash(request, "That username is already taken.", "warn")
         return RedirectResponse("/signup", status_code=303)
@@ -46,13 +42,7 @@ def signup_action(
         username=form.username,
         pw_hash=ph.hash(form.password),
         email=str(form.email),
-        public_enabled=form.public_enabled,
-        age=None,
-        gender=None,
-        med_conditions=None,
-        country=None,
-        state=None,
-        city=None,
+        public_enabled=form.public_enabled
     )
     dbSes.add(user)
     dbSes.commit()
@@ -88,8 +78,7 @@ def research_signup_action(
         username=form.username,
         pw_hash=ph.hash(form.password),
         email=str(form.email),
-        ror_id=form.ror_id,
-        data_filters="{}",
+        ror_id=form.ror_id
     )
     dbSes.add(researcher)
     dbSes.commit()
