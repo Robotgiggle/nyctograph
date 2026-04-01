@@ -20,6 +20,7 @@ def about_us(request: Request):
 def logout_action(request: Request):
     response = RedirectResponse("/", status_code=303)
     request.session.pop("user_id", None)
+    request.session.pop("researcher_id", None)
     request.session.pop("username", None)
     return response
 

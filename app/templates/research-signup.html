@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Create a research institution account</h1>
+    <p>
+        This account is for researchers who need access to anonymized global statistics and public dream data (per team requirements).
+        Nyctograph stores your credentials in our database so you can use the service. We also store a record of any user data you request from us.
+        By marking the consent box below, you confirm that you understand this and agree to our storage of this information.
+    </p>
+    <p>
+        You will also need to provide your organization&apos;s <strong>Research Organization Registry (ROR)</strong> identifier so we can verify your institution.
+    </p>
+    <form action="" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required minlength="3" maxlength="64" autocomplete="username">
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
+        <br>
+        <label for="password_confirm">Confirm password:</label>
+        <input type="password" id="password_confirm" name="password_confirm" required minlength="8" autocomplete="new-password">
+        <br>
+        <label for="ror_id">ROR ID (e.g. URL or ID from <a href="https://ror.org" target="_blank" rel="noopener">ror.org</a>):</label>
+        <input type="text" id="ror_id" name="ror_id" required minlength="3" maxlength="512" placeholder="https://ror.org/xxxxxxxx">
+        <br><br>
+        <label>
+            <input type="checkbox" name="consent_data_storage" value="yes" required>
+            I consent to Nyctograph storing my research account information as described above.
+        </label>
+        <br><br>
+        <input type="submit" value="Create research account">
+    </form>
+    <p>
+        <a href="/login">Log in</a> | <a href="/signup">Standard user sign up</a>
+    </p>
+{% endblock %}
