@@ -2,7 +2,6 @@ from unittest.mock import MagicMock, patch, ANY
 from fastapi.testclient import TestClient
 from html import unescape
 from datetime import time
-from pytest import xfail
 
 from ..forms import DreamEntryForm
 from ..models import User, Tag
@@ -136,21 +135,19 @@ class TestHomepage:
         db_instance.commit.assert_called()
 
     def test_submit_entry_guest(self, db_class: MagicMock, client: TestClient):
-        # ==========================================
-        xfail("sign-up page not implemented yet")
-        # ==========================================
-        
-        set_session(client, {"user_id": 3})
+        set_session(client, {})
         db_instance = db_class.return_value
-        entryData = {"title": "New Test Entry!", "description": "Hello world, I am the description"}
+        entryData = {
+            "title": "New Test Entry!",
+            "description": "Hello world, I am the description",
+            "public": "False",
+        }
 
         response = client.post("/", data=entryData)
 
         assert response.status_code == 200
         assert response.url == "http://testserver/signup"
-        assert "Entry data temporarily saved" in response.text
-        # no login performed
+        assert "Dream entry temporarily stored" in unescape(response.text)
         db_instance.get.assert_not_called()
-        # entry not saved to DB
         db_instance.add.assert_not_called()
         db_instance.commit.assert_not_called()

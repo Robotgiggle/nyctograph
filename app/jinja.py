@@ -4,10 +4,12 @@ from fastapi.templating import Jinja2Templates
 
 # Setup for Jinja2 template engine
 
-def global_context(request: Request): 
+def global_context(request: Request):
     return {
         "flash": request.session.pop("flashMessages", []),
-        "uname": request.session.get("username")
+        "uname": request.session.get("username"),
+        "is_researcher": request.session.get("researcher_id") is not None,
+        "standard_user_id": request.session.get("user_id"),
     }
 
 templates = Jinja2Templates(directory=dirname(__file__)+"/templates", context_processors=[global_context])

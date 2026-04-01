@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .database import engine
-from .models import User
+from .models import User, Researcher
 
 # Hasher object used throughout the app
 ph = PasswordHasher()
@@ -35,7 +35,16 @@ def get_user(request: Request, dbSes: DbSesDep):
     if id: return dbSes.get(User, id)
     else: return None
 # Type alias for the dependency
-UserDep = Annotated[User, Depends(get_user)]
+UserDep = Annotated[User | None, Depends(get_user)]
+
+# [DEPENDENCY] Logged-in researcher, or None
+def get_researcher(request: Request, dbSes: DbSesDep):
+    rid = request.session.get("researcher_id")
+    if rid is None:
+        return None
+    return dbSes.get(Researcher, rid)
+
+ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):

@@ -2,10 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
+from sqlalchemy import select
 
 from ..models import Tag
 from ..forms import DreamEntryForm
-from ..utils import *
+from ..utils import DbSesDep, ResearcherDep, UserDep, flash
 from ..jinja import templates
 
 router = APIRouter()
@@ -38,7 +39,7 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
     return templates.TemplateResponse(request, "record-dream.html", context)
 
 @router.post("/")
-def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, formDataModel: Annotated[DreamEntryForm, Form()]):#, title: Annotated[str, Form()], description: Annotated[str, Form()]):
+def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, researcher: ResearcherDep, formDataModel: Annotated[DreamEntryForm, Form()]):#, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:
         # Create and save a new DreamEntry based on form data, and link any necessary tags
         newEntry = formDataModel.createDreamEntry()
@@ -64,6 +65,13 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, formDa
         flash(request, "Dream entry saved", "success")
         return RedirectResponse("/", status_code=303)
     else:
+        if researcher:
+            flash(
+                request,
+                "Research institution accounts cannot save dream entries. Log in with a standard user account to record dreams.",
+                "warn",
+            )
+            return RedirectResponse("/", status_code=303)
         # Store a representation of the form data into the session for later use
         request.session["storedEntry"] = formDataModel.model_dump_json()
 

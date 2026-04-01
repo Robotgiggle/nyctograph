@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Create a standard account</h1>
+    <p>
+        Nyctograph stores your dream entries and account details in our database so you can use the service.
+        By marking the consent box below, you confirm that you understand this and agree to our storage of this data.
+        You may mark individual dream entries as public only if you opt in below; otherwise new entries stay private by default.
+    </p>
+    <form action="" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required minlength="3" maxlength="64" autocomplete="username">
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
+        <br>
+        <label for="password_confirm">Confirm password:</label>
+        <input type="password" id="password_confirm" name="password_confirm" required minlength="8" autocomplete="new-password">
+        <br><br>
+        <label>
+            <input type="checkbox" name="consent_data_storage" value="yes" required>
+            I consent to Nyctograph storing my account data and dream entries as described above.
+        </label>
+        <br>
+        <label>
+            <input type="checkbox" name="public_opt_in" value="yes">
+            I want to be able to mark my dream entries as public (optional; you can change this later in account settings).
+        </label>
+        <br><br>
+        <input type="submit" value="Create account">
+    </form>
+    <p>
+        <a href="/login">Already have an account? Log in</a><br>
+        <a href="/signup/research">Research institution registration</a>
+    </p>
+{% endblock %}

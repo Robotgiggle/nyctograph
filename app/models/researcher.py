@@ -10,9 +10,9 @@ class Researcher(Base):
     __tablename__ = "researchers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(index=True)
+    username: Mapped[str] = mapped_column(index=True, unique=True)
     pw_hash: Mapped[str]
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(unique=True)
     ror_id: Mapped[str]
     data_filters: Mapped[str]
 

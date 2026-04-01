@@ -13,7 +13,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(index=True, unique=True)
     pw_hash: Mapped[str]
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(unique=True)
     public_enabled: Mapped[bool]
     # additional optional details
     age: Mapped[int|None]
