@@ -1,6 +1,6 @@
 import json
 import pytest
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from itsdangerous import TimestampSigner
 from fastapi.testclient import TestClient
 
@@ -19,4 +19,9 @@ def set_session(client: TestClient, sessionDict: dict):
     ).decode('utf-8')
     client.cookies = {'session': sessionCookie}
 
-# TODO: implement get_session
+def get_session(client: TestClient) -> dict:
+    signer = TimestampSigner(COOKIE_SECRET_KEY)
+    rawCookie = client.cookies.get('session', domain='testserver.local')   # check for the real cookie
+    if not rawCookie: rawCookie = client.cookies.get('session', domain='') # check for our artificial cookie
+    if not rawCookie: return {}
+    return json.loads(b64decode(signer.unsign(rawCookie)))

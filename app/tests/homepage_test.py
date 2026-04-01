@@ -124,7 +124,7 @@ class TestHomepage:
         assert callArgs.get("country") == entryData["country"]
         assert callArgs.get("state") == entryData["state"]
         assert callArgs.get("city") == entryData["city"]
-        assert callArgs.get("public") == bool(entryData["public"])
+        assert callArgs.get("public") == (entryData["public"] == "True")
         assert entry_instance.created_at != None
         for tag in entryData["content_tags"] + entryData["type_tags"] + entryData["context_tags"]:
             db_instance.get.assert_any_call(Tag, tag)
@@ -138,9 +138,11 @@ class TestHomepage:
         set_session(client, {})
         db_instance = db_class.return_value
         entryData = {
-            "title": "New Test Entry!",
-            "description": "Hello world, I am the description",
-            "public": "False",
+            "title": "New Test Entry!", "description": "Hello world, I am the description", 
+            "content_tags": ["Flying", "Chase"], "sense_sound": "on", "sense_pain": "on",
+            "type_tags": ["Recurring"], "context": "Hello world, I am the context", 
+            "context_tags": ["Vacation", "New Job"], "bed_time": "11:30", "wake_time": "15:30",
+            "country": "testCountry", "state": "testState", "city": "testCity", "public": "False"
         }
 
         response = client.post("/", data=entryData)
@@ -148,6 +150,27 @@ class TestHomepage:
         assert response.status_code == 200
         assert response.url == "http://testserver/signup"
         assert "Dream entry temporarily stored" in unescape(response.text)
+        # No login check or attempt to save to DB
         db_instance.get.assert_not_called()
         db_instance.add.assert_not_called()
         db_instance.commit.assert_not_called()
+        # Entry data stored in browser session
+        storedEntryRaw = get_session(client).get('storedEntry')
+        assert storedEntryRaw is not None
+        storedEntry = json.loads(storedEntryRaw)
+        assert storedEntry['title'] == entryData['title']
+        assert storedEntry['description'] == entryData['description']
+        assert storedEntry['sense_sight'] == ("sense_sight" in entryData)
+        assert storedEntry['sense_sound'] == ("sense_sound" in entryData)
+        assert storedEntry['sense_touch'] == ("sense_touch" in entryData)
+        assert storedEntry['sense_smell'] == ("sense_smell" in entryData)
+        assert storedEntry['sense_taste'] == ("sense_taste" in entryData)
+        assert storedEntry['sense_pain'] == ("sense_pain" in entryData)
+        assert storedEntry['sense_other'] == ("sense_other" in entryData)
+        assert storedEntry['context'] == entryData["context"]
+        assert storedEntry['bed_time'] == entryData["bed_time"]+":00"
+        assert storedEntry['wake_time'] == entryData["wake_time"]+":00"
+        assert storedEntry['country'] == entryData["country"]
+        assert storedEntry['state'] == entryData["state"]
+        assert storedEntry['city'] == entryData["city"]
+        assert storedEntry['public'] == (entryData["public"] == "True")
