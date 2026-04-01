@@ -1,5 +1,5 @@
 from typing import Annotated
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..models import User
 
@@ -15,6 +15,12 @@ class AccountConfigForm(BaseModel):
     country: str|None = None
     state: str|None = None
     city: str|None = None
+
+    @field_validator("age", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, input: str|None):
+        if input == '': return None
+        return input
 
     @model_validator(mode="after")
     def password_not_empty(self):
