@@ -1,22 +1,51 @@
-from typing import Annotated
+from typing import Annotated, List, Tuple
 
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from ..models import Tag
+from ..models import User, Tag
 from ..forms import DreamEntryForm
 from ..utils import DbSesDep, ResearcherDep, UserDep, flash
 from ..jinja import templates
 
 router = APIRouter()
 
+# Attempts to save the provided form data into the database
+# Returns a bool for whether it succeeded, and a list of messages to flash
+def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) -> Tuple[bool, List[str]]:
+    flashes = []
+    newEntry = formDataModel.createDreamEntry()
+    if newEntry.public and not user.public_enabled:
+        newEntry.public = False
+        flashes.append(("Entry marked as non-public to match your account settings.", "info"))
+    user.dream_entries.append(newEntry)
+    badTags = []
+    for tagName in formDataModel.all_tags:
+        tagObj = dbSes.get(Tag, tagName)
+        if tagObj is None: badTags.append(tagName)
+        else: newEntry.tags.append(tagObj)
+    if badTags:
+            for tag in badTags: flashes.append((f"'{tag}' is not a valid tag!", "warn"))
+            return (False, flashes)
+    dbSes.add(newEntry)
+    dbSes.commit()
+    return (True, flashes)
+
 @router.get("/")
 def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
-    # Attempt to retrieve stored form data from the session
+    # Attempt to retrieve stored form data from the session, save and clear storage if logged in
     storedEntryJson = request.session.get("storedEntry")
     if storedEntryJson:
         storedEntry = DreamEntryForm.model_validate_json(storedEntryJson)
+        if user:
+            success, flashes = save_dream_entry(dbSes, user, storedEntry)
+            for item in flashes: flash(request, item[0], item[1])
+            if success: 
+                flash(request, "Stored dream entry saved.", "success")
+                request.session.pop("storedEntry", None)
+                storedEntry = None
     else:
         storedEntry = None
     
@@ -41,28 +70,15 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
 @router.post("/")
 def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, researcher: ResearcherDep, formDataModel: Annotated[DreamEntryForm, Form()]):#, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:
-        # Create and save a new DreamEntry based on form data, and link any necessary tags
-        newEntry = formDataModel.createDreamEntry()
-        if newEntry.public and not user.public_enabled:
-            newEntry.public = False
-            flash(request, "Entry marked as non-public to match your account settings", "info")
-        user.dream_entries.append(newEntry)
-        badTags = []
-        for tagName in formDataModel.all_tags:
-            tagObj = dbSes.get(Tag, tagName)
-            if tagObj is None: badTags.append(tagName)
-            else: newEntry.tags.append(tagObj)
-        if badTags:
-            for tag in badTags: flash(request, f"'{tag}' is not a valid tag!", "warn")
-            return RedirectResponse("/", status_code=303)
-        dbSes.add(newEntry)
-        dbSes.commit()
+        success, flashes = save_dream_entry(dbSes, user, formDataModel)
+        for item in flashes: flash(request, item[0], item[1])
+        if not success: return RedirectResponse("/", status_code=303)
 
         # Now that the entry is saved, clear it out of the session if it's there
         request.session.pop("storedEntry", None)
 
         # Return to homepage with success message
-        flash(request, "Dream entry saved", "success")
+        flash(request, "Dream entry saved.", "success")
         return RedirectResponse("/", status_code=303)
     else:
         if researcher:
@@ -72,9 +88,10 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
                 "warn",
             )
             return RedirectResponse("/", status_code=303)
+        
         # Store a representation of the form data into the session for later use
         request.session["storedEntry"] = formDataModel.model_dump_json()
 
         # Redirect to the signup page with 'please sign up first' message
-        flash(request, "Dream entry temporarily stored - create an account to save it!", "info")
+        flash(request, "Dream entry temporarily stored - log in or create an account to save it!", "info")
         return RedirectResponse("/signup", status_code=303)
