@@ -1,5 +1,6 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
+from datetime import date, timedelta
 
 from ..models import User
 
@@ -9,17 +10,20 @@ class AccountConfigForm(BaseModel):
     current_password: str|None = None
     new_password: str|None = None
     public_enabled: bool|None = None
-    age: Annotated[int, Field(ge=13)]|None = None
+    birth_date: date|Literal['']|None = None
     gender: str|None = None
     med_conditions: str|None = None
     country: str|None = None
     state: str|None = None
     city: str|None = None
 
-    @field_validator("age", mode="before")
+    @field_validator("birth_date")
     @classmethod
-    def empty_string_to_none(cls, input: str|None):
-        if input == '': return None
+    def must_be_at_least_13(cls, input):
+        if type(input) is date:
+            age = date.today() - input
+            if age.days/365.25 < 13:
+                raise ValueError("Must be at least 13 years old!")
         return input
 
     @model_validator(mode="after")

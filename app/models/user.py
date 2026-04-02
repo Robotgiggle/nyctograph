@@ -1,5 +1,6 @@
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import date
 
 from ..database import Base
 
@@ -16,7 +17,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True)
     public_enabled: Mapped[bool]
     # additional optional details
-    age: Mapped[int|None]
+    birth_date: Mapped[date|None]
     gender: Mapped[str|None]
     med_conditions: Mapped[str|None]
     country: Mapped[str|None]
@@ -24,6 +25,11 @@ class User(Base):
     city: Mapped[str|None]
 
     dream_entries: Mapped[List["DreamEntry"]] = relationship(back_populates="user")
+
+    @property
+    def age(self):
+        if self.birth_date is None: return None
+        else: return (date.today() - self.birth_date).days / 365.25
 
     def __repr__(self) -> str:
         return f"User(id: {self.id}, uname: {self.username})"

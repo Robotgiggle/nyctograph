@@ -27,8 +27,8 @@
         <input type="radio" id="public-no" name="public_enabled" value="False" required {%if not user.public_enabled%}checked{%endif%}>
         <label for="public-no">No</label>
         <br><br>
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" min="1" max="120" value="{{ user.age if user.age is not none }}">
+        <label for="birth_date">Birth date:</label>
+        <input type="date" id="birth_date" name="birth_date" value="{{ user.birth_date if user.birth_date is not none }}">
         <br>
         <label for="gender">Gender:</label>
         <input type="text" id="gender" name="gender" value="{{ user.gender if user.gender is not none }}">

@@ -58,8 +58,8 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
         request.session["username"] = formData.new_username
     if formData.public_enabled is not None:
         user.public_enabled = formData.public_enabled
-    if formData.age is not None:
-        user.age = formData.age
+    if formData.birth_date is not None:
+        user.birth_date = formData.birth_date or None
     if formData.gender is not None:
         user.gender = formData.gender or None
     if formData.med_conditions is not None:

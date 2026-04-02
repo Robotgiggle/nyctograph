@@ -17,3 +17,7 @@ class Researcher(Base):
     data_filters: Mapped[str|None]
 
     downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")
+
+    # TODO: this should check the entry against the researcher's filters
+    def allowed_to_view(self, entry):
+        return True
