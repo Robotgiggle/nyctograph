@@ -9,18 +9,18 @@ from .utils import ph
 
 content = [
     "Flying", "Falling", "Paralysis", "Chase", "Embarrassment", "Driving", "School", "Teeth", "Disaster",
-    "Monster", "Family", "Romance", "Death", "Sex", "Food", "Betrayal", "Revenge", "Transformation",
-    "Naked", "Lost", "Unprepared", "Searching", "Lateness", "Wealth", "Water", "Fire", "Bathroom", 
-    "Hospital", "Workplace", "Adventure", "Video Game", "Abstract"
+    "Monster", "Family", "Romance", "Death", "Sex", "Food", "Youth", "Old Age", "Betrayal", "Revenge", 
+    "Transformation", "Naked", "Lost", "Unprepared", "Searching", "Lateness", "Wealth", "Water", "Fire", 
+    "Bathroom", "Hospital", "Workplace", "Adventure", "Video Game", "Abstract"
 ]
 
 types = ["Nightmare", "Recurring", "Lucid", "False Awakening", "Sleep Paralysis"]
 
 contexts = [
-    "High Stress", "Illness (Self)", "Illness (Other)", "Pregnancy", "Upcoming Deadline", "Political Change", 
-    "Vacation", "Graduation", "Job Interview", "Daytime Nap", "Scary Media", "New Relationship", "New Job",
-    "New Child", "New Living Place", "Recent Argument", "Recent Breakup", "Lost Job", "Recent Death", 
-    "Natural Disaster", "Major Injury"
+    "High Stress", "Illness (Self)", "Illness (Other)", "Money Issues", "Upcoming Deadline", "Pregnancy", 
+    "Political Change", "Vacation", "Graduation", "Marriage", "Holiday", "Birthday", "Job Interview", 
+    "Scary Media", "In Love", "New Relationship", "New Job", "New Child", "New Living Place", "Rejection",
+    "Recent Argument", "Recent Breakup", "Lost Job", "Recent Death", "Natural Disaster", "Major Injury"
 ]
 
 def main():
