@@ -17,6 +17,10 @@ router = APIRouter()
 def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) -> Tuple[bool, List[str]]:
     flashes = []
     newEntry = formDataModel.createDreamEntry()
+    for entry in user.dream_entries:
+        if entry.title == newEntry.title:
+            flashes.append((f"You already have an entry with that title!", "warn"))
+            return (False, flashes)
     if newEntry.public and not user.public_enabled:
         newEntry.public = False
         flashes.append(("Entry marked as non-public to match your account settings.", "info"))
@@ -39,12 +43,13 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
     storedEntryJson = request.session.get("storedEntry")
     if storedEntryJson:
         storedEntry = DreamEntryForm.model_validate_json(storedEntryJson)
-        if user:
+        if user and request.session.get("saveOnLogin"):
             success, flashes = save_dream_entry(dbSes, user, storedEntry)
             for item in flashes: flash(request, item[0], item[1])
             if success: 
                 flash(request, "Stored dream entry saved.", "success")
                 request.session.pop("storedEntry", None)
+                request.session.pop("saveOnLogin", None)
                 storedEntry = None
     else:
         storedEntry = None
@@ -72,10 +77,13 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
     if user:
         success, flashes = save_dream_entry(dbSes, user, formDataModel)
         for item in flashes: flash(request, item[0], item[1])
-        if not success: return RedirectResponse("/", status_code=303)
+        if not success: 
+            request.session["storedEntry"] = formDataModel.model_dump_json()
+            return RedirectResponse("/", status_code=303)
 
         # Now that the entry is saved, clear it out of the session if it's there
         request.session.pop("storedEntry", None)
+        request.session.pop("saveOnLogin", None)
 
         # Return to homepage with success message
         flash(request, "Dream entry saved.", "success")
@@ -91,6 +99,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
         
         # Store a representation of the form data into the session for later use
         request.session["storedEntry"] = formDataModel.model_dump_json()
+        request.session["saveOnLogin"] = True
 
         # Redirect to the signup page with 'please sign up first' message
         flash(request, "Dream entry temporarily stored - log in or create an account to save it!", "info")

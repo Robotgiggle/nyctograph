@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .models import *
@@ -23,9 +24,14 @@ contexts = [
 ]
 
 def main():
+    with Session(engine) as ses:
+        ses.execute(text("DROP VIEW IF EXISTS research_entries"))
+        ses.commit()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     with Session(engine) as ses:
+        with open("app/research_entries_view.sql") as file:
+            ses.execute(text(file.read()))
         for item in content:
             ses.add(Tag(category="dream_content", value=item))
         for item in types:
