@@ -34,6 +34,7 @@ class DreamEntry(Base):
     context: Mapped[str|None]
     bed_time: Mapped[time|None]
     wake_time: Mapped[time|None]
+    sleep_hours: Mapped[float|None]
     country: Mapped[str|None]
     state: Mapped[str|None]
     city: Mapped[str|None]

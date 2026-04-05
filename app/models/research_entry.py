@@ -28,20 +28,20 @@ class ResearchEntry(Base):
     created_at: Mapped[datetime]
     context: Mapped[str|None]
     context_tags: Mapped[str|None]
-
     bed_time: Mapped[time|None]
     wake_time: Mapped[time|None]
-
+    sleep_hours: Mapped[float|None]
     country: Mapped[str|None]
     state: Mapped[str|None]
     city: Mapped[str|None]
+    calc_tags: Mapped[str|None]
 
     reflection: Mapped[str|None]
     rfln_timestamp: Mapped[datetime|None]
 
     username: Mapped[str] = mapped_column(primary_key=True)
-    user_gender: Mapped[str|None]
     user_age: Mapped[float|None]
+    user_gender: Mapped[str|None]
     user_med_conditions: Mapped[str|None]
 
     def __repr__(self) -> str:
