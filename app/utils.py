@@ -2,7 +2,6 @@ from argon2 import PasswordHasher
 from typing import Annotated
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .database import engine

@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 
 from .routers import homepage, login, my_dreams, signup, global_stats, misc
 from .utils import flash
+from .stat_calc import calculate_global_stats
 
 # ===== CORE APP SETUP =====
 
@@ -16,9 +17,8 @@ COOKIE_SECRET_KEY = "correcthorsebatterystaple"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # pre-startup handlers go here
-    yield
-    # post-shutdown handlers go here
+    asyncio.create_task(calculate_global_stats(0.25))
+    yield # pre-startup handlers go before this, post-shutdown handlers go after
 
 app = FastAPI(lifespan=lifespan)
 
