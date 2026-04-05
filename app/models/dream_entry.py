@@ -1,6 +1,6 @@
 from typing import List, TYPE_CHECKING
 from datetime import datetime, time
-from sqlalchemy import ForeignKey, CheckConstraint
+from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -13,6 +13,7 @@ class DreamEntry(Base):
     __tablename__ = "dream_entries"
     __table_args__ = (
         CheckConstraint("(reflection IS NULL) = (rfln_timestamp IS NULL)"),
+        UniqueConstraint("user_id", "title")
     )
 
     # core entry data
