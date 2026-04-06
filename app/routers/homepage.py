@@ -43,7 +43,7 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
     storedEntryData = request.session.get("storedEntry")
     storedEntry = None
     
-    # verify format and clear wrong data
+    # Verify data format and clear if invalid
     if storedEntryData:
         try:
             if isinstance(storedEntryData, dict):
