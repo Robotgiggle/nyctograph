@@ -7,6 +7,11 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import Tag, GlobalStats
 
+#
+# The association rate represents "how often is Tag B present on entries that have Tag A?"
+# This can also be stated as "to what extent does Tag A imply Tag B?"
+#
+
 class TagAssociation(Base):
     __tablename__ = "tag_associations"
     __table_args__ = (
@@ -18,8 +23,8 @@ class TagAssociation(Base):
 
     tag_val_a: Mapped[str] = mapped_column(ForeignKey("tags.value"), primary_key=True)
     tag_val_b: Mapped[str] = mapped_column(ForeignKey("tags.value"), primary_key=True)
-    time_slice: Mapped[str]
-    age_bracket: Mapped[str]
+    time_slice: Mapped[str] = mapped_column(primary_key=True)
+    age_bracket: Mapped[str] = mapped_column(primary_key=True)
     association_rate: Mapped[float]
 
     tag_a: Mapped["Tag"] = relationship(foreign_keys=[tag_val_a])
