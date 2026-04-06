@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>My Dream Statistics</h1>
+    <h1>Personal Stats</h1>
     
     <nav style="margin: 20px 0;">
         <a href="/">← Back to Home</a>
@@ -13,114 +13,59 @@
         {% if data.total_entries == 0 %}
             <p><em>No dream entries found for this time period.</em></p>
         {% else %}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                <!-- Basic Stats -->
-                <div>
-                    <h3>Overview</h3>
-                    <ul style="list-style: none; padding: 0;">
-                        <li><strong>Total Dreams:</strong> {{ data.total_entries }}</li>
-                        <li><strong>Public Dreams:</strong> {{ "%.1f"|format(data.public_ratio * 100) }}%</li>
-                        <li><strong>Dreams with Reflection:</strong> {{ "%.1f"|format(data.reflection_ratio * 100) }}%</li>
-                        {% if data.avg_sleep_duration > 0 %}
-                            <li><strong>Avg Sleep Duration:</strong> {{ "%.1f"|format(data.avg_sleep_duration) }} hours</li>
-                        {% endif %}
-                    </ul>
-                </div>
+            <h3>Overview</h3>
+            <ul>
+                <li>Total Dreams: {{ data.total_entries }}</li>
+                <li>Public Dreams: {{ "%.1f"|format(data.public_ratio * 100) }}%</li>
+                <li>Dreams with Reflection: {{ "%.1f"|format(data.reflection_ratio * 100) }}%</li>
+                {% if data.avg_sleep_duration > 0 %}
+                    <li>Average Sleep Duration: {{ "%.1f"|format(data.avg_sleep_duration) }} hours</li>
+                {% endif %}
+            </ul>
 
-                <!-- Top Tags -->
-                <div>
-                    <h3>Common Themes</h3>
-                    <div style="margin-bottom: 15px;">
-                        <strong>Dream Content:</strong><br>
-                        {% if data.top_content_tag %}
-                            1. {{ data.top_content_tag }}<br>
-                            {% if data.second_content_tag %}
-                                2. {{ data.second_content_tag }}
-                            {% endif %}
-                        {% else %}
-                            <em>No tags yet</em>
-                        {% endif %}
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <strong>Dream Type:</strong><br>
-                        {% if data.top_type_tag %}
-                            1. {{ data.top_type_tag }}<br>
-                            {% if data.second_type_tag %}
-                                2. {{ data.second_type_tag }}
-                            {% endif %}
-                        {% else %}
-                            <em>No tags yet</em>
-                        {% endif %}
-                    </div>
-                    
-                    <div>
-                        <strong>Life Context:</strong><br>
-                        {% if data.top_context_tag %}
-                            1. {{ data.top_context_tag }}<br>
-                            {% if data.second_context_tag %}
-                                2. {{ data.second_context_tag }}
-                            {% endif %}
-                        {% else %}
-                            <em>No tags yet</em>
-                        {% endif %}
-                    </div>
-                </div>
+            <h3>Common Themes</h3>
+            <p><strong>Dream Content:</strong><br>
+            {% if data.top_content_tag %}
+                1. {{ data.top_content_tag }}
+                {% if data.second_content_tag %}
+                    <br>2. {{ data.second_content_tag }}
+                {% endif %}
+            {% else %}
+                <em>No tags yet</em>
+            {% endif %}
+            </p>
+            
+            <p><strong>Dream Type:</strong><br>
+            {% if data.top_type_tag %}
+                1. {{ data.top_type_tag }}
+                {% if data.second_type_tag %}
+                    <br>2. {{ data.second_type_tag }}
+                {% endif %}
+            {% else %}
+                <em>No tags yet</em>
+            {% endif %}
+            </p>
+            
+            <p><strong>Life Context:</strong><br>
+            {% if data.top_context_tag %}
+                1. {{ data.top_context_tag }}
+                {% if data.second_context_tag %}
+                    <br>2. {{ data.second_context_tag }}
+                {% endif %}
+            {% else %}
+                <em>No tags yet</em>
+            {% endif %}
+            </p>
 
-                <!-- Sensory Experience -->
-                <div style="grid-column: span 2;">
-                    <h3>Sensory Experience Rates</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <div>
-                            <strong>Sight:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #4CAF50; width: {{ data.sight_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.sight_rate * 100) }}%
-                        </div>
-                        
-                        <div>
-                            <strong>Sound:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #2196F3; width: {{ data.sound_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.sound_rate * 100) }}%
-                        </div>
-                        
-                        <div>
-                            <strong>Touch:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #FF9800; width: {{ data.touch_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.touch_rate * 100) }}%
-                        </div>
-                        
-                        <div>
-                            <strong>Smell:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #9C27B0; width: {{ data.smell_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.smell_rate * 100) }}%
-                        </div>
-                        
-                        <div>
-                            <strong>Taste:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #E91E63; width: {{ data.taste_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.taste_rate * 100) }}%
-                        </div>
-                        
-                        <div>
-                            <strong>Pain:</strong>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 3px; overflow: hidden;">
-                                <div style="background: #F44336; width: {{ data.pain_rate * 100 }}%; height: 100%;"></div>
-                            </div>
-                            {{ "%.1f"|format(data.pain_rate * 100) }}%
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h3>Sensory Experience Rates</h3>
+            <ul>
+                <li>Sight: {{ "%.1f"|format(data.sight_rate * 100) }}%</li>
+                <li>Sound: {{ "%.1f"|format(data.sound_rate * 100) }}%</li>
+                <li>Touch: {{ "%.1f"|format(data.touch_rate * 100) }}%</li>
+                <li>Smell: {{ "%.1f"|format(data.smell_rate * 100) }}%</li>
+                <li>Taste: {{ "%.1f"|format(data.taste_rate * 100) }}%</li>
+                <li>Pain: {{ "%.1f"|format(data.pain_rate * 100) }}%</li>
+            </ul>
         {% endif %}
     </section>
     {% endmacro %}
