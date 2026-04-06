@@ -88,7 +88,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
         success, flashes = save_dream_entry(dbSes, user, formDataModel)
         for item in flashes: flash(request, item[0], item[1])
         if not success: 
-            request.session["storedEntry"] = formDataModel.model_dump()
+            request.session["storedEntry"] = formDataModel.model_dump(mode='json')
             return RedirectResponse("/", status_code=303)
 
         # Now that the entry is saved, clear it out of the session if it's there
@@ -108,7 +108,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
             return RedirectResponse("/", status_code=303)
         
         # Store a representation of the form data into the session for later use
-        request.session["storedEntry"] = formDataModel.model_dump()
+        request.session["storedEntry"] = formDataModel.model_dump(mode='json')
         request.session["saveOnLogin"] = True
 
         # Redirect to the signup page with 'please sign up first' message

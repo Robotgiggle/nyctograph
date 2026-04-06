@@ -11,7 +11,7 @@ from .testutils import *
 class TestHomepage:
     def test_get_homepage(self, db_class: MagicMock, client: TestClient):
         testEntryData = DreamEntryForm(title="testDream8567", description="lorem ipsum dolor sit amet", public=False)
-        set_session(client, {"storedEntry": testEntryData.model_dump_json()})
+        set_session(client, {"storedEntry": testEntryData.model_dump(mode='json')})
 
         response = client.get("/")
 
