@@ -12,6 +12,9 @@
                 {% if login_status == 1 %}
                     <a href="/my-dreams">My dreams</a> |
                 {% endif %}
+                {% if login_status == 2 %}
+                    <a href="/research">Research data</a> |
+                {% endif %}
                 {% if uname %}
                     <a href="/global-stats">Global stats</a> |
                 {% endif %}
