@@ -155,9 +155,8 @@ class TestHomepage:
         db_instance.add.assert_not_called()
         db_instance.commit.assert_not_called()
         # Entry data stored in browser session
-        storedEntryRaw = get_session(client).get('storedEntry')
-        assert storedEntryRaw is not None
-        storedEntry = json.loads(storedEntryRaw)
+        storedEntry = get_session(client).get('storedEntry')
+        assert storedEntry is not None
         assert storedEntry['title'] == entryData['title']
         assert storedEntry['description'] == entryData['description']
         assert storedEntry['sense_sight'] == ("sense_sight" in entryData)
