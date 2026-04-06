@@ -40,19 +40,29 @@ def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) 
 @router.get("/")
 def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
     # Attempt to retrieve stored form data from the session, save and clear storage if logged in
-    storedEntryJson = request.session.get("storedEntry")
-    if storedEntryJson:
-        storedEntry = DreamEntryForm.model_validate_json(storedEntryJson)
-        if user and request.session.get("saveOnLogin"):
-            success, flashes = save_dream_entry(dbSes, user, storedEntry)
-            for item in flashes: flash(request, item[0], item[1])
-            if success: 
-                flash(request, "Stored dream entry saved.", "success")
+    storedEntryData = request.session.get("storedEntry")
+    storedEntry = None
+    
+    # verify format and clear wrong data
+    if storedEntryData:
+        try:
+            if isinstance(storedEntryData, dict):
+                storedEntry = DreamEntryForm.model_validate(storedEntryData)
+            else:
                 request.session.pop("storedEntry", None)
                 request.session.pop("saveOnLogin", None)
-                storedEntry = None
-    else:
-        storedEntry = None
+        except Exception:
+            request.session.pop("storedEntry", None)
+            request.session.pop("saveOnLogin", None)
+    
+    if storedEntry and user and request.session.get("saveOnLogin"):
+        success, flashes = save_dream_entry(dbSes, user, storedEntry)
+        for item in flashes: flash(request, item[0], item[1])
+        if success: 
+            flash(request, "Stored dream entry saved.", "success")
+            request.session.pop("storedEntry", None)
+            request.session.pop("saveOnLogin", None)
+            storedEntry = None
     
     # Various useful data for the template renderer
     context = {
@@ -78,7 +88,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
         success, flashes = save_dream_entry(dbSes, user, formDataModel)
         for item in flashes: flash(request, item[0], item[1])
         if not success: 
-            request.session["storedEntry"] = formDataModel.model_dump_json()
+            request.session["storedEntry"] = formDataModel.model_dump()
             return RedirectResponse("/", status_code=303)
 
         # Now that the entry is saved, clear it out of the session if it's there
@@ -98,7 +108,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
             return RedirectResponse("/", status_code=303)
         
         # Store a representation of the form data into the session for later use
-        request.session["storedEntry"] = formDataModel.model_dump_json()
+        request.session["storedEntry"] = formDataModel.model_dump()
         request.session["saveOnLogin"] = True
 
         # Redirect to the signup page with 'please sign up first' message
