@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -41,4 +41,4 @@ class GlobalStats(Base):
     other_rate: Mapped[float]
     avg_sleep_duration: Mapped[float]
 
-    tag_associations: Mapped['TagAssociation'] = relationship(back_populates="stats_obj")
+    tag_associations: Mapped[List["TagAssociation"]] = relationship(back_populates="stats_obj")

@@ -12,6 +12,14 @@ if TYPE_CHECKING:
 # This can also be stated as "to what extent does Tag A imply Tag B?"
 #
 
+# positive association if near 1
+# negative association if near 0
+# neutral association if rate = total B / total entries
+
+# association strength:
+# if rate > midpoint, invlerp(midpoint,1,rate)
+# if rate < midpoint, -invlerp(-midpoint,0,-rate)
+
 class TagAssociation(Base):
     __tablename__ = "tag_associations"
     __table_args__ = (
@@ -26,6 +34,7 @@ class TagAssociation(Base):
     time_slice: Mapped[str] = mapped_column(primary_key=True)
     age_bracket: Mapped[str] = mapped_column(primary_key=True)
     association_rate: Mapped[float]
+    association_strength: Mapped[float]
 
     tag_a: Mapped["Tag"] = relationship(foreign_keys=[tag_val_a])
     tag_b: Mapped["Tag"] = relationship(foreign_keys=[tag_val_b])

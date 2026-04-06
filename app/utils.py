@@ -1,7 +1,8 @@
 from argon2 import PasswordHasher
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from .database import engine
@@ -44,6 +45,14 @@ def get_researcher(request: Request, dbSes: DbSesDep):
     return dbSes.get(Researcher, rid)
 # Type alias for the dependency
 ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
+
+def inv_lerp(start: float, end: float, value: float):
+    return (value - start) / (end - start)
+
+# Runs a query that will find a single value, and unwraps the response to return that value
+def single_value_query(dbSes: Session, query: Select, default):
+    raw = dbSes.execute(query)
+    return (raw.first() or [default])[0]
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):
