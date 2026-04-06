@@ -46,6 +46,7 @@ def get_researcher(request: Request, dbSes: DbSesDep):
 # Type alias for the dependency
 ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
 
+# Inverse linear interpolation (how far from start to end is value?)
 def inv_lerp(start: float, end: float, value: float):
     return (value - start) / (end - start)
 

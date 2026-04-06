@@ -9,16 +9,10 @@ if TYPE_CHECKING:
 
 #
 # The association rate represents "how often is Tag B present on entries that have Tag A?"
-# This can also be stated as "to what extent does Tag A imply Tag B?"
 #
-
-# positive association if near 1
-# negative association if near 0
-# neutral association if rate = total B / total entries
-
-# association strength:
-# if rate > midpoint, invlerp(midpoint,1,rate)
-# if rate < midpoint, -invlerp(-midpoint,0,-rate)
+# The association strength (between 1 and -1) represents the degree to which the association rate
+# varies from the base rate of Tag B. Strength is 0 if rate = total B / total entries.
+#
 
 class TagAssociation(Base):
     __tablename__ = "tag_associations"

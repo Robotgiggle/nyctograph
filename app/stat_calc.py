@@ -4,7 +4,7 @@ from sqlalchemy import select, delete, desc, func
 from sqlalchemy.orm import Session
 import logging
 
-from .models import DreamEntry, User, Tag, TagAssociation, GlobalStats
+from .models import DreamEntry, User, Tag, TagTotal, TagAssociation, GlobalStats
 from .database import engine
 from .utils import single_value_query, inv_lerp
 
@@ -48,45 +48,17 @@ baseStatQuery = select(
     func.coalesce(func.avg(DreamEntry.sleep_hours), 0)
 ).join(User).where(DreamEntry.public == True)
 
-baseTagQuery = (
-    select(Tag.category, Tag.value, func.count().label("total"))    # Select all tags along with the
-    .join(Tag, DreamEntry.tags).join(User)                          # number of times they appear
-    .where(DreamEntry.public == True, Tag.category != 'calculated') #
-    .group_by(Tag.value)                                            #
-    .distinct(Tag.category)                # Only keep the tag in each category with the biggest total
-    .order_by(Tag.category, desc('total')) # 
-)
-
 async def calculate_general_stats(dbSes: Session):
     # calculate new global stats, across four time periods and four age brackets
     for daysIncluded in [1, 7, 30, None]:
         for ageBracket in [(13,29), (30,49), (50,999), None]:
             statQueryFiltered = apply_query_filters(baseStatQuery, daysIncluded, ageBracket)
-            tagQueryFiltered = apply_query_filters(baseTagQuery, daysIncluded, ageBracket)
-
             statResults = dbSes.execute(statQueryFiltered).first()
-            tagResults1 = dbSes.execute(tagQueryFiltered).all()
-            t1Dict = tag_results_to_dict(tagResults1)
-            topTags = map(lambda e: e[0], t1Dict.values())
-            tagResults2 = dbSes.execute(tagQueryFiltered.where(Tag.value.not_in(topTags))).all()
-            t2Dict = tag_results_to_dict(tagResults2)
 
             newStatsObj = GlobalStats(
                 time_slice = {1: "day", 7: "week", 30: "month", None: "all"}[daysIncluded],
                 age_bracket = {(13,29): "13-29", (30,49): "30-49", (50,999): "50+", None: "all"}[ageBracket],
                 total_entries = statResults[0] if statResults else 0,
-                top_content_tag = t1Dict["dream_content"][0],
-                top_content_tag_count = t1Dict["dream_content"][1],
-                second_content_tag = t2Dict["dream_content"][0],
-                second_content_tag_count = t2Dict["dream_content"][1],
-                top_context_tag = t1Dict["irl_context"][0],
-                top_context_tag_count = t1Dict["irl_context"][1],
-                second_context_tag = t2Dict["irl_context"][0],
-                second_context_tag_count = t2Dict["irl_context"][1],
-                top_type_tag = t1Dict["dream_type"][0],
-                top_type_tag_count = t1Dict["dream_type"][1],
-                second_type_tag = t2Dict["dream_type"][0],
-                second_type_tag_count = t2Dict["dream_type"][1],
                 sight_rate = statResults[1]/statResults[0] if statResults and statResults[0] else 0,
                 sound_rate = statResults[2]/statResults[0] if statResults and statResults[0] else 0,
                 touch_rate = statResults[3]/statResults[0] if statResults and statResults[0] else 0,
@@ -106,6 +78,37 @@ async def calculate_general_stats(dbSes: Session):
         logger.info("[STATS] General statistics %.0f percent complete...", completion)
     logger.info("[STATS] General statistics complete.")
 
+async def calculate_tag_totals(dbSes: Session):
+    baseTagQuery = (
+        select(Tag.value, Tag.category, func.count().label("total"))
+        .join(Tag, DreamEntry.tags).join(User)
+        .where(DreamEntry.public == True)
+        .group_by(Tag.value)
+    )
+
+    for daysIncluded in [1, 7, 30, None]:
+        for ageBracket in [(13,29), (30,49), (50,999), None]:
+            tqFiltered = apply_query_filters(baseTagQuery, daysIncluded, ageBracket)
+            tagCounts = dbSes.execute(tqFiltered).all()
+            
+            for row in tagCounts:
+                newTotal = TagTotal(
+                    tag_val = row[0],
+                    tag_cat = row[1],
+                    time_slice = {1: "day", 7: "week", 30: "month", None: "all"}[daysIncluded],
+                    age_bracket = {(13,29): "13-29", (30,49): "30-49", (50,999): "50+", None: "all"}[ageBracket],
+                    total = row[2]
+                )
+                dbSes.add(newTotal)
+            
+            # yield to the event loop to allow request handling mid-calculation
+            await asyncio.sleep(0)
+
+        # calculate completion percent
+        completion = 25 * [1, 7, 30, None].index(daysIncluded)
+        logger.info("[STATS] Tag totals %.0f percent complete...", completion)
+    logger.info("[STATS] Tag totals complete.")
+
 async def calculate_tag_associations(dbSes: Session):
     # calculate new tag associations
     tags = [*map(lambda row: row[0], dbSes.execute(select(Tag)).all())]
@@ -123,7 +126,7 @@ async def calculate_tag_associations(dbSes: Session):
                 DreamEntry.public, 
                 DreamEntry.tags.any(Tag.value == tagB.value)
             )
-            queryTotal = select(func.count()).where(DreamEntry.public)
+            queryTotal = select(func.count()).join_from(DreamEntry, User).where(DreamEntry.public)
 
             # loop across four time periods and four age brackets
             for daysIncluded in [1, 7, 30, None]:
@@ -170,11 +173,15 @@ async def global_stat_calc_loop(interval_mins: float):
             logger.info("[STATS] Beginning statistics calculation based on %d public entries...", totalEntries)
 
             # delete the data from the last calculation run
+            dbSes.execute(delete(TagTotal))
             dbSes.execute(delete(TagAssociation))
             dbSes.execute(delete(GlobalStats))
+            
             # calculate new data
             await calculate_general_stats(dbSes)
+            await calculate_tag_totals(dbSes)
             await calculate_tag_associations(dbSes)
+            
             # commit the transaction only once everything is done
             dbSes.commit()
             dbSes.close()

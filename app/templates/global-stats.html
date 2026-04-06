@@ -20,19 +20,53 @@
     </section>
 
     <section>
+        <h2>Special Dream Types</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Entries</th>
+                    <th>% of Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tag_total in totals.dream_type %}
+                    <tr>
+                        <td>{{ tag_total[0] }}</td>
+                        <td>{{ tag_total[1] }}</td>
+                        <td>{{ (100*tag_total[1]/stats.total_entries)|round(2) }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
         <h2>Dream Entry Tags</h2>
-        <p>
-            The most popular dream content tag is <strong>{{ stats.top_content_tag }}</strong>, appearing in <strong>{{ stats.top_content_tag_count }}</strong> dream entries,
-            and the second most popular dream content tag is <strong>{{ stats.second_content_tag }}</strong>, appearing in <strong>{{ stats.second_content_tag_count }}</strong> dream entries.
-        </p>
-        <p>
-            The most common real-world context tag is <strong>{{ stats.top_context_tag }}</strong>, appearing in <strong>{{ stats.top_context_tag_count }}</strong> dream entries,
-            and the second most common real-world context tag is <strong>{{ stats.second_context_tag }}</strong>, appearing in <strong>{{ stats.second_context_tag_count }}</strong> dream entries.
-        </p>
-        <p>
-            The most prevalent special dream type is <strong>{{ stats.top_type_tag }}</strong>, appearing in <strong>{{ stats.top_type_tag_count }}</strong> dream entries,
-            and the second most prevalent special dream type is <strong>{{ stats.second_type_tag }}</strong>, appearing in <strong>{{ stats.second_type_tag_count }}</strong> dream entries.
-        </p>
+        <div style="display:flex;">
+            {% for cat in ["dream_content", "irl_context"] %}
+                <div style="height:250px; overflow:auto;">
+                    <table>
+                        <thead style="position:sticky; top:0">
+                            <tr>
+                                <th>Tag</th>
+                                <th>Entries</th>
+                                <th>% of Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tag_total in totals[cat] %}
+                                <tr>
+                                    <td>{{ tag_total[0] }}</td>
+                                    <td>{{ tag_total[1] }}</td>
+                                    <td>{{ (100*tag_total[1]/stats.total_entries)|round(2) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
     </section>
 
     <section>
@@ -41,18 +75,26 @@
             <ul style='height:250px; overflow:auto;'>
                 {% for asso in associations %}
                     <li>
-                        <strong>{{ asso.association_rate*100|round(1) }}%</strong> of entries with <strong>{{ asso.tag_val_a }}</strong> also have <strong>{{ asso.tag_val_b }}</strong>, 
+                        <strong>{{ (asso.association_rate*100)|round(1) }}%</strong> of entries with <strong>{{ asso.tag_val_a }}</strong> also have <strong>{{ asso.tag_val_b }}</strong>. 
+                        This is
                         {% if asso.association_strength > 0.5 %} 
-                            which is <strong>much higher</strong> than the general prevalence of {{ asso.tag_val_b }}.
+                            a <strong>much higher</strong>
                         {% elif asso.association_strength > 0.1 %} 
-                            which is <strong>higher</strong> than the general prevalence of {{ asso.tag_val_b }}.
+                            a <strong>higher</strong>
                         {% elif asso.association_strength >= -0.1 %} 
-                            which is <strong>about the same</strong> as the general prevalence of {{ asso.tag_val_b }}.
+                            <strong>about the same</strong>
                         {% elif asso.association_strength >= -0.5 %} 
-                            which is <strong>lower</strong> than the general prevalence of {{ asso.tag_val_b }}.
+                            a <strong>lower</strong>
                         {% else %} 
-                            which is <strong>much lower</strong> than the general prevalence of {{ asso.tag_val_b }}.
+                            a <strong>much lower</strong>
                         {% endif %}
+                        rate (association strength <strong>{{ asso.association_strength|round(2) }}</strong>) 
+                        {% if asso.association_strength|abs <= 0.1 %}
+                            as
+                        {% else %}
+                            than
+                        {% endif %}
+                        the general prevalence of <strong>{{ asso.tag_val_b }}</strong>.
                     </li>   
                 {% endfor %}
             </ul>
