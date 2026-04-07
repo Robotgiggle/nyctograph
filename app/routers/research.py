@@ -5,7 +5,7 @@ from sqlalchemy import Select, select, or_, false, func
 
 from ..models import Tag, ResearchEntry
 from ..forms import ResearchFilterForm
-from ..utils import ResearcherDep, DbSesDep, flash
+from ..utils import ResearcherDep, DbSesDep, flash, not_implemented_yet
 from ..jinja import templates
 
 router = APIRouter()
@@ -88,3 +88,7 @@ def research_filter_action(
     dbSes.commit()
     flash(request, "Filters saved.", "success")
     return RedirectResponse("/research", status_code=303)
+
+@router.get("/research/data")
+def research_data_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
+    return not_implemented_yet(request, "/research")

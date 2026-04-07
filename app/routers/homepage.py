@@ -38,7 +38,15 @@ def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) 
     return (True, flashes)
 
 @router.get("/")
-def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
+def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep, researcher: ResearcherDep):
+    if researcher:
+        flash(
+            request,
+            "Research institution accounts cannot record dream entries. Log in with a standard user account to record dreams.",
+            "warn",
+        )
+        return RedirectResponse("/research", status_code=303)
+
     # Attempt to retrieve stored form data from the session, save and clear storage if logged in
     storedEntryData = request.session.get("storedEntry")
     storedEntry = None
@@ -105,7 +113,7 @@ def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, resear
                 "Research institution accounts cannot save dream entries. Log in with a standard user account to record dreams.",
                 "warn",
             )
-            return RedirectResponse("/", status_code=303)
+            return RedirectResponse("/research", status_code=303)
         
         # Store a representation of the form data into the session for later use
         request.session["storedEntry"] = formDataModel.model_dump(mode='json')
