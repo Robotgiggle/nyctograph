@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block body %}
     <h1>Research Data Filters</h1>
-    <p>
-        <strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your current filters.
-        (Download is not yet available.)
-    </p>
+    <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently saved filters.</p>
+    <p id="dirty" style="color:red" hidden>The filters selected below are <strong>not</strong> saved!</p>
 
-    <form action="" method="post">
-        <h2>Dream Content Tags</h2>
-        <p>Include entries that have at least one of the selected tags. Leave all unchecked to include any.</p>
+    <form id="update_filters" action="" method="post">
+        <h2>Dream Entry Tags</h2>
+        <p>Entries will be included if they have at least one of the selected tags. Leave all unchecked to include any.</p>
+
+        <h3>Dream Content</h3>
         {% for tag in content_tags %}
             <label>
                 <input type="checkbox" name="content_tags" value="{{ tag }}"
@@ -16,9 +16,9 @@
                 {{ tag }}
             </label>
         {% endfor %}
-        <br><br>
+        <br>
 
-        <h2>Dream Type Tags</h2>
+        <h3>Dream Type</h3>
         {% for tag in type_tags %}
             <label>
                 <input type="checkbox" name="type_tags" value="{{ tag }}"
@@ -26,9 +26,9 @@
                 {{ tag }}
             </label>
         {% endfor %}
-        <br><br>
+        <br>
 
-        <h2>Real-World Context Tags</h2>
+        <h3>Real-World Context</h3>
         {% for tag in context_tags %}
             <label>
                 <input type="checkbox" name="context_tags" value="{{ tag }}"
@@ -55,15 +55,37 @@
         <input type="number" id="age_max" name="age_max" min="13" max="120"
             value="{{ filters.age_max if filters.age_max is not none }}">
         <br>
-        <label for="gender">Gender:</label>
-        <input type="text" id="gender" name="gender"
-            value="{{ filters.gender if filters.gender is not none }}">
+        <label>Gender (uncheck all to ignore gender):</label>
+        <br>
+        <label>
+            <input type="checkbox" name="gender" value="Male"
+                {{ "checked" if filters.gender and "Male" in filters.gender }}>
+            Male
+        </label>
+        <label>
+            <input type="checkbox" name="gender" value="Female"
+                {{ "checked" if filters.gender and "Female" in filters.gender }}>
+            Female
+        </label>
+        <label>
+            <input type="checkbox" name="gender" value="Other"
+                {{ "checked" if filters.gender and "Other" in filters.gender }}>
+            Other
+        </label>
         <br><br>
 
         <h2>Location</h2>
         <label for="country">Country:</label>
         <input type="text" id="country" name="country"
             value="{{ filters.country if filters.country is not none }}">
+        <br>
+        <label for="state">State/Province:</label>
+        <input type="text" id="state" name="state"
+            value="{{ filters.state if filters.state is not none }}">
+        <br>
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city"
+            value="{{ filters.city if filters.city is not none }}">
         <br><br>
 
         <h2>Reflection</h2>
@@ -84,4 +106,12 @@
 
         <input type="submit" value="Save filters">
     </form>
+
+    <script>
+        form = document.getElementById("update_filters");
+        warning = document.getElementById("dirty");
+        form.addEventListener("input", function (event) {
+            warning.hidden = false;
+        })
+    </script>
 {% endblock %}

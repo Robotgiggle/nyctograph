@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..database import Base
 
 if TYPE_CHECKING:
-    from . import DownloadRecord
+    from . import DownloadRecord, DreamEntry
 
 class Researcher(Base):
     __tablename__ = "researchers"
@@ -20,7 +20,7 @@ class Researcher(Base):
 
     downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")
 
-    def allowed_to_view(self, entry) -> bool:
+    def allowed_to_view(self, entry: DreamEntry) -> bool:
         """Check whether a DreamEntry matches this researcher's saved filters."""
         if not self.data_filters:
             return True
@@ -63,12 +63,18 @@ class Researcher(Base):
 
         # Gender
         gender = filters.get("gender")
-        if gender and entry.user.gender != gender:
+        if gender and entry.user.gender not in gender:
             return False
 
-        # Country
+        # Location
         country = filters.get("country")
         if country and entry.country != country:
+            return False
+        state = filters.get("state")
+        if state and entry.state != state:
+            return False
+        city = filters.get("city")
+        if city and entry.city != city:
             return False
 
         # Reflection

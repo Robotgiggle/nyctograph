@@ -6,4 +6,4 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     pass
 
-engine = create_engine("postgresql://postgres:opensesame@localhost:5432/nyctograph")
+engine = create_engine("postgresql://postgres:opensesame@localhost:5432/myTestDb")

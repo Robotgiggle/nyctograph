@@ -37,10 +37,14 @@ def _entry_matches_filters(filters: ResearchFilterForm, entry: ResearchEntry) ->
         if filters.age_max is not None and entry.user_age > filters.age_max:
             return False
 
-    if filters.gender and entry.user_gender != filters.gender:
+    if filters.gender and entry.user_gender not in filters.gender:
         return False
 
     if filters.country and entry.country != filters.country:
+        return False
+    if filters.state and entry.state != filters.state:
+        return False
+    if filters.city and entry.city != filters.city:
         return False
 
     if filters.has_reflection == "yes" and entry.reflection is None:

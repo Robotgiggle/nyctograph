@@ -11,14 +11,16 @@ class ResearchFilterForm(BaseModel):
     date_to: date | None = None
     age_min: int | None = None
     age_max: int | None = None
-    gender: str | None = None
+    gender: List[str] | None = None
     country: str | None = None
+    city: str | None = None
+    state: str | None = None
     has_reflection: Literal["yes", "no"] | None = None
 
-    @field_validator("date_from", "date_to", "gender", "country", "age_min", "age_max", "has_reflection", mode="before")
+    @field_validator("date_from", "date_to", "gender", "country", "state", "city", "age_min", "age_max", "has_reflection", mode="before")
     @classmethod
     def empty_to_none(cls, v):
-        if v == "":
+        if v == "" or v == []:
             return None
         return v
 
