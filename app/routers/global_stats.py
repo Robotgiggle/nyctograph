@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from sqlalchemy import select
 
-from ..utils import DbSesDep, single_value_query
+from ..utils import DbSesDep
 from ..jinja import templates
 from ..models import GlobalStats, TagTotal, TagAssociation
 
@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("/global-stats")
 def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all", age_bracket: str = "all"):
     statsQuery = select(GlobalStats).where(GlobalStats.time_slice == time_slice, GlobalStats.age_bracket == age_bracket)
-    statsAll: GlobalStats|None = single_value_query(dbSes, statsQuery, None)
+    statsAll: GlobalStats|None = dbSes.execute(statsQuery).scalar()
     tagTotals = {}
     associations = None
 
@@ -22,11 +22,11 @@ def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all"
                 .where(TagTotal.stats_obj == statsAll, TagTotal.tag_cat == cat)
                 .order_by(TagTotal.total.desc())
             ).all()
-        associations = [*map(lambda row: row[0], dbSes.execute(
+        associations = dbSes.execute(
             select(TagAssociation)
             .where(TagAssociation.stats_obj == statsAll)
             .order_by(TagAssociation.association_strength.desc())
-        ).all())]
+        ).scalars().all()
         
     context = {
         "stats": statsAll, 

@@ -6,7 +6,7 @@ import logging
 
 from .models import DreamEntry, User, Tag, TagTotal, TagAssociation, GlobalStats
 from .database import engine
-from .utils import single_value_query, inv_lerp
+from .utils import inv_lerp
 
 logger = logging.getLogger("uvicorn")
 
@@ -63,7 +63,7 @@ async def calculate_general_stats(dbSes: Session):
 
             statResults = dbSes.execute(statQueryFiltered).first()
             fullSleepQuery = select(func.coalesce(func.avg(sleepSubqFiltered.c.per_user), 0))
-            sleepResult = single_value_query(dbSes, fullSleepQuery, 0)
+            avgSleep = dbSes.execute(fullSleepQuery).scalar() or 0
 
             newStatsObj = GlobalStats(
                 time_slice = {1: "day", 7: "week", 30: "month", None: "all"}[daysIncluded],
@@ -76,7 +76,7 @@ async def calculate_general_stats(dbSes: Session):
                 taste_rate = statResults[5]/statResults[0] if statResults and statResults[0] else 0,
                 pain_rate = statResults[6]/statResults[0] if statResults and statResults[0] else 0,
                 other_rate = statResults[7]/statResults[0] if statResults and statResults[0] else 0,
-                avg_sleep_duration = sleepResult
+                avg_sleep_duration = avgSleep
             )
             dbSes.add(newStatsObj)
 
@@ -123,7 +123,7 @@ async def calculate_tag_totals(dbSes: Session):
 
 async def calculate_tag_associations(dbSes: Session):
     # calculate new tag associations
-    tags = [*map(lambda row: row[0], dbSes.execute(select(Tag)).all())]
+    tags = dbSes.execute(select(Tag)).scalars().all()
     for tagA in tags:
         for tagB in tags:
             # don't compare tags in the same category
@@ -148,15 +148,16 @@ async def calculate_tag_associations(dbSes: Session):
                     queryTotalFiltered = apply_query_filters(queryTotal, daysIncluded, ageBracket)
                     entriesA = dbSes.execute(queryAFiltered).all()
                     entriesB = dbSes.execute(queryBFiltered).all()
-                    if not entriesA or not entriesB: continue
+                    totalEntries = dbSes.execute(queryTotalFiltered).scalar()
+                    if not entriesA or not entriesB or not totalEntries: continue
                     rate = len(set(entriesA) & set(entriesB)) / len(entriesA)
-                    neutralPoint = len(entriesB) / single_value_query(dbSes, queryTotalFiltered, 0)
-                    if neutralPoint == rate == 1: 
+                    baseRate = len(entriesB) / totalEntries
+                    if baseRate == rate == 1: 
                         strength = 1
-                    elif rate >= neutralPoint: 
-                        strength = inv_lerp(neutralPoint, 1, rate)
+                    elif rate >= baseRate: 
+                        strength = inv_lerp(baseRate, 1, rate)
                     else:
-                        strength = -1*inv_lerp(-1*neutralPoint, 0, -1*rate)
+                        strength = -1*inv_lerp(-1*baseRate, 0, -1*rate)
                     newAssociation = TagAssociation(
                         tag_a = tagA,
                         tag_b = tagB,
@@ -181,7 +182,7 @@ async def global_stat_calc_loop(interval_mins: float):
     while True:
         dbSes = Session(engine)
         try:
-            totalEntries = single_value_query(dbSes, select(func.count()).where(DreamEntry.public), 0)
+            totalEntries = dbSes.execute(select(func.count()).where(DreamEntry.public)).scalar() or 0
             logger.info("[STATS] Beginning statistics calculation based on %d public entries...", totalEntries)
 
             # delete the data from the last calculation run

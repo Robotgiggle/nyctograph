@@ -50,12 +50,6 @@ ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
 def inv_lerp(start: float, end: float, value: float):
     return (value - start) / (end - start)
 
-# Runs a query that will find a single value, and unwraps the response to return that value
-def single_value_query(dbSes: Session, query: Select, default):
-    row = dbSes.execute(query).first()
-    if row is None: return default
-    else: return row[0] or default
-
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):
     if "flashMessages" not in request.session:

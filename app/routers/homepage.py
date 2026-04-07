@@ -69,9 +69,9 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep):
     context = {
         "entry": storedEntry,
         "senses": ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'],
-        "contentTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "dream_content")).all()),
-        "typeTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "dream_type")).all()),
-        "contextTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "irl_context")).all()),
+        "contentTags": dbSes.execute(select(Tag.value).where(Tag.category == "dream_content")).scalars().all(),
+        "typeTags": dbSes.execute(select(Tag.value).where(Tag.category == "dream_type")).scalars().all(),
+        "contextTags": dbSes.execute(select(Tag.value).where(Tag.category == "irl_context")).scalars().all(),
         "defaultLocation": (
             storedEntry.country if storedEntry else (user.country or '' if user else ''), 
             storedEntry.state if storedEntry else (user.state or '' if user else ''), 
