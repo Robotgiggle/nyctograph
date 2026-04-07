@@ -17,9 +17,9 @@ COOKIE_SECRET_KEY = "correcthorsebatterystaple"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    calcLoopTask = asyncio.create_task(global_stat_calc_loop(2)) # in production, this number should be *much* higher
-    yield # pre-startup handlers go before this, post-shutdown handlers go after
-    #calcLoopTask.cancel()
+    # start the stat calc loop in the background; in prod, the interval should be *much* higher
+    asyncio.create_task(global_stat_calc_loop(interval_mins=2))
+    yield
 
 app = FastAPI(lifespan=lifespan)
 

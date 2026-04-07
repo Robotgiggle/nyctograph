@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse
-from sqlalchemy import select, func
+from sqlalchemy import select
 
-from ..utils import DbSesDep, single_value_query, not_implemented_yet
+from ..utils import DbSesDep, single_value_query
 from ..jinja import templates
 from ..models import GlobalStats, TagTotal, TagAssociation
 
