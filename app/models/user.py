@@ -1,4 +1,5 @@
 from typing import List, TYPE_CHECKING
+from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date
 
@@ -9,6 +10,9 @@ if TYPE_CHECKING:
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("gender IN ('Male', 'Female', 'Other')"),
+    )
 
     # core account info
     id: Mapped[int] = mapped_column(primary_key=True)

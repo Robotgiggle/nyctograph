@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
-from .routers import homepage, login, my_dreams, signup, global_stats, misc
+from .routers import homepage, login, my_dreams, signup, global_stats, misc, research
 from .utils import flash
 
 # ===== CORE APP SETUP =====
@@ -32,6 +32,7 @@ app.include_router(global_stats.router)
 app.include_router(login.router)
 app.include_router(signup.router)
 app.include_router(misc.router)
+app.include_router(research.router)
 
 @app.exception_handler(RequestValidationError)
 def validation_error_handler(request: Request, exc: RequestValidationError):

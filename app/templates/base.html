@@ -13,6 +13,9 @@
                     <a href="/my-dreams">My dreams</a> |
                     <a href="/personal-stats">Personal stats</a> |
                 {% endif %}
+                {% if login_status == 2 %}
+                    <a href="/research">Research data</a> |
+                {% endif %}
                 {% if uname %}
                     <a href="/global-stats">Global stats</a> |
                 {% endif %}
