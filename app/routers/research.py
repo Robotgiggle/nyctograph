@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import Select, select, or_, false, func
 
 from ..models import Tag, ResearchEntry
 from ..forms import ResearchFilterForm
@@ -10,49 +10,40 @@ from ..jinja import templates
 
 router = APIRouter()
 
+def filter_research_query(query: Select, filters: ResearchFilterForm):
+    if filters.content_tags:
+        query = query.where(or_(false(), *[ResearchEntry.content_tags.contains(tag) for tag in filters.content_tags]))
+    if filters.type_tags:
+        query = query.where(or_(false(), *[ResearchEntry.content_tags.contains(tag) for tag in filters.type_tags]))
+    if filters.context_tags:
+        query = query.where(or_(false(), *[ResearchEntry.content_tags.contains(tag) for tag in filters.context_tags]))
 
-def _entry_matches_filters(filters: ResearchFilterForm, entry: ResearchEntry) -> bool:
-    """Apply filter criteria to a ResearchEntry (tags stored as semicolon-separated strings)."""
-    entry_content_tags = set(entry.content_tags.split(";")) if entry.content_tags else set()
-    entry_type_tags = set(entry.type_tags.split(";")) if entry.type_tags else set()
-    entry_context_tags = set(entry.context_tags.split(";")) if entry.context_tags else set()
+    if filters.date_from:
+        query = query.where(ResearchEntry.created_at >= filters.date_from)
+    if filters.date_to:
+        query = query.where(ResearchEntry.created_at <= filters.date_to)
 
-    if filters.content_tags and not entry_content_tags & set(filters.content_tags):
-        return False
-    if filters.type_tags and not entry_type_tags & set(filters.type_tags):
-        return False
-    if filters.context_tags and not entry_context_tags & set(filters.context_tags):
-        return False
+    if filters.age_min:
+        query = query.where(ResearchEntry.user_age >= filters.age_min)
+    if filters.age_max:
+        query = query.where(ResearchEntry.user_age <= filters.age_max)
 
-    if filters.date_from and entry.created_at.date() < filters.date_from:
-        return False
-    if filters.date_to and entry.created_at.date() > filters.date_to:
-        return False
+    if filters.gender:
+        query = query.where(ResearchEntry.user_gender.in_(filters.gender))
 
-    if filters.age_min is not None or filters.age_max is not None:
-        if entry.user_age is None:
-            return False
-        if filters.age_min is not None and entry.user_age < filters.age_min:
-            return False
-        if filters.age_max is not None and entry.user_age > filters.age_max:
-            return False
+    if filters.country:
+        query = query.where(ResearchEntry.country == filters.country)
+    if filters.state:
+        query = query.where(ResearchEntry.state == filters.state)
+    if filters.city:
+        query = query.where(ResearchEntry.city == filters.city)
 
-    if filters.gender and entry.user_gender not in filters.gender:
-        return False
+    if filters.has_reflection == "yes":
+        query = query.where(ResearchEntry.reflection != None)
+    elif filters.has_reflection == "no":
+        query = query.where(ResearchEntry.reflection == None)
 
-    if filters.country and entry.country != filters.country:
-        return False
-    if filters.state and entry.state != filters.state:
-        return False
-    if filters.city and entry.city != filters.city:
-        return False
-
-    if filters.has_reflection == "yes" and entry.reflection is None:
-        return False
-    if filters.has_reflection == "no" and entry.reflection is not None:
-        return False
-
-    return True
+    return query
 
 
 @router.get("/research")
@@ -68,9 +59,9 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     type_tags = [t.value for t in all_tags if t.category == "dream_type"]
     context_tags = [t.value for t in all_tags if t.category == "irl_context"]
 
-    all_entries = dbSes.execute(select(ResearchEntry)).scalars().all()
-    match_count = sum(1 for e in all_entries if _entry_matches_filters(current_filters, e))
-    total_count = len(all_entries)
+    countQuery = select(func.count()).select_from(ResearchEntry)
+    total_count = dbSes.execute(countQuery).scalar()
+    match_count = dbSes.execute(filter_research_query(countQuery, current_filters)).scalar()
 
     return templates.TemplateResponse(request, "research.html", {
         "filters": current_filters,
