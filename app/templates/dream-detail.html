@@ -64,5 +64,34 @@
     </section>
     {% endif %}
 
+    <section>
+        <h2>Follow-up reflections</h2>
+        {% if entry.follow_up_reflections and entry.follow_up_reflections|length > 0 %}
+            <ul>
+                {% for r in entry.follow_up_reflections %}
+                    <li style="margin-bottom: 12px;">
+                        <div style="white-space: pre-line;">{{ r.text }}</div>
+                        <div><small><strong>Added:</strong> {{ r.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></div>
+                        {% if is_owner %}
+                            <form method="post" action="/my-dreams/{{ entry.id }}/follow-ups/{{ r.id }}/delete" style="margin-top: 6px;">
+                                <button type="submit">Delete</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No follow-up reflections yet.</p>
+        {% endif %}
+
+        {% if is_owner %}
+            <h3>Add a follow-up</h3>
+            <form method="post" action="/my-dreams/{{ entry.id }}/follow-ups">
+                <textarea name="text" rows="5" cols="80" required></textarea><br>
+                <button type="submit">Save follow-up</button>
+            </form>
+        {% endif %}
+    </section>
+
     <p><a href="/my-dreams">← Back to My Dreams</a></p>
 {% endblock %}
