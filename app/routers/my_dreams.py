@@ -177,7 +177,6 @@ def view_personal_stats(request: Request, dbSes: DbSesDep, user: UserDep):
         'all': calculate_personal_stats(user, 'all'),
         'month': calculate_personal_stats(user, 'month'),
         'week': calculate_personal_stats(user, 'week'),
-        'day': calculate_personal_stats(user, 'day'),
     }
     
     return templates.TemplateResponse(request, "my-dreams-stats.html", {"stats": stats})
