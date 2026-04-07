@@ -36,24 +36,34 @@ def apply_query_filters(query, daysIncluded, ageBracket):
     else:
         return dayFiltered
 
-baseStatQuery = select(
-    func.count(), 
-    func.count().filter(DreamEntry.sense_sight == True), 
-    func.count().filter(DreamEntry.sense_sound == True), 
-    func.count().filter(DreamEntry.sense_touch == True), 
-    func.count().filter(DreamEntry.sense_smell == True), 
-    func.count().filter(DreamEntry.sense_taste == True), 
-    func.count().filter(DreamEntry.sense_pain == True), 
-    func.count().filter(DreamEntry.sense_other == True), 
-    func.coalesce(func.avg(DreamEntry.sleep_hours), 0)
-).join(User).where(DreamEntry.public == True)
-
 async def calculate_general_stats(dbSes: Session):
+    # build the two queries
+    baseSleepSubq = (
+        select(func.avg(DreamEntry.sleep_hours).label("per_user"))
+        .join(User).where(DreamEntry.public == True)
+        .group_by(DreamEntry.user_id)
+    )
+    baseStatQuery = select(
+        func.count(), 
+        func.count().filter(DreamEntry.sense_sight == True), 
+        func.count().filter(DreamEntry.sense_sound == True), 
+        func.count().filter(DreamEntry.sense_touch == True), 
+        func.count().filter(DreamEntry.sense_smell == True), 
+        func.count().filter(DreamEntry.sense_taste == True), 
+        func.count().filter(DreamEntry.sense_pain == True), 
+        func.count().filter(DreamEntry.sense_other == True), 
+        #func.coalesce(func.avg(avgSleepSubq.c.per_user), 0)
+    ).join(User).where(DreamEntry.public == True)
+
     # calculate new global stats, across four time periods and four age brackets
     for daysIncluded in [1, 7, 30, None]:
         for ageBracket in [(13,29), (30,49), (50,999), None]:
             statQueryFiltered = apply_query_filters(baseStatQuery, daysIncluded, ageBracket)
+            sleepSubqFiltered = apply_query_filters(baseSleepSubq, daysIncluded, ageBracket).subquery()
+
             statResults = dbSes.execute(statQueryFiltered).first()
+            fullSleepQuery = select(func.coalesce(func.avg(sleepSubqFiltered.c.per_user), 0))
+            sleepResult = single_value_query(dbSes, fullSleepQuery, 0)
 
             newStatsObj = GlobalStats(
                 time_slice = {1: "day", 7: "week", 30: "month", None: "all"}[daysIncluded],
@@ -66,7 +76,7 @@ async def calculate_general_stats(dbSes: Session):
                 taste_rate = statResults[5]/statResults[0] if statResults and statResults[0] else 0,
                 pain_rate = statResults[6]/statResults[0] if statResults and statResults[0] else 0,
                 other_rate = statResults[7]/statResults[0] if statResults and statResults[0] else 0,
-                avg_sleep_duration = statResults[8] if statResults else 0 #TODO: better logic here
+                avg_sleep_duration = sleepResult
             )
             dbSes.add(newStatsObj)
 
@@ -79,6 +89,7 @@ async def calculate_general_stats(dbSes: Session):
     logger.info("[STATS] General statistics complete.")
 
 async def calculate_tag_totals(dbSes: Session):
+    # build the base query
     baseTagQuery = (
         select(Tag.value, Tag.category, func.count().label("total"))
         .join(Tag, DreamEntry.tags).join(User)
@@ -86,6 +97,7 @@ async def calculate_tag_totals(dbSes: Session):
         .group_by(Tag.value)
     )
 
+    # loop across four time periods and four age brackets
     for daysIncluded in [1, 7, 30, None]:
         for ageBracket in [(13,29), (30,49), (50,999), None]:
             tqFiltered = apply_query_filters(baseTagQuery, daysIncluded, ageBracket)
