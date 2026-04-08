@@ -11,7 +11,7 @@ from .testutils import *
 class TestHomepage:
     def test_get_homepage(self, db_class: MagicMock, client: TestClient):
         testEntryData = DreamEntryForm(title="testDream8567", description="lorem ipsum dolor sit amet", public=False)
-        set_session(client, {"storedEntry": testEntryData.model_dump_json()})
+        set_session(client, {"storedEntry": testEntryData.model_dump(mode='json')})
 
         response = client.get("/")
 
@@ -155,9 +155,8 @@ class TestHomepage:
         db_instance.add.assert_not_called()
         db_instance.commit.assert_not_called()
         # Entry data stored in browser session
-        storedEntryRaw = get_session(client).get('storedEntry')
-        assert storedEntryRaw is not None
-        storedEntry = json.loads(storedEntryRaw)
+        storedEntry = get_session(client).get('storedEntry')
+        assert storedEntry is not None
         assert storedEntry['title'] == entryData['title']
         assert storedEntry['description'] == entryData['description']
         assert storedEntry['sense_sight'] == ("sense_sight" in entryData)

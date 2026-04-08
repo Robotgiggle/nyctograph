@@ -29,7 +29,7 @@ def login_action(request: Request, dbSes: DbSesDep, uname: Annotated[str, Form()
         request.session.pop("user_id", None)
         request.session["researcher_id"] = res_row[0]
         request.session["username"] = uname
-        return RedirectResponse("/", status_code=303)
+        return RedirectResponse("/research", status_code=303)
 
     flash(request, "Invalid credentials!", "warn")
     return RedirectResponse("/login", status_code=303)

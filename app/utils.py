@@ -57,6 +57,6 @@ def flash(request: Request, message: str, type: str):
     request.session["flashMessages"].append((message, type))
 
 # Return this from a path operation if the actual functionality hasn't been implemented yet
-def not_implemented_yet(request: Request):
+def not_implemented_yet(request: Request, redirect: str = "/"):
     flash(request, "This page or method ("+str(request.url)+") has not been implemented yet!", "warn")
-    return RedirectResponse("/", status_code=303)
+    return RedirectResponse(redirect, status_code=303)
