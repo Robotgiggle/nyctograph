@@ -56,13 +56,24 @@
     </section>
     {% endif %}
 
-    {% if entry.reflection %}
     <section>
-        <h2>Reflection</h2>
-        <p style="white-space: pre-line;">{{ entry.reflection }}</p>
-        {% if entry.rfln_timestamp %}<p><strong>Reflected on:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
+        <h2>Follow-Up Reflection</h2>
+        {% if is_owner %}
+            <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
+                <textarea name="rfln" rows="6" cols="50" 
+                    placeholder="Did this dream have any impact on your life?"
+                    >{{ entry.reflection if entry.reflection }}</textarea>
+                <br>
+                <button type="submit">Save reflection</button>
+                {% if entry.rfln_timestamp %}
+                    <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                {% endif %}
+            </form>
+        {% else %}
+            <p style="white-space: pre-line;">{{ entry.reflection if entry.reflection }}</p>
+            <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        {% endif %}
     </section>
-    {% endif %}
 
     <p><a href="/my-dreams">← Back to My Dreams</a></p>
 {% endblock %}

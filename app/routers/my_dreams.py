@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from datetime import datetime, timedelta
 from collections import Counter
@@ -163,7 +163,36 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
         return RedirectResponse("/my-dreams" if user else "/login", status_code=303)
     
     # Render the detail page
-    return templates.TemplateResponse(request, "dream-detail.html", {"entry": entry})
+    return templates.TemplateResponse(
+        request,
+        "dream-detail.html",
+        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id)},
+    )
+
+# Update the follow-up reflection on the current entry
+@router.post("/my-dreams/{entry_id}/reflection")
+def update_reflection(request: Request,
+    entry_id: int,
+    dbSes: DbSesDep,
+    user: UserDep,
+    rfln: Annotated[str, Form()] = "",
+):
+    if not user:
+        flash(request, "You must be logged in to add a follow-up reflection.", "warn")
+        return RedirectResponse("/login", status_code=303)
+
+    entry = dbSes.get(DreamEntry, entry_id)
+    if not entry or entry.user_id != user.id:
+        flash(request, "You don't have permission to modify this entry.", "warn")
+        return RedirectResponse("/my-dreams", status_code=303)
+
+    entry.reflection = rfln
+    entry.rfln_timestamp = datetime.now()
+    dbSes.add(entry)
+    dbSes.commit()
+
+    flash(request, "Follow-up reflection saved.", "success")
+    return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
 
 # Page to display personal statistics
 @router.get("/personal-stats")
