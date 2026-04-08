@@ -39,9 +39,6 @@ class ResearchEntry(Base):
     reflection: Mapped[str|None]
     rfln_timestamp: Mapped[datetime|None]
 
-    follow_up_count: Mapped[int]
-    follow_up_reflections: Mapped[str|None]
-
     username: Mapped[str] = mapped_column(primary_key=True)
     user_gender: Mapped[str|None]
     user_age: Mapped[float|None]

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from collections import Counter
 from typing import List
 
-from ..models import DreamEntry, FollowUpReflection, User
+from ..models import DreamEntry, User
 from ..utils import *
 from ..jinja import templates
 
@@ -110,7 +110,7 @@ def calculate_personal_stats(user: User, time_slice: str = 'all'):
     
     # Calculate public and reflection ratios
     public_count = sum(1 for e in entries if e.public)
-    reflection_count = sum(1 for e in entries if (e.reflection or (e.follow_up_reflections and len(e.follow_up_reflections) > 0)))
+    reflection_count = sum(1 for e in entries if e.reflection)
     
     return {
         'time_slice': time_slice,
@@ -169,14 +169,13 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
         {"entry": entry, "is_owner": bool(user and entry.user_id == user.id)},
     )
 
-
-@router.post("/my-dreams/{entry_id}/follow-ups")
-def create_follow_up_reflection(
-    request: Request,
+# Update the follow-up reflection on the current entry
+@router.post("/my-dreams/{entry_id}/reflection")
+def update_reflection(request: Request,
     entry_id: int,
     dbSes: DbSesDep,
     user: UserDep,
-    text: str = Form(min_length=1),
+    rfln: Annotated[str, Form()] = "",
 ):
     if not user:
         flash(request, "You must be logged in to add a follow-up reflection.", "warn")
@@ -184,46 +183,15 @@ def create_follow_up_reflection(
 
     entry = dbSes.get(DreamEntry, entry_id)
     if not entry or entry.user_id != user.id:
-        flash(request, "You don't have permission to add a follow-up reflection to this entry.", "warn")
+        flash(request, "You don't have permission to modify this entry.", "warn")
         return RedirectResponse("/my-dreams", status_code=303)
 
-    reflection_text = (text or "").strip()
-    if not reflection_text:
-        flash(request, "Follow-up reflection cannot be empty.", "warn")
-        return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
-
-    fur = FollowUpReflection(entry_id=entry.id, user_id=user.id, text=reflection_text, created_at=datetime.now())
-    dbSes.add(fur)
+    entry.reflection = rfln
+    entry.rfln_timestamp = datetime.now()
+    dbSes.add(entry)
     dbSes.commit()
+
     flash(request, "Follow-up reflection saved.", "success")
-    return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
-
-
-@router.post("/my-dreams/{entry_id}/follow-ups/{follow_up_id}/delete")
-def delete_follow_up_reflection(
-    request: Request,
-    entry_id: int,
-    follow_up_id: int,
-    dbSes: DbSesDep,
-    user: UserDep,
-):
-    if not user:
-        flash(request, "You must be logged in to delete a follow-up reflection.", "warn")
-        return RedirectResponse("/login", status_code=303)
-
-    entry = dbSes.get(DreamEntry, entry_id)
-    if not entry or entry.user_id != user.id:
-        flash(request, "You don't have permission to delete follow-up reflections for this entry.", "warn")
-        return RedirectResponse("/my-dreams", status_code=303)
-
-    fur = dbSes.get(FollowUpReflection, follow_up_id)
-    if not fur or fur.entry_id != entry.id or fur.user_id != user.id:
-        flash(request, "Follow-up reflection not found.", "warn")
-        return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
-
-    dbSes.delete(fur)
-    dbSes.commit()
-    flash(request, "Follow-up reflection deleted.", "success")
     return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
 
 # Page to display personal statistics

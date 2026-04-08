@@ -56,40 +56,22 @@
     </section>
     {% endif %}
 
-    {% if entry.reflection %}
     <section>
-        <h2>Reflection</h2>
-        <p style="white-space: pre-line;">{{ entry.reflection }}</p>
-        {% if entry.rfln_timestamp %}<p><strong>Reflected on:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>{% endif %}
-    </section>
-    {% endif %}
-
-    <section>
-        <h2>Follow-up reflections</h2>
-        {% if entry.follow_up_reflections and entry.follow_up_reflections|length > 0 %}
-            <ul>
-                {% for r in entry.follow_up_reflections %}
-                    <li style="margin-bottom: 12px;">
-                        <div style="white-space: pre-line;">{{ r.text }}</div>
-                        <div><small><strong>Added:</strong> {{ r.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></div>
-                        {% if is_owner %}
-                            <form method="post" action="/my-dreams/{{ entry.id }}/follow-ups/{{ r.id }}/delete" style="margin-top: 6px;">
-                                <button type="submit">Delete</button>
-                            </form>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No follow-up reflections yet.</p>
-        {% endif %}
-
+        <h2>Follow-Up Reflection</h2>
         {% if is_owner %}
-            <h3>Add a follow-up</h3>
-            <form method="post" action="/my-dreams/{{ entry.id }}/follow-ups">
-                <textarea name="text" rows="5" cols="80" required></textarea><br>
-                <button type="submit">Save follow-up</button>
+            <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
+                <textarea name="rfln" rows="6" cols="50" 
+                    placeholder="Did this dream have any impact on your life?"
+                    >{{ entry.reflection if entry.reflection }}</textarea>
+                <br>
+                <button type="submit">Save reflection</button>
+                {% if entry.rfln_timestamp %}
+                    <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                {% endif %}
             </form>
+        {% else %}
+            <p style="white-space: pre-line;">{{ entry.reflection if entry.reflection }}</p>
+            <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         {% endif %}
     </section>
 
