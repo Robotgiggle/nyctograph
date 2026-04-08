@@ -1,8 +1,8 @@
 from argon2 import PasswordHasher
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from .database import engine
@@ -45,6 +45,10 @@ def get_researcher(request: Request, dbSes: DbSesDep):
     return dbSes.get(Researcher, rid)
 # Type alias for the dependency
 ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
+
+# Inverse linear interpolation (how far from start to end is value?)
+def inv_lerp(start: float, end: float, value: float):
+    return (value - start) / (end - start)
 
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):

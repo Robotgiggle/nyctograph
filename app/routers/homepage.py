@@ -16,6 +16,8 @@ router = APIRouter()
 # Returns a bool for whether it succeeded, and a list of messages to flash
 def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) -> Tuple[bool, List[str]]:
     flashes = []
+
+    # Create the DreamEntry itself
     newEntry = formDataModel.createDreamEntry()
     for entry in user.dream_entries:
         if entry.title == newEntry.title:
@@ -25,14 +27,23 @@ def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) 
         newEntry.public = False
         flashes.append(("Entry marked as non-public to match your account settings.", "info"))
     user.dream_entries.append(newEntry)
+
+    # Link the appropriate tags, fail if a nonexistent tag is listed
     badTags = []
     for tagName in formDataModel.all_tags:
         tagObj = dbSes.get(Tag, tagName)
         if tagObj is None: badTags.append(tagName)
         else: newEntry.tags.append(tagObj)
     if badTags:
-            for tag in badTags: flashes.append((f"'{tag}' is not a valid tag!", "warn"))
-            return (False, flashes)
+        for tag in badTags: flashes.append((f"'{tag}' is not a valid tag!", "warn"))
+        return (False, flashes)
+    
+    # Compare entry location to user's default location
+    if formDataModel.country != user.country or formDataModel.state != user.state or formDataModel.city != user.city:
+        nsLocTag = dbSes.get(Tag, "Atypical Location")
+        if nsLocTag: newEntry.tags.append(nsLocTag)
+
+    # Save the entry
     dbSes.add(newEntry)
     dbSes.commit()
     return (True, flashes)
@@ -76,9 +87,9 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep, research
     context = {
         "entry": storedEntry,
         "senses": ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'],
-        "contentTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "dream_content")).all()),
-        "typeTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "dream_type")).all()),
-        "contextTags": map(lambda row: row[0], dbSes.execute(select(Tag.value).where(Tag.category == "irl_context")).all()),
+        "contentTags": dbSes.execute(select(Tag.value).where(Tag.category == "dream_content")).scalars().all(),
+        "typeTags": dbSes.execute(select(Tag.value).where(Tag.category == "dream_type")).scalars().all(),
+        "contextTags": dbSes.execute(select(Tag.value).where(Tag.category == "irl_context")).scalars().all(),
         "defaultLocation": (
             storedEntry.country if storedEntry else (user.country or '' if user else ''), 
             storedEntry.state if storedEntry else (user.state or '' if user else ''), 
