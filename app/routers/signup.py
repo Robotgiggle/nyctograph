@@ -89,4 +89,4 @@ def research_signup_action(
     request.session["username"] = researcher.username
 
     flash(request, "Research account created. You are now logged in.", "success")
-    return RedirectResponse("/", status_code=303)
+    return RedirectResponse("/research", status_code=303)

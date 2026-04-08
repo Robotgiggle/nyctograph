@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block body %}
     <h1>Research Filters</h1>
-    <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently saved filters.</p>
-    <p id="dirty" style="color:red" hidden>The filters selected below are <strong>not</strong> saved!</p>
+    {% if total_count == None %}
+        <p>You do not have any saved filters yet. Choose some below, then press 'Save filters' to save them.</p>
+    {% else %}
+        <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently saved filters.</p>
+    {% endif %}
+    <p id="dirty" style="color:red" hidden>The filters selected below are <strong>not</strong> yet saved!</p>
 
     <form id="update_filters" action="" method="post">
         <h2>Dream Entry Tags</h2>
@@ -39,6 +43,7 @@
         <br><br>
 
         <h2>Date Range</h2>
+        <p>Leave blank to ignore entry timestamps.</p>
         <label for="date_from">From:</label>
         <input type="date" id="date_from" name="date_from"
             value="{{ filters.date_from if filters.date_from is not none }}">
@@ -48,6 +53,7 @@
         <br><br>
 
         <h2>User Demographics</h2>
+        <p>Leave blank to ignore user demographics.</p>
         <label for="age_min">Min age:</label>
         <input type="number" id="age_min" name="age_min" min="13" max="120"
             value="{{ filters.age_min if filters.age_min is not none }}">
@@ -75,6 +81,7 @@
         <br><br>
 
         <h2>Location</h2>
+        <p>Leave blank to ignore location data.</p>
         <label for="country">Country:</label>
         <input type="text" id="country" name="country"
             value="{{ filters.country if filters.country is not none }}">
