@@ -1,8 +1,13 @@
 from typing import List
+from urllib.parse import quote
 import resend
+
+from .jinja import template_string
 
 # TODO: put this in an environment variable for security
 resend.api_key = "re_afbMQGHk_iEL3SWZF47KntYfeBB51LhqQ"
+
+APP_DOMAIN = "http://localhost:8000"
 
 def send_email(recipients: List[str], subject: str, body_html: str):
     params: resend.Emails.SendParams = {
@@ -13,3 +18,20 @@ def send_email(recipients: List[str], subject: str, body_html: str):
     }
     email = resend.Emails.send(params)
     return email
+
+def send_research_approval(recipient: str, name: str, token: str):
+    confirm_url = APP_DOMAIN + "/signup/research/confirm?token=" + quote(token)
+    context = {"name": name, "url": confirm_url}
+    send_email(
+        [recipient],
+        "Research account approved",
+        template_string("email/research_approval.html", context)
+    )
+
+def send_research_denial(recipient: str, name: str, req_msg: str, deny_msg: str):
+    context = {"name": name, "req_msg": req_msg, "deny_msg": deny_msg}
+    send_email(
+        [recipient],
+        "Research account request denied",
+        template_string("email/research_denial.html", context)
+    )

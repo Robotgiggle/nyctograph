@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
-from ..forms import ResearchSignupRequestForm, StandardSignupForm
+from ..forms import ResearchSignupRequestForm, ResearchSignupConfirmForm, StandardSignupForm
 from ..models import User, Researcher, ResearchRequest
 from ..utils import DbSesDep, flash, ph
 from ..jinja import templates
@@ -75,7 +75,8 @@ def research_signup_action(
         name=form.name,
         email=str(form.email),
         ror_id=form.ror_id,
-        reason=form.reason
+        reason=form.reason,
+        status="Pending"
     )
     dbSes.add(newReq)
     dbSes.commit()
@@ -83,32 +84,39 @@ def research_signup_action(
     flash(request, "Account request submitted! We will get back to you shortly.", "success")
     return RedirectResponse("/signup/research", status_code=303)
 
-# @router.post("/signup/research")
-# def research_signup_action(
-#     request: Request,
-#     dbSes: DbSesDep,
-#     form: Annotated[ResearchSignupForm, Form()],
-# ):
-#     if _username_taken(dbSes, form.username):
-#         flash(request, "That username is already taken.", "warn")
-#         return RedirectResponse("/signup/research", status_code=303)
-#     if _email_taken(dbSes, str(form.email)):
-#         flash(request, "That email is already registered.", "warn")
-#         return RedirectResponse("/signup/research", status_code=303)
+@router.get("/signup/research/confirm")
+def research_confirmation_form(request: Request, token: str = ""):
+    return templates.TemplateResponse(request, "research-signup-confirm.html", {"token": token})
 
-#     researcher = Researcher(
-#         username=form.username,
-#         pw_hash=ph.hash(form.password),
-#         email=str(form.email),
-#         ror_id=form.ror_id
-#     )
-#     dbSes.add(researcher)
-#     dbSes.commit()
-#     dbSes.refresh(researcher)
+@router.post("/signup/research/confirm")
+def research_confirmation_action(
+    request: Request,
+    dbSes: DbSesDep,
+    form: Annotated[ResearchSignupConfirmForm, Form()],
+):
+    if _username_taken(dbSes, form.username):
+        flash(request, "That username is already taken.", "warn")
+        return RedirectResponse("/signup/research/confirm?token="+form.token, status_code=303)
+    
+    req = dbSes.execute(select(ResearchRequest).where(ResearchRequest.token == form.token)).scalar()
+    if req is None:
+        flash(request, "Invalid account token. You must submit a research account request and have it approved before you can create an account.", "warn")
+        return RedirectResponse("/signup/research", status_code=303)
 
-#     request.session.pop("user_id", None)
-#     request.session["researcher_id"] = researcher.id
-#     request.session["username"] = researcher.username
+    researcher = Researcher(
+        username=form.username,
+        pw_hash=ph.hash(form.password),
+        email=req.email,
+        ror_id=req.ror_id
+    )
+    dbSes.add(researcher)
+    dbSes.delete(req)
+    dbSes.commit()
+    dbSes.refresh(researcher)
 
-#     flash(request, "Research account created. You are now logged in.", "success")
-#     return RedirectResponse("/research", status_code=303)
+    request.session.pop("user_id", None)
+    request.session["researcher_id"] = researcher.id
+    request.session["username"] = researcher.username
+
+    flash(request, "Research account created. You are now logged in.", "success")
+    return RedirectResponse("/research", status_code=303)

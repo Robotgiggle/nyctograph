@@ -1,4 +1,4 @@
 from .dream_entry_form import DreamEntryForm
 from .account_config_form import AccountConfigForm
-from .signup_forms import ResearchSignupRequestForm, StandardSignupForm
+from .signup_forms import ResearchSignupRequestForm, ResearchSignupConfirmForm, StandardSignupForm
 from .research_filter_form import ResearchFilterForm
