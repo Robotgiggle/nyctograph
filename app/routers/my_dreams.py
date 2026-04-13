@@ -163,10 +163,11 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
         return RedirectResponse("/my-dreams" if user else "/login", status_code=303)
     
     # Render the detail page
+    back_url = "/my-dreams" if user else "/research/data"
     return templates.TemplateResponse(
         request,
         "dream-detail.html",
-        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id)},
+        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id), "back_url": back_url},
     )
 
 # Update the follow-up reflection on the current entry

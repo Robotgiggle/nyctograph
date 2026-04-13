@@ -62,7 +62,7 @@ class Researcher(Base):
 
         return query
 
-    def allowed_to_view(self, entry: DreamEntry) -> bool:
+    def allowed_to_view(self, entry: "DreamEntry") -> bool:
         """Check whether a DreamEntry matches this researcher's saved filters."""
         if not self.data_filters:
             return True

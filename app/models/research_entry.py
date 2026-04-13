@@ -12,6 +12,7 @@ class ResearchEntry(Base):
     __tablename__ = "research_entries"
     metadata = MetaData()
 
+    entry_id: Mapped[int]
     title: Mapped[str] = mapped_column(primary_key=True)
     description: Mapped[str]
     content_tags: Mapped[str|None]
