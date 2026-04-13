@@ -4,8 +4,8 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
-from ..forms import ResearchSignupForm, StandardSignupForm
-from ..models import Researcher, User
+from ..forms import ResearchSignupRequestForm, StandardSignupForm
+from ..models import User, Researcher, ResearchRequest
 from ..utils import DbSesDep, flash, ph
 from ..jinja import templates
 
@@ -58,35 +58,57 @@ def signup_action(request: Request, dbSes: DbSesDep, form: Annotated[StandardSig
 
 @router.get("/signup/research")
 def research_signup_form(request: Request):
-    return templates.TemplateResponse(request, "research-signup.html", {})
+    return templates.TemplateResponse(request, "research-signup-request.html", {})
 
 
 @router.post("/signup/research")
 def research_signup_action(
     request: Request,
     dbSes: DbSesDep,
-    form: Annotated[ResearchSignupForm, Form()],
+    form: Annotated[ResearchSignupRequestForm, Form()],
 ):
-    if _username_taken(dbSes, form.username):
-        flash(request, "That username is already taken.", "warn")
-        return RedirectResponse("/signup/research", status_code=303)
     if _email_taken(dbSes, str(form.email)):
-        flash(request, "That email is already registered.", "warn")
+        flash(request, "That email is already used by an existing account.", "warn")
         return RedirectResponse("/signup/research", status_code=303)
 
-    researcher = Researcher(
-        username=form.username,
-        pw_hash=ph.hash(form.password),
+    newReq = ResearchRequest(
+        name=form.name,
         email=str(form.email),
-        ror_id=form.ror_id
+        ror_id=form.ror_id,
+        reason=form.reason
     )
-    dbSes.add(researcher)
+    dbSes.add(newReq)
     dbSes.commit()
-    dbSes.refresh(researcher)
 
-    request.session.pop("user_id", None)
-    request.session["researcher_id"] = researcher.id
-    request.session["username"] = researcher.username
+    flash(request, "Account request submitted! We will get back to you shortly.", "success")
+    return RedirectResponse("/signup/research", status_code=303)
 
-    flash(request, "Research account created. You are now logged in.", "success")
-    return RedirectResponse("/research", status_code=303)
+# @router.post("/signup/research")
+# def research_signup_action(
+#     request: Request,
+#     dbSes: DbSesDep,
+#     form: Annotated[ResearchSignupForm, Form()],
+# ):
+#     if _username_taken(dbSes, form.username):
+#         flash(request, "That username is already taken.", "warn")
+#         return RedirectResponse("/signup/research", status_code=303)
+#     if _email_taken(dbSes, str(form.email)):
+#         flash(request, "That email is already registered.", "warn")
+#         return RedirectResponse("/signup/research", status_code=303)
+
+#     researcher = Researcher(
+#         username=form.username,
+#         pw_hash=ph.hash(form.password),
+#         email=str(form.email),
+#         ror_id=form.ror_id
+#     )
+#     dbSes.add(researcher)
+#     dbSes.commit()
+#     dbSes.refresh(researcher)
+
+#     request.session.pop("user_id", None)
+#     request.session["researcher_id"] = researcher.id
+#     request.session["username"] = researcher.username
+
+#     flash(request, "Research account created. You are now logged in.", "success")
+#     return RedirectResponse("/research", status_code=303)

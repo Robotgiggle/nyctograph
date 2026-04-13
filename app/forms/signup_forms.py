@@ -26,20 +26,30 @@ class StandardSignupForm(BaseModel):
         return self.public_opt_in == "yes"
 
 
-class ResearchSignupForm(BaseModel):
-    """Research institution registration (separate account table; ROR ID identifies the organization)."""
+class ResearchSignupRequestForm(BaseModel):
+    """Research account request form (step 1 of the account creation process)."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    username: Annotated[str, Field(min_length=3, max_length=64)]
+    name: Annotated[str, Field(min_length=3, max_length=64)]
     email: EmailStr
-    password: Annotated[str, Field(min_length=8, max_length=256)]
-    password_confirm: str
     ror_id: Annotated[str, Field(min_length=3, max_length=512)]
-    consent_data_storage: Literal["yes"]
+    reason: Annotated[str, Field(min_length=5)]
 
-    @model_validator(mode="after")
-    def passwords_match(self):
-        if self.password != self.password_confirm:
-            raise ValueError("Passwords do not match")
-        return self
+# class ResearchSignupForm(BaseModel):
+#     """Research institution registration (separate account table; ROR ID identifies the organization)."""
+
+#     model_config = ConfigDict(str_strip_whitespace=True)
+
+#     username: Annotated[str, Field(min_length=3, max_length=64)]
+#     email: EmailStr
+#     password: Annotated[str, Field(min_length=8, max_length=256)]
+#     password_confirm: str
+#     ror_id: Annotated[str, Field(min_length=3, max_length=512)]
+#     consent_data_storage: Literal["yes"]
+
+#     @model_validator(mode="after")
+#     def passwords_match(self):
+#         if self.password != self.password_confirm:
+#             raise ValueError("Passwords do not match")
+#         return self
