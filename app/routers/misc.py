@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Request, Form
+from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from os import urandom
@@ -23,10 +23,11 @@ def admin_page(request: Request, user: UserDep, dbSes: DbSesDep):
 
     return templates.TemplateResponse(request, "admin.html", {"requests": requests})
 
-# Admin page form action
+# Admin page action (approving/denying research account requests)
 @router.post("/admin")
 def admin_action(
     request: Request, 
+    bg_tasks: BackgroundTasks,
     user: UserDep, 
     dbSes: DbSesDep, 
     req_id: Annotated[int, Form()], 
@@ -45,11 +46,11 @@ def admin_action(
     if approval == "Approve":
         req.status = "Approved"
         req.token = ph.hash(urandom(20))[31:]
-        send_research_approval(req.email, req.name, req.token or "")
+        bg_tasks.add_task(send_research_approval, req.email, req.name, req.token or "")
         flash(request, "Research request approved.", "success")
     elif approval == "Deny":
         dbSes.delete(req)
-        send_research_denial(req.email, req.name, req.reason, deny_msg)
+        bg_tasks.add_task(send_research_denial, req.email, req.name, req.reason, deny_msg)
         flash(request, "Research request denied.", "success")
     dbSes.commit()
 

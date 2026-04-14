@@ -1,13 +1,15 @@
-from typing import List
-from urllib.parse import quote
 import resend
+from typing import List
+from fastapi import BackgroundTasks
+from urllib.parse import quote
+from dotenv import load_dotenv
+from os import getenv
 
 from .jinja import template_string
 
-# TODO: put this in an environment variable for security
-resend.api_key = "re_afbMQGHk_iEL3SWZF47KntYfeBB51LhqQ"
+load_dotenv(".env")
 
-APP_DOMAIN = "http://localhost:8000"
+resend.api_key = getenv("RESEND_API_KEY")
 
 def send_email(recipients: List[str], subject: str, body_html: str):
     params: resend.Emails.SendParams = {
@@ -20,7 +22,7 @@ def send_email(recipients: List[str], subject: str, body_html: str):
     return email
 
 def send_research_approval(recipient: str, name: str, token: str):
-    confirm_url = APP_DOMAIN + "/signup/research/confirm?token=" + quote(token)
+    confirm_url = getenv("APP_DOMAIN", "") + "/signup/research/confirm?token=" + quote(token)
     context = {"name": name, "url": confirm_url}
     send_email(
         [recipient],

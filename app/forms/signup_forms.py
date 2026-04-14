@@ -37,7 +37,7 @@ class ResearchSignupRequestForm(BaseModel):
     reason: Annotated[str, Field(min_length=5)]
 
 class ResearchSignupConfirmForm(BaseModel):
-    """Research institution registration (separate account table; ROR ID identifies the organization)."""
+    """Research account confirmation form (step 2 of the account creation process)."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
 

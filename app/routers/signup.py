@@ -100,7 +100,7 @@ def research_confirmation_action(
     
     req = dbSes.execute(select(ResearchRequest).where(ResearchRequest.token == form.token)).scalar()
     if req is None:
-        flash(request, "Invalid account token. You must submit a research account request and have it approved before you can create an account.", "warn")
+        flash(request, "Invalid account token. You must request a research account and be approved before you can create the account.", "warn")
         return RedirectResponse("/signup/research", status_code=303)
 
     researcher = Researcher(
