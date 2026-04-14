@@ -160,13 +160,14 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
     # - you're a researcher and the entry doesn't match your filters
     if (user and entry.user_id != user.id) or (res and not res.allowed_to_view(entry)):
         flash(request, "You don't have permission to view this dream entry!", "warn")
-        return RedirectResponse("/my-dreams" if user else "/login", status_code=303)
+        return RedirectResponse("/my-dreams" if user else "/research", status_code=303)
     
     # Render the detail page
+    back_url = "/my-dreams" if user else "/research/data"
     return templates.TemplateResponse(
         request,
         "dream-detail.html",
-        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id)},
+        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id), "back_url": back_url},
     )
 
 # Update the follow-up reflection on the current entry

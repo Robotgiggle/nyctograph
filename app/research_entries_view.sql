@@ -1,5 +1,5 @@
 CREATE VIEW research_entries AS
-SELECT de.title, de.description, STRING_AGG((SELECT t.value WHERE t.category = 'dream_content'), ';') AS content_tags,
+SELECT de.id AS entry_id, de.title, de.description, STRING_AGG((SELECT t.value WHERE t.category = 'dream_content'), ';') AS content_tags,
        STRING_AGG((SELECT t.value WHERE t.category = 'dream_type'), ';') AS type_tags, de.sense_sight, de.sense_sound, 
 	   de.sense_touch, de.sense_smell, de.sense_taste, de.sense_pain, de.sense_other, de.created_at, de.context, 
 	   STRING_AGG((SELECT t.value WHERE t.category = 'irl_context'), ';') AS context_tags, de.bed_time, de.wake_time,
