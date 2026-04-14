@@ -38,9 +38,7 @@
         {% if entry.sleep_hours %}<p><strong>Hours of sleep:</strong> {{ entry.sleep_hours|round(2) }}</p>{% endif %}
         {% if entry.city or entry.state or entry.country %}
             <p><strong>Location:</strong> 
-                {% if entry.city %}{{ entry.city }}{% endif %}{% if entry.state %}, {% endif %}
-                {% if entry.state %}{{ entry.state }}{% endif %}{% if entry.country %}, {% endif %}
-                {% if entry.country %}{{ entry.country }}{% endif %}
+                {{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}
             </p>
         {% endif %}
     </section>
@@ -70,9 +68,11 @@
                     <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
                 {% endif %}
             </form>
-        {% else %}
-            <p style="white-space: pre-line;">{{ entry.reflection if entry.reflection }}</p>
+        {% elif entry.reflection %}
+            <p style="white-space: pre-line;">{{ entry.reflection }}</p>
             <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        {% else %}
+            <p>No saved reflection.</p>
         {% endif %}
     </section>
 

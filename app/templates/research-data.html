@@ -21,16 +21,22 @@
     <br>
 
     {% if entries %}
-    <table border="1" cellpadding="6" cellspacing="0">
+    <table border="1" cellpadding="6" cellspacing="0" style="white-space:nowrap;">
         <thead>
             <tr>
                 <th>Title</th>
                 <th>Author</th>
                 <th>Date</th>
+                <th>Location</th>
+                <th>Senses</th>
                 <th>Content Tags</th>
                 <th>Type Tags</th>
                 <th>Context Tags</th>
+                <th>Sleep Time</th>
                 <th>Reflection</th>
+                <th>Author Age</th>
+                <th>Author Gender</th>
+                <th>Medical Conditions</th>
             </tr>
         </thead>
         <tbody>
@@ -39,10 +45,22 @@
                 <td><a href="/my-dreams/{{ entry.entry_id }}">{{ entry.title }}</a></td>
                 <td>{{ entry.username }}</td>
                 <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
-                <td>{{ entry.content_tags.replace(';', ', ') if entry.content_tags else '—' }}</td>
-                <td>{{ entry.type_tags.replace(';', ', ') if entry.type_tags else '—' }}</td>
-                <td>{{ entry.context_tags.replace(';', ', ') if entry.context_tags else '—' }}</td>
+                <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}</td>
+                <td>{{ ('👁️' if entry.sense_sight else '')+
+                       ('👂' if entry.sense_sound else '')+
+                       ('🫳' if entry.sense_touch else '')+
+                       ('👃' if entry.sense_smell else '') }}<br>
+                    {{ ('👅' if entry.sense_taste else '')+
+                       ('💥' if entry.sense_pain else '')+
+                       ('❓' if entry.sense_other else '') }}</td>
+                <td style="white-space:normal">{{ entry.content_tags.replace(';', ', ') if entry.content_tags else '—' }}</td>
+                <td style="white-space:normal">{{ entry.type_tags.replace(';', ', ') if entry.type_tags else '—' }}</td>
+                <td style="white-space:normal">{{ entry.context_tags.replace(';', ', ') if entry.context_tags else '—' }}</td>
+                <td>{{ '%0.2f'|format(entry.sleep_hours)+' hrs' if entry.sleep_hours else '—' }}</td>
                 <td>{{ "Yes" if entry.reflection else "No" }}</td>
+                <td>{{ '%0.2f'|format(entry.user_age) if entry.user_age else '—' }}</td>
+                <td>{{ entry.user_gender if entry.user_gender else '—' }}</td>
+                <td>{{ entry.user_med_conditions if entry.user_med_conditions else '—' }}</td>
             </tr>
             {% endfor %}
         </tbody>

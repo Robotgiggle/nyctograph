@@ -94,7 +94,7 @@ def research_data_page(
         per_page = 10
 
     count_query = res.filter_query(select(func.count()).select_from(ResearchEntry))
-    total_count = dbSes.execute(count_query).scalar()
+    total_count = dbSes.execute(count_query).scalar() or 0
 
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
