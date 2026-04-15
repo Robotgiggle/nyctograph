@@ -59,7 +59,7 @@ def admin_action(
 # Page explaining what Nyctograph is
 @router.get("/about-us")
 def about_us(request: Request):
-    return not_implemented_yet(request)
+    return templates.TemplateResponse(request, "about-us.html", {})
 
 # Route that logs you out when visited
 @router.get("/logout")
