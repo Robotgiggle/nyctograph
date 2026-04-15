@@ -18,10 +18,10 @@ def _username_taken(dbSes, username: str) -> bool:
     return u is not None or r is not None
 
 
-def _email_taken(dbSes, email: str) -> bool:
-    u = dbSes.execute(select(User.id).where(User.email == email)).first()
-    r = dbSes.execute(select(Researcher.id).where(Researcher.email == email)).first()
-    return u is not None or r is not None
+def _email_taken(dbSes, email: str, research: bool) -> bool:
+    table = Researcher if research else User
+    existing = dbSes.execute(select(table.id).where(table.email == email)).first()
+    return existing is not None
 
 
 @router.get("/signup")
@@ -34,7 +34,7 @@ def signup_action(request: Request, dbSes: DbSesDep, form: Annotated[StandardSig
     if _username_taken(dbSes, form.username):
         flash(request, "That username is already taken.", "warn")
         return RedirectResponse("/signup", status_code=303)
-    if _email_taken(dbSes, str(form.email)):
+    if _email_taken(dbSes, str(form.email), False):
         flash(request, "That email is already registered.", "warn")
         return RedirectResponse("/signup", status_code=303)
 
@@ -67,8 +67,13 @@ def research_signup_action(
     dbSes: DbSesDep,
     form: Annotated[ResearchSignupRequestForm, Form()],
 ):
-    if _email_taken(dbSes, str(form.email)):
+    if _email_taken(dbSes, str(form.email), True):
         flash(request, "That email is already used by an existing account.", "warn")
+        return RedirectResponse("/signup/research", status_code=303)
+    
+    existingReq = dbSes.execute(select(ResearchRequest.id).where(ResearchRequest.email == form.email)).first()
+    if existingReq is not None:
+        flash(request, "There is already a pending request with that email - please wait for us to review it.", "warn")
         return RedirectResponse("/signup/research", status_code=303)
 
     newReq = ResearchRequest(
