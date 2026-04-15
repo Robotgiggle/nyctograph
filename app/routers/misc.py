@@ -7,7 +7,7 @@ from os import urandom
 from ..utils import UserDep, DbSesDep, flash, verify_pw, ph, not_implemented_yet
 from ..jinja import templates
 from ..forms import AccountConfigForm
-from ..models import User, ResearchRequest
+from ..models import User, ResearchRequest, DreamEntry
 from ..email import send_research_approval, send_research_denial
 
 router = APIRouter()
@@ -103,6 +103,22 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
         user.username = formData.new_username
         request.session["username"] = formData.new_username
     if formData.public_enabled is not None:
+        # If changing from public to private, make all existing entries private
+        if user.public_enabled and not formData.public_enabled:
+            # Get all public dream entries for this user and make them private
+            public_entries = dbSes.execute(
+                select(DreamEntry).where(
+                    DreamEntry.user_id == user.id,
+                    DreamEntry.public == True
+                )
+            ).scalars().all()
+            
+            for entry in public_entries:
+                entry.public = False
+            
+            if len(public_entries) > 0:
+                flash(request, f"{len(public_entries)} public dream entries have been made private.", "info")
+        
         user.public_enabled = formData.public_enabled
     if formData.birth_date is not None:
         user.birth_date = formData.birth_date or None
