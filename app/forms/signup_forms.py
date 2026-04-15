@@ -26,17 +26,26 @@ class StandardSignupForm(BaseModel):
         return self.public_opt_in == "yes"
 
 
-class ResearchSignupForm(BaseModel):
-    """Research institution registration (separate account table; ROR ID identifies the organization)."""
+class ResearchSignupRequestForm(BaseModel):
+    """Research account request form (step 1 of the account creation process)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: Annotated[str, Field(min_length=3, max_length=64)]
+    email: EmailStr
+    ror_id: Annotated[str, Field(min_length=3, max_length=512)]
+    reason: Annotated[str, Field(min_length=5)]
+
+class ResearchSignupConfirmForm(BaseModel):
+    """Research account confirmation form (step 2 of the account creation process)."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
     username: Annotated[str, Field(min_length=3, max_length=64)]
-    email: EmailStr
     password: Annotated[str, Field(min_length=8, max_length=256)]
     password_confirm: str
-    ror_id: Annotated[str, Field(min_length=3, max_length=512)]
     consent_data_storage: Literal["yes"]
+    token: str
 
     @model_validator(mode="after")
     def passwords_match(self):

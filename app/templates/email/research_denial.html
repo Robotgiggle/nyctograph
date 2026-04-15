@@ -1,0 +1,8 @@
+{% extends "email/email_base.html" %}
+{% block body %}
+    <p>Unfortunately, your request for a Nyctograph research account has been denied.</p>
+    <p>Your request message:</p>
+    <p class="quote">{{req_msg}}</p>
+    <p>Reason for denial:</p>
+    <p class="quote">{{deny_msg}}</p>
+{% endblock %}

@@ -1,14 +1,60 @@
 from typing import Annotated
-from fastapi import APIRouter, Request, Form
+from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
+from os import urandom
 
 from ..utils import UserDep, DbSesDep, flash, verify_pw, ph, not_implemented_yet
 from ..jinja import templates
 from ..forms import AccountConfigForm
-from ..models import User
+from ..models import User, ResearchRequest
+from ..email import send_research_approval, send_research_denial
 
 router = APIRouter()
+
+# Admin control page
+@router.get("/admin")
+def admin_page(request: Request, user: UserDep, dbSes: DbSesDep):
+    if not user or user.username != "admin":
+        flash(request, "You do not have permission to access this page!", "warn")
+        return RedirectResponse("/", status_code=303)
+    
+    requests = dbSes.execute(select(ResearchRequest)).scalars().all()
+
+    return templates.TemplateResponse(request, "admin.html", {"requests": requests})
+
+# Admin page action (approving/denying research account requests)
+@router.post("/admin")
+def admin_action(
+    request: Request, 
+    bg_tasks: BackgroundTasks,
+    user: UserDep, 
+    dbSes: DbSesDep, 
+    req_id: Annotated[int, Form()], 
+    approval: Annotated[str, Form()],
+    deny_msg: Annotated[str, Form()] = ""
+):
+    if not user or user.username != "admin":
+        flash(request, "You do not have permission for this action!", "warn")
+        return RedirectResponse("/", status_code=303)
+    
+    req = dbSes.get(ResearchRequest, req_id)
+    if req is None:
+        flash(request, f"Research request with ID {req_id} not found in DB!", "warn")
+        return RedirectResponse("/admin", status_code=303)
+
+    if approval == "Approve":
+        req.status = "Approved"
+        req.token = ph.hash(urandom(20))[31:]
+        bg_tasks.add_task(send_research_approval, req.email, req.name, req.token or "")
+        flash(request, "Research request approved.", "success")
+    elif approval == "Deny":
+        dbSes.delete(req)
+        bg_tasks.add_task(send_research_denial, req.email, req.name, req.reason, deny_msg)
+        flash(request, "Research request denied.", "success")
+    dbSes.commit()
+
+    return RedirectResponse("/admin", status_code=303)
 
 # Page explaining what Nyctograph is
 @router.get("/about-us")

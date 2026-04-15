@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Admin controls</h1>
+    
+    <section>
+        <h2>Research account requests</h2>
+        {% for req in requests %}
+            <div>
+                <p><strong>Name:</strong> {{req.name}} | <strong>Email:</strong> {{req.email}} | <strong>ROR ID:</strong> {{req.ror_id}}</p>
+                <p style="white-space: pre-line;">{{req.reason}}</p>
+                <form action="" method="post" >
+                    <span><strong>Status:</strong> {{req.status}}</span>
+                    {% if req.status == "Pending" %}
+                         | 
+                        <input type="hidden" name="req_id" value="{{req.id}}">
+                        <input type="submit" name="approval" value="Approve" style="height:36px;vertical-align:middle" formnovalidate> | 
+                        <input type="submit" name="approval" value="Deny" style="height:36px;vertical-align:middle">
+                        <textarea name="deny_msg" placeholder="Reason for denial" cols="25" style="vertical-align:middle" required></textarea>
+                    {% endif %}
+                </form>
+            </div>
+        {% endfor %}
+    </section>
+{% endblock %}

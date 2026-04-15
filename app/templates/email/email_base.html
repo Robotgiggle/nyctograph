@@ -1,0 +1,33 @@
+<head>
+    <style>
+        .bg {
+            background-color: #f7f9fa;
+            padding: 15px;
+        }
+        .wrapper {
+            background-color: lavender;
+            padding: 10px;
+            padding-left: 15px;
+            border-radius: 8px;
+            width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .name {
+            font-size: 1.2em;
+        }
+        .quote {
+            white-space: pre-line;
+            background-color: #f0f0f7;
+            padding: 10px;
+            width: fit-content;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg">
+    <div class="wrapper">
+        <p class="name">Dear {{name}},</p>
+        {% block body %}{% endblock %}
+    </div>
+</body>

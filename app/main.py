@@ -1,5 +1,7 @@
 import asyncio
+from os import getenv
 from os.path import dirname
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -13,19 +15,20 @@ from .stat_calc import global_stat_calc_loop
 
 # ===== CORE APP SETUP =====
 
-COOKIE_SECRET_KEY = "correcthorsebatterystaple"
+load_dotenv(".env")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # start the stat calc loop in the background; in prod, the interval should be *much* higher
-    asyncio.create_task(global_stat_calc_loop(interval_mins=2))
+    # start the stat calc loop in the background
+    interval_mins = int(getenv("GLOBAL_CALC_INTERVAL", "2"))
+    asyncio.create_task(global_stat_calc_loop(interval_mins))
     yield
 
 app = FastAPI(lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=dirname(__file__)+"/static"), name="static")
 
-app.add_middleware(SessionMiddleware, secret_key=COOKIE_SECRET_KEY)
+app.add_middleware(SessionMiddleware, secret_key=getenv("COOKIE_SECRET_KEY", ""))
 
 app.include_router(homepage.router)
 app.include_router(my_dreams.router)
