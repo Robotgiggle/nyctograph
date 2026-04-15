@@ -167,7 +167,7 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
     return templates.TemplateResponse(
         request,
         "dream-detail.html",
-        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id), "back_url": back_url},
+        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id), "back_url": back_url, "user": user},
     )
 
 # Update the follow-up reflection on the current entry
@@ -193,6 +193,36 @@ def update_reflection(request: Request,
     dbSes.commit()
 
     flash(request, "Follow-up reflection saved.", "success")
+    return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
+
+# Toggle the public/private status of a dream entry
+@router.post("/my-dreams/{entry_id}/toggle-public")
+def toggle_entry_public_status(request: Request,
+    entry_id: int,
+    dbSes: DbSesDep,
+    user: UserDep,
+    make_public: Annotated[bool, Form()],
+):
+    if not user:
+        flash(request, "You must be logged in to modify entries.", "warn")
+        return RedirectResponse("/login", status_code=303)
+
+    entry = dbSes.get(DreamEntry, entry_id)
+    if not entry or entry.user_id != user.id:
+        flash(request, "You don't have permission to modify this entry.", "warn")
+        return RedirectResponse("/my-dreams", status_code=303)
+
+    # Only allow making entries public if user has public_enabled
+    if make_public and not user.public_enabled:
+        flash(request, "You must enable public data sharing in your account settings before making entries public.", "warn")
+        return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
+
+    entry.public = make_public
+    dbSes.add(entry)
+    dbSes.commit()
+
+    status = "public" if make_public else "private"
+    flash(request, f"Dream entry is now {status}.", "success")
     return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
 
 # Page to display personal statistics

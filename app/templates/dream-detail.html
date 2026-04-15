@@ -11,7 +11,49 @@
         <h2>Basic Information</h2>
         <p><strong>Created:</strong> {{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p><strong>Author:</strong> {{ entry.user.username }}</p>
-        <p><strong>Visibility:</strong> {{ "Public" if entry.public else "Private" }}</p>
+        <p>
+            <strong>Visibility:</strong> {{ "Public" if entry.public else "Private" }}
+            {% if is_owner %}
+                <button id="edit-visibility-btn" onclick="toggleVisibilityEdit()" {%if not user.public_enabled%}disabled{%endif%}>
+                    Edit
+                </button>
+                {% if not user.public_enabled %}
+                    <span style="font-size: 0.9em; color: #666;">
+                        (Enable public data sharing in <a href="/account">account settings</a> first)
+                    </span>
+                {% endif %}
+            {% endif %}
+        </p>
+        
+        {% if is_owner %}
+            <form id="visibility-edit-form" method="post" action="/my-dreams/{{ entry.id }}/toggle-public" style="display: none; margin-top: 1em; padding: 1em; background-color: #f5f5f5; border-radius: 4px;">
+                <strong>Change visibility:</strong><br>
+                <input type="radio" id="make-private" name="make_public" value="False" 
+                    {%if not entry.public%}checked{%endif%}>
+                <label for="make-private">Private</label>
+                
+                <input type="radio" id="make-public" name="make_public" value="True" 
+                    {%if entry.public%}checked{%endif%}>
+                <label for="make-public">Public</label>
+                <br><br>
+                <button type="submit">Save</button>
+                <button type="button" onclick="toggleVisibilityEdit()">Cancel</button>
+            </form>
+            
+            <script>
+                function toggleVisibilityEdit() {
+                    const form = document.getElementById('visibility-edit-form');
+                    const btn = document.getElementById('edit-visibility-btn');
+                    if (form.style.display === 'none') {
+                        form.style.display = 'block';
+                        btn.style.display = 'none';
+                    } else {
+                        form.style.display = 'none';
+                        btn.style.display = 'inline';
+                    }
+                }
+            </script>
+        {% endif %}
     </section>
 
     {% if entry.sense_sight is not none or entry.sense_sound is not none or entry.sense_touch is not none or entry.sense_smell is not none or entry.sense_taste is not none or entry.sense_pain is not none or entry.sense_other is not none %}
