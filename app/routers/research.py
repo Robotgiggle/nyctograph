@@ -1,10 +1,13 @@
 import math
-from typing import Annotated
+import csv
+import io
+from typing import Annotated, Sequence
 from fastapi import APIRouter, Request, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
+from datetime import datetime
 
-from ..models import Tag, ResearchEntry
+from ..models import Tag, ResearchEntry, DownloadRecord
 from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
@@ -99,7 +102,7 @@ def research_data_page(
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
 
-    entries_query = res.filter_query(select(ResearchEntry))
+    entries_query = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
     entries_query = entries_query.offset((page - 1) * per_page).limit(per_page)
     entries = dbSes.execute(entries_query).scalars().all()
 
@@ -111,3 +114,125 @@ def research_data_page(
         "total_pages": total_pages,
         "page_range": _page_range(page, total_pages),
     })
+
+
+@router.get("/research/download")
+def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep):
+    if not res:
+        flash(request, "This page requires a research institution account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+
+    if not res.data_filters:
+        flash(request, "No requested data. Set filters first.", "warn")
+        return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
+
+    countQuery = res.filter_query(select(func.count()).select_from(ResearchEntry))
+    sampleQuery = res.filter_query(select(ResearchEntry).order_by(func.random()).limit(10))
+    count = dbSes.scalar(countQuery)
+    sampleRows = dbSes.scalars(sampleQuery).all()
+    if not count:
+        flash(request, "No public entries match your current filters.", "warn")
+        return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
+
+    estSizeBytes = estimate_download_size(sampleRows, count)
+
+    return templates.TemplateResponse(
+        request,
+        "download-requested-data.html",
+        {
+            "has_data": True,
+            "row_count": count,
+            "est_size": sizeof_fmt(estSizeBytes),
+            "default_filename": f"nyctograph_entries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        },
+    )
+
+
+@router.post("/research/download")
+def research_download_action(
+    request: Request,
+    dbSes: DbSesDep,
+    res: ResearcherDep,
+    filename: str = Form(min_length=1),
+):
+    if not res:
+        flash(request, "This page requires a research institution account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+
+    if not res.data_filters:
+        flash(request, "No requested data. Set filters first.", "warn")
+        return RedirectResponse("/research/download", status_code=303)
+
+    dataQuery = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
+    rows = dbSes.scalars(dataQuery).all()
+    if not rows:
+        flash(request, "No public entries match your current filters.", "warn")
+        return RedirectResponse("/research/download", status_code=303)
+
+    safe_name = (filename or "").strip() or "nyctograph_entries.csv"
+    if not safe_name.lower().endswith(".csv"):
+        safe_name += ".csv"
+
+    csv_iter = generate_csv_iter(rows)
+
+    dbSes.add(
+        DownloadRecord(
+            researcher_id=res.id,
+            downloaded_at=datetime.now(),
+            filters_used=res.data_filters or "{}",
+        )
+    )
+    dbSes.commit()
+
+    # StreamingResponse matches team guidance + FastAPI CSV patterns (no temp file on disk).
+    headers = {"Content-Disposition": f'attachment; filename="{safe_name}"'}
+    return StreamingResponse(
+        csv_iter,
+        media_type="text/csv; charset=utf-8",
+        headers=headers,
+    )
+
+
+orderedColNames = [
+    "title", "description", "content_tags", "type_tags", "sense_sight", "sense_sound", "sense_touch", 
+    "sense_smell", "sense_taste", "sense_pain", "sense_other", "created_at", "context", "context_tags",
+    "bed_time", "wake_time", "sleep_hours", "country", "state", "city", "not_at_home", "reflection", 
+    "rfln_timestamp", "username", "user_gender", "user_age", "user_med_conditions"
+]
+
+
+# Convert a number of bytes to a human-readable file size
+def sizeof_fmt(num, suffix="B"):
+    if num < 1000.0: return f"{num:d} bytes"
+    for unit in ("K", "M", "G", "T", "P", "E", "Z"):
+        num /= 1000.0
+        if num < 1000.0:
+            return f"{num:3.1f} {unit}{suffix}"
+    return f"{num:.1f} Y{suffix}"
+
+
+# Estimate the size of the file by averaging the size of a small sample of rows and multiplying by total row count
+def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) -> int:
+    # Write them to a test CSV
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(map(lambda entry: entry.__dict__, sampleRows))
+
+    # Estimate size of full CSV (the +1 is because of the header row)
+    full = buf.getvalue()
+    avgPerRow = len(full.encode("utf-8")) / (len(sampleRows)+1)
+    return int(avgPerRow * (totalRows+1))
+
+
+# Convert a list of ResearchEntry objects into a StringIO representing a CSV file.
+# The output from this can be sent back to the client to make them download the file.
+def generate_csv_iter(rows: Sequence[ResearchEntry]) -> io.StringIO:
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(map(lambda entry: entry.__dict__, rows))
+
+    buf.seek(0)
+    
+    return buf

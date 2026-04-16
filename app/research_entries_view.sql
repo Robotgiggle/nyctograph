@@ -3,7 +3,7 @@ SELECT de.id AS entry_id, de.title, de.description, STRING_AGG((SELECT t.value W
        STRING_AGG((SELECT t.value WHERE t.category = 'dream_type'), ';') AS type_tags, de.sense_sight, de.sense_sound, 
 	   de.sense_touch, de.sense_smell, de.sense_taste, de.sense_pain, de.sense_other, de.created_at, de.context, 
 	   STRING_AGG((SELECT t.value WHERE t.category = 'irl_context'), ';') AS context_tags, de.bed_time, de.wake_time,
-	   de.sleep_hours, de.country, de.state, de.city, STRING_AGG((SELECT t.value WHERE t.category = 'calculated'), ';') AS calc_tags, 
+	   de.sleep_hours, de.country, de.state, de.city, BOOL_OR(t.value = 'Atypical Location') AS not_at_home, 
 	   de.reflection, de.rfln_timestamp, u.username, EXTRACT(DAY FROM (NOW()-u.birth_date))/365.25 AS user_age, 
 	   u.gender AS user_gender, u.med_conditions AS user_med_conditions
 FROM dream_entries AS de
