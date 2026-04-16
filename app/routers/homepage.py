@@ -39,7 +39,10 @@ def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) 
         return (False, flashes)
     
     # Compare entry location to user's default location
-    if formDataModel.country != user.country or formDataModel.state != user.state or formDataModel.city != user.city:
+    atypical_country = user.country is not None and formDataModel.country != user.country
+    atypical_state = user.state is not None and formDataModel.state != user.state
+    atypical_city = user.city is not None and formDataModel.city != user.city
+    if atypical_country or atypical_state or atypical_city:
         nsLocTag = dbSes.get(Tag, "Atypical Location")
         if nsLocTag: newEntry.tags.append(nsLocTag)
 

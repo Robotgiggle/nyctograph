@@ -173,7 +173,7 @@ def research_download_action(
     if not safe_name.lower().endswith(".csv"):
         safe_name += ".csv"
 
-    csv_bytes = _generate_csv_bytes(rows)
+    csv_iter = generate_csv_iter(rows)
 
     dbSes.add(
         DownloadRecord(
@@ -187,10 +187,19 @@ def research_download_action(
     # StreamingResponse matches team guidance + FastAPI CSV patterns (no temp file on disk).
     headers = {"Content-Disposition": f'attachment; filename="{safe_name}"'}
     return StreamingResponse(
-        iter([csv_bytes]),
+        csv_iter,
         media_type="text/csv; charset=utf-8",
         headers=headers,
     )
+
+
+orderedColNames = [
+    "title", "description", "content_tags", "type_tags", "sense_sight", "sense_sound", "sense_touch", 
+    "sense_smell", "sense_taste", "sense_pain", "sense_other", "created_at", "context", "context_tags",
+    "bed_time", "wake_time", "sleep_hours", "country", "state", "city", "not_at_home", "reflection", 
+    "rfln_timestamp", "username", "user_gender", "user_age", "user_med_conditions"
+]
+
 
 # Convert a number of bytes to a human-readable file size
 def sizeof_fmt(num, suffix="B"):
@@ -216,69 +225,14 @@ def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) 
     return int(avgPerRow * (totalRows+1))
 
 
-def _generate_csv_bytes(rows: list[ResearchEntry]) -> bytes:
+# Convert a list of ResearchEntry objects into a StringIO representing a CSV file.
+# The output from this can be sent back to the client to make them download the file.
+def generate_csv_iter(rows: Sequence[ResearchEntry]) -> io.StringIO:
     buf = io.StringIO()
-    writer = csv.writer(buf)
+    writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(map(lambda entry: entry.__dict__, rows))
 
-    writer.writerow(
-        [
-            "title",
-            "description",
-            "content_tags",
-            "type_tags",
-            "sense_sight",
-            "sense_sound",
-            "sense_touch",
-            "sense_smell",
-            "sense_taste",
-            "sense_pain",
-            "sense_other",
-            "created_at",
-            "context",
-            "context_tags",
-            "bed_time",
-            "wake_time",
-            "country",
-            "state",
-            "city",
-            "reflection",
-            "rfln_timestamp",
-            "username",
-            "user_gender",
-            "user_age",
-            "user_med_conditions",
-        ]
-    )
-
-    for r in rows:
-        writer.writerow(
-            [
-                r.title,
-                r.description,
-                r.content_tags,
-                r.type_tags,
-                r.sense_sight,
-                r.sense_sound,
-                r.sense_touch,
-                r.sense_smell,
-                r.sense_taste,
-                r.sense_pain,
-                r.sense_other,
-                r.created_at.isoformat(sep=" ", timespec="seconds") if r.created_at else None,
-                r.context,
-                r.context_tags,
-                r.bed_time.isoformat() if r.bed_time else None,
-                r.wake_time.isoformat() if r.wake_time else None,
-                r.country,
-                r.state,
-                r.city,
-                r.reflection,
-                r.rfln_timestamp.isoformat(sep=" ", timespec="seconds") if r.rfln_timestamp else None,
-                r.username,
-                r.user_gender,
-                r.user_age,
-                r.user_med_conditions,
-            ]
-        )
-
-    return buf.getvalue().encode("utf-8")
+    buf.seek(0)
+    
+    return buf
