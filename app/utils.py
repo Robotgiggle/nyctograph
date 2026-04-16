@@ -1,8 +1,8 @@
 from argon2 import PasswordHasher
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from .database import engine
@@ -46,6 +46,10 @@ def get_researcher(request: Request, dbSes: DbSesDep):
 # Type alias for the dependency
 ResearcherDep = Annotated[Researcher | None, Depends(get_researcher)]
 
+# Inverse linear interpolation (how far from start to end is value?)
+def inv_lerp(start: float, end: float, value: float):
+    return (value - start) / (end - start)
+
 # Adds a message to the flash list, to be displayed the next time a page is loaded
 def flash(request: Request, message: str, type: str):
     if "flashMessages" not in request.session:
@@ -53,6 +57,6 @@ def flash(request: Request, message: str, type: str):
     request.session["flashMessages"].append((message, type))
 
 # Return this from a path operation if the actual functionality hasn't been implemented yet
-def not_implemented_yet(request: Request):
+def not_implemented_yet(request: Request, redirect: str = "/"):
     flash(request, "This page or method ("+str(request.url)+") has not been implemented yet!", "warn")
-    return RedirectResponse("/", status_code=303)
+    return RedirectResponse(redirect, status_code=303)

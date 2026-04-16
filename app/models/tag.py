@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..database import Base
 
 if TYPE_CHECKING:
-    from . import DreamEntry
+    from . import DreamEntry, TagTotal, TagAssociation
 
 # extra table to store many-to-many mapping of dream entries to tags
 entry_tag_association_table = Table(
@@ -22,6 +22,7 @@ class Tag(Base):
     category: Mapped[str]
 
     entries: Mapped[List["DreamEntry"]] = relationship(back_populates="tags", secondary=entry_tag_association_table)
+    totals: Mapped[List["TagTotal"]] = relationship(back_populates="tag")
 
     def __repr__(self) -> str:
         return f"Tag(val: {self.value}, cat: {self.category})"

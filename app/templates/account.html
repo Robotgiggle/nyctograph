@@ -31,7 +31,12 @@
         <input type="date" id="birth_date" name="birth_date" value="{{ user.birth_date if user.birth_date is not none }}">
         <br>
         <label for="gender">Gender:</label>
-        <input type="text" id="gender" name="gender" value="{{ user.gender if user.gender is not none }}">
+        <select id="gender" name="gender">
+            <option value="" {{"selected" if not user.gender}}>---</option>
+            <option {{"selected" if user.gender=="Male"}}>Male</option>
+            <option {{"selected" if user.gender=="Female"}}>Female</option>
+            <option {{"selected" if user.gender=="Other"}}>Other</option>
+        </select>
         <br>
         <label for="med_conditions">Medical conditions:</label>
         <br>

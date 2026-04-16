@@ -23,6 +23,10 @@ contexts = [
     "Recent Argument", "Recent Breakup", "Lost Job", "Recent Death", "Natural Disaster", "Major Injury"
 ]
 
+calcs = [
+    "Short Sleep", "Very Short Sleep", "Long Sleep", "Daytime Sleep", "Atypical Location"
+]
+
 def main():
     # Postgres: drop_all() can fail when leftover tables/views/constraints exist outside
     # SQLAlchemy metadata (e.g. old migrations). Reset the public schema for a clean dev DB.
@@ -42,6 +46,8 @@ def main():
             ses.add(Tag(category="dream_type", value=item))
         for item in contexts:
             ses.add(Tag(category="irl_context", value=item))
+        for item in calcs:
+            ses.add(Tag(category="calculated", value=item))
         ses.add(User(username="admin", pw_hash=ph.hash("dream"), email="fake@fake.com", public_enabled=True))
         ses.commit()
 

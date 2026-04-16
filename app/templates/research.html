@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>Research Filters</h1>
+    {% if total_count == None %}
+        <p>You do not have any saved filters yet. Choose some below, then press 'Save filters' to save them.</p>
+    {% else %}
+        <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently saved filters.</p>
+    {% endif %}
+    <p id="dirty" style="color:red" hidden>The filters selected below are <strong>not</strong> yet saved!</p>
+
+    <form id="update_filters" action="" method="post">
+        <h2>Dream Entry Tags</h2>
+        <p>Entries will be included if they have at least one of the selected tags. Leave all unchecked to include any.</p>
+
+        <h3>Dream Content</h3>
+        {% for tag in content_tags %}
+            <label>
+                <input type="checkbox" name="content_tags" value="{{ tag }}"
+                    {{ "checked" if tag in filters.content_tags }}>
+                {{ tag }}
+            </label>
+        {% endfor %}
+        <br>
+
+        <h3>Dream Type</h3>
+        {% for tag in type_tags %}
+            <label>
+                <input type="checkbox" name="type_tags" value="{{ tag }}"
+                    {{ "checked" if tag in filters.type_tags }}>
+                {{ tag }}
+            </label>
+        {% endfor %}
+        <br>
+
+        <h3>Real-World Context</h3>
+        {% for tag in context_tags %}
+            <label>
+                <input type="checkbox" name="context_tags" value="{{ tag }}"
+                    {{ "checked" if tag in filters.context_tags }}>
+                {{ tag }}
+            </label>
+        {% endfor %}
+        <br><br>
+
+        <h2>Date Range</h2>
+        <p>Leave blank to ignore entry timestamps.</p>
+        <label for="date_from">From:</label>
+        <input type="date" id="date_from" name="date_from"
+            value="{{ filters.date_from if filters.date_from is not none }}">
+        <label for="date_to">To:</label>
+        <input type="date" id="date_to" name="date_to"
+            value="{{ filters.date_to if filters.date_to is not none }}">
+        <br><br>
+
+        <h2>User Demographics</h2>
+        <p>Leave blank to ignore user demographics.</p>
+        <label for="age_min">Min age:</label>
+        <input type="number" id="age_min" name="age_min" min="13" max="120"
+            value="{{ filters.age_min if filters.age_min is not none }}">
+        <label for="age_max">Max age:</label>
+        <input type="number" id="age_max" name="age_max" min="13" max="120"
+            value="{{ filters.age_max if filters.age_max is not none }}">
+        <br>
+        <label>Gender (uncheck all to ignore gender):</label>
+        <br>
+        <label>
+            <input type="checkbox" name="gender" value="Male"
+                {{ "checked" if filters.gender and "Male" in filters.gender }}>
+            Male
+        </label>
+        <label>
+            <input type="checkbox" name="gender" value="Female"
+                {{ "checked" if filters.gender and "Female" in filters.gender }}>
+            Female
+        </label>
+        <label>
+            <input type="checkbox" name="gender" value="Other"
+                {{ "checked" if filters.gender and "Other" in filters.gender }}>
+            Other
+        </label>
+        <br><br>
+
+        <h2>Location</h2>
+        <p>Leave blank to ignore location data.</p>
+        <label for="country">Country:</label>
+        <input type="text" id="country" name="country"
+            value="{{ filters.country if filters.country is not none }}">
+        <br>
+        <label for="state">State/Province:</label>
+        <input type="text" id="state" name="state"
+            value="{{ filters.state if filters.state is not none }}">
+        <br>
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city"
+            value="{{ filters.city if filters.city is not none }}">
+        <br><br>
+
+        <h2>Reflection</h2>
+        <label>Include entries:</label>
+        <br>
+        <input type="radio" id="rfln-any" name="has_reflection" value=""
+            {{ "checked" if filters.has_reflection is none }}>
+        <label for="rfln-any">With or without a reflection</label>
+        <br>
+        <input type="radio" id="rfln-yes" name="has_reflection" value="yes"
+            {{ "checked" if filters.has_reflection == "yes" }}>
+        <label for="rfln-yes">With a reflection only</label>
+        <br>
+        <input type="radio" id="rfln-no" name="has_reflection" value="no"
+            {{ "checked" if filters.has_reflection == "no" }}>
+        <label for="rfln-no">Without a reflection only</label>
+        <br><br>
+
+        <input type="submit" value="Save filters">
+    </form>
+
+    <script>
+        form = document.getElementById("update_filters");
+        warning = document.getElementById("dirty");
+        form.addEventListener("input", function (event) {
+            warning.hidden = false;
+        })
+    </script>
+{% endblock %}

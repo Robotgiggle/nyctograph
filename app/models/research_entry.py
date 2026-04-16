@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, time
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -12,6 +12,7 @@ class ResearchEntry(Base):
     __tablename__ = "research_entries"
     metadata = MetaData()
 
+    entry_id: Mapped[int]
     title: Mapped[str] = mapped_column(primary_key=True)
     description: Mapped[str]
     content_tags: Mapped[str|None]
@@ -28,20 +29,20 @@ class ResearchEntry(Base):
     created_at: Mapped[datetime]
     context: Mapped[str|None]
     context_tags: Mapped[str|None]
-
     bed_time: Mapped[time|None]
     wake_time: Mapped[time|None]
-
+    sleep_hours: Mapped[float|None]
     country: Mapped[str|None]
     state: Mapped[str|None]
     city: Mapped[str|None]
+    calc_tags: Mapped[str|None]
 
     reflection: Mapped[str|None]
     rfln_timestamp: Mapped[datetime|None]
 
     username: Mapped[str] = mapped_column(primary_key=True)
-    user_gender: Mapped[str|None]
     user_age: Mapped[float|None]
+    user_gender: Mapped[str|None]
     user_med_conditions: Mapped[str|None]
 
     def __repr__(self) -> str:
