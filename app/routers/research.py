@@ -1,6 +1,7 @@
 import math
 import csv
 import io
+from typing import Annotated, Sequence
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
@@ -101,7 +102,7 @@ def research_data_page(
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
 
-    entries_query = res.filter_query(select(ResearchEntry))
+    entries_query = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
     entries_query = entries_query.offset((page - 1) * per_page).limit(per_page)
     entries = dbSes.execute(entries_query).scalars().all()
 
@@ -125,19 +126,23 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
         flash(request, "No requested data. Set filters first.", "warn")
         return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
 
-    rows = res.fetch_matching_research_entries(dbSes, newest_first=False, limit=None)
-    if not rows:
+    countQuery = res.filter_query(select(func.count()).select_from(ResearchEntry))
+    sampleQuery = res.filter_query(select(ResearchEntry).order_by(func.random()).limit(10))
+    count = dbSes.scalar(countQuery)
+    sampleRows = dbSes.scalars(sampleQuery).all()
+    if not count:
         flash(request, "No public entries match your current filters.", "warn")
         return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
 
-    csv_bytes = _generate_csv_bytes(rows)
+    estSizeBytes = estimate_download_size(sampleRows, count)
+
     return templates.TemplateResponse(
         request,
         "download-requested-data.html",
         {
             "has_data": True,
-            "row_count": len(rows),
-            "size_bytes": len(csv_bytes),
+            "row_count": count,
+            "est_size": sizeof_fmt(estSizeBytes),
             "default_filename": f"nyctograph_entries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         },
     )
@@ -158,7 +163,8 @@ def research_download_action(
         flash(request, "No requested data. Set filters first.", "warn")
         return RedirectResponse("/research/download", status_code=303)
 
-    rows = res.fetch_matching_research_entries(dbSes, newest_first=False, limit=None)
+    dataQuery = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
+    rows = dbSes.scalars(dataQuery).all()
     if not rows:
         flash(request, "No public entries match your current filters.", "warn")
         return RedirectResponse("/research/download", status_code=303)
@@ -185,6 +191,30 @@ def research_download_action(
         media_type="text/csv; charset=utf-8",
         headers=headers,
     )
+
+# Convert a number of bytes to a human-readable file size
+def sizeof_fmt(num, suffix="B"):
+    if num < 1000.0: return f"{num:d} bytes"
+    for unit in ("K", "M", "G", "T", "P", "E", "Z"):
+        num /= 1000.0
+        if num < 1000.0:
+            return f"{num:3.1f} {unit}{suffix}"
+    return f"{num:.1f} Y{suffix}"
+
+
+# Estimate the size of the file by averaging the size of a small sample of rows and multiplying by total row count
+def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) -> int:
+    # Write them to a test CSV
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(map(lambda entry: entry.__dict__, sampleRows))
+
+    # Estimate size of full CSV (the +1 is because of the header row)
+    full = buf.getvalue()
+    avgPerRow = len(full.encode("utf-8")) / (len(sampleRows)+1)
+    return int(avgPerRow * (totalRows+1))
+
 
 def _generate_csv_bytes(rows: list[ResearchEntry]) -> bytes:
     buf = io.StringIO()

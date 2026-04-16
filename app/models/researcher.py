@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+from datetime import date, time, datetime
 from typing import Any, List, TYPE_CHECKING
 
 from sqlalchemy import Select, false, or_, select
@@ -14,54 +14,9 @@ if TYPE_CHECKING:
     from . import DownloadRecord, DreamEntry
 
 
-def parse_iso_date(s: str | None) -> date | None:
-    s = (s or "").strip()
-    if not s:
-        return None
-    return date.fromisoformat(s)
-
-
-def _parse_filters_json(filters_json: str | None) -> dict[str, Any]:
-    if not filters_json:
-        return {}
-    try:
-        obj = json.loads(filters_json)
-        return obj if isinstance(obj, dict) else {}
-    except Exception:
-        return {}
-
-
-def _normalize_filter_dict(filters: dict[str, Any]) -> dict[str, Any]:
-    """Merge legacy research_data keys (start_date/end_date) with main ResearchFilterForm keys."""
-    out = dict(filters)
-    if out.get("date_from") in (None, "") and out.get("start_date"):
-        out["date_from"] = out.pop("start_date", None)
-    if out.get("date_to") in (None, "") and out.get("end_date"):
-        out["date_to"] = out.pop("end_date", None)
-    for key, default in (
-        ("content_tags", []),
-        ("type_tags", []),
-        ("context_tags", []),
-    ):
-        if key not in out or out[key] is None:
-            out[key] = default
-    return out
-
-
-def _date_to_datetime_start(d: date | str | None):
-    if d is None or d == "":
-        return None
-    if isinstance(d, str):
-        d = date.fromisoformat(d[:10])
-    return datetime.combine(d, datetime.min.time())
-
-
-def _date_to_datetime_end(d: date | str | None):
-    if d is None or d == "":
-        return None
-    if isinstance(d, str):
-        d = date.fromisoformat(d[:10])
-    return datetime.combine(d, datetime.max.time())
+def date_str_to_datetime(d: str, max: bool):
+    theDate = date.fromisoformat(d[:10])
+    return datetime.combine(theDate, time.max if max else time.min)
 
 
 class Researcher(Base):
@@ -76,15 +31,12 @@ class Researcher(Base):
 
     downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")
 
-    def parsed_filters(self) -> dict[str, Any]:
-        return _normalize_filter_dict(_parse_filters_json(self.data_filters))
-
     def filter_query(self, query: Select):
         """Filter a query on ``ResearchEntry`` using this account's saved filters (same rules as /research UI)."""
         if not self.data_filters:
             raise RuntimeError("This Researcher does not have any configured filters!")
 
-        filters = self.parsed_filters()
+        filters: dict = json.loads(self.data_filters)
 
         content_tags = filters.get("content_tags") or []
         if content_tags:
@@ -102,19 +54,19 @@ class Researcher(Base):
                 or_(false(), *[ResearchEntry.context_tags.contains(tag) for tag in context_tags])
             )
 
-        df = filters.get("date_from")
-        dt = filters.get("date_to")
-        d_start = _date_to_datetime_start(df) if df not in (None, "") else None
-        d_end = _date_to_datetime_end(dt) if dt not in (None, "") else None
-        if d_start:
-            query = query.where(ResearchEntry.created_at >= d_start)
-        if d_end:
-            query = query.where(ResearchEntry.created_at <= d_end)
+        date_from = filters.get("date_from")
+        if date_from:
+            dt_from = date_str_to_datetime(date_from, False)
+            query = query.where(ResearchEntry.created_at >= dt_from)
+        date_to = filters.get("date_to")
+        if date_to:
+            dt_to = date_str_to_datetime(date_to, True)
+            query = query.where(ResearchEntry.created_at <= dt_to)
 
         age_min = filters.get("age_min")
-        age_max = filters.get("age_max")
         if age_min is not None:
             query = query.where(ResearchEntry.user_age >= age_min)
+        age_max = filters.get("age_max")
         if age_max is not None:
             query = query.where(ResearchEntry.user_age <= age_max)
 
@@ -140,40 +92,12 @@ class Researcher(Base):
 
         return query
 
-    def select_matching_research_entries(
-        self,
-        *,
-        newest_first: bool = False,
-        limit: int | None = None,
-    ):
-        """SELECT over ``research_entries`` using the same rules as ``filter_query``."""
-        if not self.data_filters:
-            return select(ResearchEntry).where(false())
-
-        stmt = select(ResearchEntry)
-        stmt = self.filter_query(stmt)
-        order_col = ResearchEntry.created_at.desc() if newest_first else ResearchEntry.created_at.asc()
-        stmt = stmt.order_by(order_col)
-        if limit is not None:
-            stmt = stmt.limit(limit)
-        return stmt
-
-    def fetch_matching_research_entries(
-        self,
-        session: Session,
-        *,
-        newest_first: bool = False,
-        limit: int | None = None,
-    ) -> list[ResearchEntry]:
-        stmt = self.select_matching_research_entries(newest_first=newest_first, limit=limit)
-        return list(session.scalars(stmt).all())
-
     def allowed_to_view(self, entry: "DreamEntry") -> bool:
         """Check whether a DreamEntry matches this researcher's saved filters."""
         if not self.data_filters:
             return True
 
-        filters = self.parsed_filters()
+        filters = json.loads(self.data_filters)
         entry_tag_values = {tag.value for tag in entry.tags}
 
         content_tags = set(filters.get("content_tags") or [])

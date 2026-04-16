@@ -7,11 +7,11 @@
     <p><a href="/request-data">Set filters</a></p>
   {% else %}
     <p><strong>Entries:</strong> {{ row_count }}</p>
-    <p><strong>Estimated file size:</strong> {{ size_bytes }} bytes</p>
+    <p><strong>Estimated file size: </strong>{{ est_size }}</p>
 
-    <form method="post" action="/download-requested-data" onsubmit="return confirm('Download ' + {{size_bytes}} + ' bytes to your device?');">
+    <form method="post" action="" onsubmit="return confirm('Download approximately {{est_size}} to your device?');">
       <label for="filename">File name:</label>
-      <input type="text" id="filename" name="filename" value="{{ default_filename }}" required>
+      <input type="text" id="filename" name="filename" value="{{ default_filename }}" size="35" required>
       <button type="submit">Download CSV</button>
     </form>
 
