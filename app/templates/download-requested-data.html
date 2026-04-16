@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+  <h1>Download requested data (research)</h1>
+
+  {% if not has_data %}
+    <p>No downloadable data available yet.</p>
+    <p><a href="/request-data">Set filters</a></p>
+  {% else %}
+    <p><strong>Entries:</strong> {{ row_count }}</p>
+    <p><strong>Estimated file size:</strong> {{ size_bytes }} bytes</p>
+
+    <form method="post" action="/download-requested-data" onsubmit="return confirm('Download ' + {{size_bytes}} + ' bytes to your device?');">
+      <label for="filename">File name:</label>
+      <input type="text" id="filename" name="filename" value="{{ default_filename }}" required>
+      <button type="submit">Download CSV</button>
+    </form>
+
+    <p><small>
+      Note: browsers control the actual save location. Your browser will download to its configured download folder (or prompt you).
+    </small></p>
+  {% endif %}
+
+  <p>
+    <a href="/request-data">Edit filters</a> |
+    <a href="/view-requested-data">View requested data</a>
+  </p>
+{% endblock %}
+

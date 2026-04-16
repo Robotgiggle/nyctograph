@@ -24,10 +24,14 @@ contexts = [
 ]
 
 def main():
+    # Postgres: drop_all() can fail when leftover tables/views/constraints exist outside
+    # SQLAlchemy metadata (e.g. old migrations). Reset the public schema for a clean dev DB.
     with Session(engine) as ses:
-        ses.execute(text("DROP VIEW IF EXISTS research_entries"))
+        ses.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+        ses.execute(text("CREATE SCHEMA public"))
+        ses.execute(text("GRANT ALL ON SCHEMA public TO postgres"))
+        ses.execute(text("GRANT ALL ON SCHEMA public TO public"))
         ses.commit()
-    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     with Session(engine) as ses:
         with open("app/research_entries_view.sql") as file:
