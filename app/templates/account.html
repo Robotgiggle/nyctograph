@@ -2,7 +2,7 @@
 {% block body %}
     <h1>Account Settings</h1>
 
-    <form action="" method="post">
+    <form action="" method="post" onsubmit="return warnWhenSettingPrivate()">
         <h2>Basic Info</h2>
         <label for="new_username">Username:</label>
         <input type="text" id="new_username" name="new_username" value="{{ user.username }}">
@@ -22,10 +22,12 @@
         <h2>Profile Details</h2>
         <label for="public_enabled">Allow my dream data to be included in global statistics and made available to researchers</label>
         <br>
-        <input type="radio" id="public-yes" name="public_enabled" value="True" required {%if user.public_enabled%}checked{%endif%}>
-        <label for="public-yes">Yes</label>
-        <input type="radio" id="public-no" name="public_enabled" value="False" required {%if not user.public_enabled%}checked{%endif%}>
-        <label for="public-no">No</label>
+        <input type="radio" id="public_yes" name="public_enabled" value="True" onclick="showInfo(true)" required {%if user.public_enabled%}checked{%endif%}>
+        <label for="public_yes">Yes</label>
+        <input type="radio" id="public_no" name="public_enabled" value="False" onclick="showInfo(false)" required {%if not user.public_enabled%}checked{%endif%}>
+        <label for="public_no">No</label>
+        <br>
+        <label style="font-size: 0.95em; color: #666;">(Entries still need to be individually marked as public for the above to apply)</label>
         <br><br>
         <label for="birth_date">Birth date:</label>
         <input type="date" id="birth_date" name="birth_date" value="{{ user.birth_date if user.birth_date is not none }}">
@@ -54,4 +56,16 @@
 
         <input type="submit" value="Save changes">
     </form>
+
+    <script>
+        function warnWhenSettingPrivate() {
+            no_button = document.getElementById("public_no")
+            if(no_button.checked) {
+                ok = confirm("Disabling data sharing will cause *all* of your dream entries to be marked as private. Are you sure?");
+                no_button.checked = ok;
+                document.getElementById("public_yes").checked = !ok;
+                return ok;
+            }
+        }
+    </script>
 {% endblock %}
