@@ -1,11 +1,12 @@
 import math
 import csv
 import io
+import json
 from typing import Annotated, Sequence
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
-from datetime import datetime
+from datetime import datetime, date
 
 from ..models import Tag, ResearchEntry, DownloadRecord
 from ..forms import ResearchFilterForm
@@ -20,16 +21,16 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
         flash(request, "This page requires a research account.", "warn")
         return RedirectResponse("/login", status_code=303)
 
-    current_filters = ResearchFilterForm.from_json(res.data_filters)
+    current_filters = ResearchFilterForm.from_json(res.pending_filters)
 
     all_tags = dbSes.execute(select(Tag)).scalars().all()
     content_tags = [t.value for t in all_tags if t.category == "dream_content"]
     type_tags = [t.value for t in all_tags if t.category == "dream_type"]
     context_tags = [t.value for t in all_tags if t.category == "irl_context"]
 
-    if res.data_filters:
+    if res.pending_filters:
         countQuery = select(func.count()).select_from(ResearchEntry)
-        matchQuery = res.filter_query(countQuery)
+        matchQuery = res.filter_query(countQuery, pending=True)
         total_count = dbSes.execute(countQuery).scalar()
         match_count = dbSes.execute(matchQuery).scalar()
     else:
@@ -42,6 +43,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
         "context_tags": context_tags,
         "match_count": match_count,
         "total_count": total_count,
+        "today": date.today()
     })
 
 
@@ -53,13 +55,36 @@ def research_filter_action(
     formData: Annotated[ResearchFilterForm, Form()],
 ):
     if not res:
-        flash(request, "This page requires a research account.", "warn")
+        flash(request, "This action requires a research account.", "warn")
         return RedirectResponse("/login", status_code=303)
 
-    res.data_filters = formData.to_json()
+    res.pending_filters = formData.to_json()
     dbSes.commit()
     flash(request, "Filters saved.", "success")
     return RedirectResponse("/research", status_code=303)
+
+
+@router.post("/research/request")
+def research_request_data_action(request: Request, dbSes: DbSesDep, res: ResearcherDep):
+    if not res:
+        flash(request, "This action requires a research account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+    
+    if not res.pending_filters:
+        flash(request, "Please configure your filters before making a data request.", "warn")
+        return RedirectResponse("/research", status_code=303)
+    
+    # ensure that only currently existing entries are included
+    parsedFilters = json.loads(res.pending_filters)
+    if parsedFilters["date_to"] is None:
+        parsedFilters["date_to"] = date.today().isoformat()
+    res.data_filters = json.dumps(parsedFilters)
+
+    dbSes.commit()
+
+    flash(request, "Request successful. You may now view and download your requested data.", "success")
+    return RedirectResponse("/research", status_code=303)
+
 
 def _page_range(page: int, total_pages: int) -> list[int]:
     """Return page numbers to display, using -1 as an ellipsis marker."""
@@ -90,7 +115,7 @@ def research_data_page(
         return RedirectResponse("/login", status_code=303)
 
     if not res.data_filters:
-        flash(request, "Please configure your research filters before viewing data.", "warn")
+        flash(request, "You have not yet requested access to any data!", "warn")
         return RedirectResponse("/research", status_code=303)
 
     if per_page not in (10, 25, 50):
@@ -123,8 +148,8 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
         return RedirectResponse("/login", status_code=303)
 
     if not res.data_filters:
-        flash(request, "No requested data. Set filters first.", "warn")
-        return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
+        flash(request, "You have not yet requested access to any data!", "warn")
+        return RedirectResponse("/research", status_code=303)
 
     countQuery = res.filter_query(select(func.count()).select_from(ResearchEntry))
     sampleQuery = res.filter_query(select(ResearchEntry).order_by(func.random()).limit(10))
@@ -132,13 +157,13 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
     sampleRows = dbSes.scalars(sampleQuery).all()
     if not count:
         flash(request, "No public entries match your current filters.", "warn")
-        return templates.TemplateResponse(request, "download-requested-data.html", {"has_data": False})
+        return templates.TemplateResponse(request, "research-download.html", {"has_data": False})
 
     estSizeBytes = estimate_download_size(sampleRows, count)
 
     return templates.TemplateResponse(
         request,
-        "download-requested-data.html",
+        "research-download.html",
         {
             "has_data": True,
             "row_count": count,
@@ -160,8 +185,8 @@ def research_download_action(
         return RedirectResponse("/login", status_code=303)
 
     if not res.data_filters:
-        flash(request, "No requested data. Set filters first.", "warn")
-        return RedirectResponse("/research/download", status_code=303)
+        flash(request, "You have not yet requested access to any data!", "warn")
+        return RedirectResponse("/research", status_code=303)
 
     dataQuery = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
     rows = dbSes.scalars(dataQuery).all()
@@ -216,13 +241,12 @@ def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) 
     # Write them to a test CSV
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
-    writer.writeheader()
     writer.writerows(map(lambda entry: entry.__dict__, sampleRows))
 
-    # Estimate size of full CSV (the +1 is because of the header row)
+    # Estimate size of full CSV (the extra 295 bytes is for the header)
     full = buf.getvalue()
-    avgPerRow = len(full.encode("utf-8")) / (len(sampleRows)+1)
-    return int(avgPerRow * (totalRows+1))
+    avgPerRow = len(full.encode("utf-8")) / len(sampleRows)
+    return int(avgPerRow * totalRows) + 295
 
 
 # Convert a list of ResearchEntry objects into a StringIO representing a CSV file.

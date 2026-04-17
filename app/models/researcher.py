@@ -27,16 +27,17 @@ class Researcher(Base):
     pw_hash: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     ror_id: Mapped[str]
+    pending_filters: Mapped[str|None]
     data_filters: Mapped[str|None]
 
     downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")
 
-    def filter_query(self, query: Select):
+    def filter_query(self, query: Select, pending: bool = False):
         """Filter a query on ``ResearchEntry`` using this account's saved filters (same rules as /research UI)."""
-        if not self.data_filters:
+        filtersRaw = self.pending_filters if pending else self.data_filters
+        if not filtersRaw:
             raise RuntimeError("This Researcher does not have any configured filters!")
-
-        filters: dict = json.loads(self.data_filters)
+        filters: dict = json.loads(filtersRaw)
 
         content_tags = filters.get("content_tags") or []
         if content_tags:
@@ -56,11 +57,11 @@ class Researcher(Base):
 
         date_from = filters.get("date_from")
         if date_from:
-            dt_from = date_str_to_datetime(date_from, False)
+            dt_from = date_str_to_datetime(date_from, max=False)
             query = query.where(ResearchEntry.created_at >= dt_from)
         date_to = filters.get("date_to")
         if date_to:
-            dt_to = date_str_to_datetime(date_to, True)
+            dt_to = date_str_to_datetime(date_to, max=True)
             query = query.where(ResearchEntry.created_at <= dt_to)
 
         age_min = filters.get("age_min")

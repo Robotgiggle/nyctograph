@@ -1,10 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Research Data</h1>
-    <p>
-        <strong>{{ total_count }}</strong> entr{{ "y" if total_count == 1 else "ies" }} match your saved filters.
-        <a href="/research">Edit filters</a>
-    </p>
+    <h1>View Requested Data</h1>
+    <p>You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }}.</p>
 
     <div>
         <strong>Entries per page:</strong>
