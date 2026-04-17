@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block body %}
     <h1>View Requested Data</h1>
-    <p>You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }}.</p>
+    <p>
+        You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
+        based on your request at {{ request_dt.strftime('%I:%M %p on %Y-%m-%d') }}.<br>
+        Entries created after that date and time are not accessible, even if they match your filters.
+    </p>
 
     <div>
         <strong>Entries per page:</strong>

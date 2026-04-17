@@ -81,12 +81,8 @@ def research_request_data_action(
         flash(request, "Please configure your filters before making a data request.", "warn")
         return RedirectResponse("/research", status_code=303)
     
-    # ensure that only currently existing entries are included
-    parsedFilters = json.loads(res.pending_filters)
-    dateTo = parsedFilters["date_to"]
-    if dateTo is None or dateTo == date.today().isoformat():
-        parsedFilters["cutoff_timestamp"] = datetime.now().isoformat()
-    res.data_filters = json.dumps(parsedFilters)
+    # lock in the filter settings
+    res.data_filters = res.pending_filters
 
     # store a record of the data access for transparency purposes
     dbSes.add(DataAccessRecord(
@@ -155,6 +151,7 @@ def research_data_page(
     entries = dbSes.execute(entries_query).scalars().all()
 
     return templates.TemplateResponse(request, "research-data.html", {
+        "request_dt": res.get_last_access_dt(),
         "entries": entries,
         "page": page,
         "per_page": per_page,

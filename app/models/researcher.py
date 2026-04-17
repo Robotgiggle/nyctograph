@@ -33,12 +33,29 @@ class Researcher(Base):
 
     data_accesses: Mapped[List["DataAccessRecord"]] = relationship(back_populates="researcher")
 
+    def get_last_access_dt(self):
+        """Get the timestamp of the latest data access request."""
+        if not self.data_accesses: return None
+        latest = datetime.min
+        for access in self.data_accesses:
+            if access.accessed_at > latest:
+                latest = access.accessed_at
+        return latest
+
     def filter_query(self, query: Select, pending: bool = False):
         """Filter a query on ``ResearchEntry`` using this account's saved filters (same rules as /research UI)."""
         filtersRaw = self.pending_filters if pending else self.data_filters
         if not filtersRaw:
             raise RuntimeError("This Researcher does not have any configured filters!")
         filters: dict = json.loads(filtersRaw)
+
+        # When filtering a real query, only entries that existed when the filters were locked in
+        # should be accessible. This prevents future entries from being included without the
+        # knowledge of their creators.
+        if not pending:
+            last_access = self.get_last_access_dt()
+            if last_access:
+                query = query.where(ResearchEntry.created_at <= last_access)
 
         content_tags = filters.get("content_tags") or []
         if content_tags:
@@ -61,13 +78,9 @@ class Researcher(Base):
             dt_from = date_str_to_datetime(date_from, max=False)
             query = query.where(ResearchEntry.created_at >= dt_from)
         date_to = filters.get("date_to")
-        cutoff = filters.get("cutoff_timestamp")
         if date_to:
             dt_to = date_str_to_datetime(date_to, max=True)
-            if cutoff and dt_to > cutoff: dt_to = cutoff
             query = query.where(ResearchEntry.created_at <= dt_to)
-        elif cutoff:
-            query = query.where(ResearchEntry.created_at <= cutoff)
 
         age_min = filters.get("age_min")
         if age_min is not None:
