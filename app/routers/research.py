@@ -76,8 +76,9 @@ def research_request_data_action(request: Request, dbSes: DbSesDep, res: Researc
     
     # ensure that only currently existing entries are included
     parsedFilters = json.loads(res.pending_filters)
-    if parsedFilters["date_to"] is None:
-        parsedFilters["date_to"] = date.today().isoformat()
+    dateTo = parsedFilters["date_to"]
+    if dateTo is None or dateTo == date.today().isoformat():
+        parsedFilters["cutoff_timestamp"] = datetime.now().isoformat()
     res.data_filters = json.dumps(parsedFilters)
 
     # store a record of the data access for transparency purposes

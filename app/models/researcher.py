@@ -61,9 +61,13 @@ class Researcher(Base):
             dt_from = date_str_to_datetime(date_from, max=False)
             query = query.where(ResearchEntry.created_at >= dt_from)
         date_to = filters.get("date_to")
+        cutoff = filters.get("cutoff_timestamp")
         if date_to:
             dt_to = date_str_to_datetime(date_to, max=True)
+            if cutoff and dt_to > cutoff: dt_to = cutoff
             query = query.where(ResearchEntry.created_at <= dt_to)
+        elif cutoff:
+            query = query.where(ResearchEntry.created_at <= cutoff)
 
         age_min = filters.get("age_min")
         if age_min is not None:
