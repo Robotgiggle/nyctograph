@@ -27,6 +27,7 @@ class Researcher(Base):
     pw_hash: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     ror_id: Mapped[str]
+    inst_name: Mapped[str]
     pending_filters: Mapped[str|None]
     data_filters: Mapped[str|None]
 
