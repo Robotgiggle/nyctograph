@@ -20,6 +20,7 @@ class User(Base):
     pw_hash: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     public_enabled: Mapped[bool]
+    notif_enabled: Mapped[bool] = mapped_column(default=True)
     # additional optional details
     birth_date: Mapped[date|None]
     gender: Mapped[str|None]

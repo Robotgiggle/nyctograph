@@ -10,6 +10,7 @@ class AccountConfigForm(BaseModel):
     current_password: str|None = None
     new_password: str|None = None
     public_enabled: bool|None = None
+    notif_enabled: bool|None = None
     birth_date: date|Literal['']|None = None
     gender: str|None = None
     med_conditions: str|None = None

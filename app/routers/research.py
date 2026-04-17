@@ -3,15 +3,16 @@ import csv
 import io
 import json
 from typing import Annotated, Sequence
-from fastapi import APIRouter, Request, Form
+from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
 
-from ..models import Tag, ResearchEntry, DataAccessRecord
+from ..models import Tag, ResearchEntry, DataAccessRecord, User
 from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
+from ..email import send_data_access_notifs
 
 router = APIRouter()
 
@@ -65,7 +66,13 @@ def research_filter_action(
 
 
 @router.post("/research/request")
-def research_request_data_action(request: Request, dbSes: DbSesDep, res: ResearcherDep):
+def research_request_data_action(
+    request: Request, 
+    bgTasks: BackgroundTasks, 
+    dbSes: DbSesDep, 
+    res: ResearcherDep,
+    row_count: Annotated[int, Form()]
+):
     if not res:
         flash(request, "This action requires a research account.", "warn")
         return RedirectResponse("/login", status_code=303)
@@ -87,8 +94,16 @@ def research_request_data_action(request: Request, dbSes: DbSesDep, res: Researc
         accessed_at=datetime.now(),
         filters_used=res.data_filters,
     ))
-
     dbSes.commit()
+
+    # send email notif to all matching users
+    notifQuery = res.filter_query(
+        select(User.email, User.username).distinct()
+        .where(User.notif_enabled)
+        .where(User.username == ResearchEntry.username)
+    )
+    userRows = dbSes.execute(notifQuery).all()
+    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, row_count)
 
     flash(request, "Request successful. You may now view and download your requested data.", "success")
     return RedirectResponse("/research", status_code=303)
@@ -196,19 +211,20 @@ def research_download_action(
         flash(request, "You have not yet requested access to any data!", "warn")
         return RedirectResponse("/research", status_code=303)
 
+    # retrieve all the data and convert it to CSV format
     dataQuery = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
     rows = dbSes.scalars(dataQuery).all()
     if not rows:
         flash(request, "No public entries match your current filters.", "warn")
         return RedirectResponse("/research/download", status_code=303)
+    csv_iter = generate_csv_iter(rows)
 
+    # define a filename
     safe_name = (filename or "").strip() or "nyctograph_entries.csv"
     if not safe_name.lower().endswith(".csv"):
         safe_name += ".csv"
 
-    csv_iter = generate_csv_iter(rows)
-
-    # StreamingResponse matches team guidance + FastAPI CSV patterns (no temp file on disk).
+    # send the CSV data to the client via a StreamingResponse
     headers = {"Content-Disposition": f'attachment; filename="{safe_name}"'}
     return StreamingResponse(
         csv_iter,

@@ -120,6 +120,8 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
                 flash(request, f"{len(public_entries)} public dream entries have been made private.", "info")
         
         user.public_enabled = formData.public_enabled
+    if formData.notif_enabled is not None:
+        user.notif_enabled = formData.notif_enabled
     if formData.birth_date is not None:
         user.birth_date = formData.birth_date or None
     if formData.gender is not None:

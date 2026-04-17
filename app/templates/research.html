@@ -6,6 +6,7 @@
     {% else %}
         <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently selected filters.</p>
         <form id="request_data" action="/research/request" method="post" onsubmit="return confirm('Are you sure these filters are correct? This will permanently replace any data you\'ve previously requested.');">
+            <input type="hidden" name="row_count" value="{{ match_count }}">
             <label for="submit_request">Request access to view and download these <strong>{{ match_count }}</strong> entries?</label>
             <input id="submit_request" type="submit" value="Request" {{ disabled if total_count == None }}>
             <br>

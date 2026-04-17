@@ -1,6 +1,5 @@
 import resend
 from typing import List
-from fastapi import BackgroundTasks
 from urllib.parse import quote
 from dotenv import load_dotenv
 from os import getenv
@@ -37,3 +36,14 @@ def send_research_denial(recipient: str, name: str, req_msg: str, deny_msg: str)
         "Research account request denied",
         template_string("email/research_denial.html", context)
     )
+
+def send_data_access_notifs(userRows, instID: str, instName: str, count: int):
+    domain = getenv("APP_DOMAIN", "")
+    instURL = f"https://ror.org/{instID}"
+    for row in userRows:
+        context = {"name": row[1], "instName": instName, "instURL": instURL, "count": count, "domain": domain}
+        send_email(
+            [row[0]],
+            "Your data was accessed",
+            template_string("email/data_access_notif.html", context)
+        )
