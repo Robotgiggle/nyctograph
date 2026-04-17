@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
 
-from ..models import Tag, ResearchEntry, DownloadRecord
+from ..models import Tag, ResearchEntry, DataAccessRecord
 from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
@@ -79,6 +79,13 @@ def research_request_data_action(request: Request, dbSes: DbSesDep, res: Researc
     if parsedFilters["date_to"] is None:
         parsedFilters["date_to"] = date.today().isoformat()
     res.data_filters = json.dumps(parsedFilters)
+
+    # store a record of the data access for transparency purposes
+    dbSes.add(DataAccessRecord(
+        researcher_id=res.id,
+        accessed_at=datetime.now(),
+        filters_used=res.data_filters,
+    ))
 
     dbSes.commit()
 
@@ -199,15 +206,6 @@ def research_download_action(
         safe_name += ".csv"
 
     csv_iter = generate_csv_iter(rows)
-
-    dbSes.add(
-        DownloadRecord(
-            researcher_id=res.id,
-            downloaded_at=datetime.now(),
-            filters_used=res.data_filters or "{}",
-        )
-    )
-    dbSes.commit()
 
     # StreamingResponse matches team guidance + FastAPI CSV patterns (no temp file on disk).
     headers = {"Content-Disposition": f'attachment; filename="{safe_name}"'}

@@ -11,7 +11,7 @@ from ..database import Base
 from .research_entry import ResearchEntry
 
 if TYPE_CHECKING:
-    from . import DownloadRecord, DreamEntry
+    from . import DataAccessRecord, DreamEntry
 
 
 def date_str_to_datetime(d: str, max: bool):
@@ -30,7 +30,7 @@ class Researcher(Base):
     pending_filters: Mapped[str|None]
     data_filters: Mapped[str|None]
 
-    downloads: Mapped[List["DownloadRecord"]] = relationship(back_populates="researcher")
+    data_accesses: Mapped[List["DataAccessRecord"]] = relationship(back_populates="researcher")
 
     def filter_query(self, query: Select, pending: bool = False):
         """Filter a query on ``ResearchEntry`` using this account's saved filters (same rules as /research UI)."""

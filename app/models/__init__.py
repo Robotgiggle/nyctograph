@@ -2,7 +2,7 @@ from .user import User
 from .researcher import Researcher
 from .dream_entry import DreamEntry
 from .tag import Tag
-from .download_record import DownloadRecord
+from .data_access_record import DataAccessRecord
 from .global_stats import GlobalStats
 from .tag_total import TagTotal
 from .tag_association import TagAssociation
