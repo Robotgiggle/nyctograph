@@ -234,7 +234,7 @@ orderedColNames = [
     "title", "description", "content_tags", "type_tags", "sense_sight", "sense_sound", "sense_touch", 
     "sense_smell", "sense_taste", "sense_pain", "sense_other", "created_at", "context", "context_tags",
     "bed_time", "wake_time", "sleep_hours", "country", "state", "city", "not_at_home", "reflection", 
-    "rfln_timestamp", "username", "user_gender", "user_age", "user_med_conditions"
+    "rfln_timestamp", "user_gender", "user_age", "user_med_conditions"
 ]
 
 

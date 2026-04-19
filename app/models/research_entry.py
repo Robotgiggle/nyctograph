@@ -12,8 +12,8 @@ class ResearchEntry(Base):
     __tablename__ = "research_entries"
     metadata = MetaData()
 
-    entry_id: Mapped[int]
-    title: Mapped[str] = mapped_column(primary_key=True)
+    entry_id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
     description: Mapped[str]
     content_tags: Mapped[str|None]
     type_tags: Mapped[str|None]
@@ -40,7 +40,7 @@ class ResearchEntry(Base):
     reflection: Mapped[str|None]
     rfln_timestamp: Mapped[datetime|None]
 
-    username: Mapped[str] = mapped_column(primary_key=True)
+    username: Mapped[str]
     user_age: Mapped[float|None]
     user_gender: Mapped[str|None]
     user_med_conditions: Mapped[str|None]

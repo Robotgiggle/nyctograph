@@ -26,9 +26,9 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Author</th>
                 <th>Date</th>
                 <th>Location</th>
+                <th>At Home?</th>
                 <th>Senses</th>
                 <th>Content Tags</th>
                 <th>Type Tags</th>
@@ -44,9 +44,9 @@
             {% for entry in entries %}
             <tr style="cursor:pointer" onclick="window.location='/my-dreams/{{ entry.entry_id }}'">
                 <td><a href="/my-dreams/{{ entry.entry_id }}">{{ entry.title }}</a></td>
-                <td>{{ entry.username }}</td>
                 <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
                 <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}</td>
+                <td style="white-space:normal">{{"No" if entry.not_at_home else "Yes"}}</td>
                 <td>{{ ('👁️' if entry.sense_sight else '')+
                        ('👂' if entry.sense_sound else '')+
                        ('🫳' if entry.sense_touch else '')+
