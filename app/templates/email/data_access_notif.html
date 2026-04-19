@@ -1,0 +1,12 @@
+{% extends "email/email_base.html" %}
+{% block body %}
+    <p>
+        One or more of your dream entries was just included in a research dataset containing {{count}} total entries.<br>
+        The dataset was requested by a researcher at <a href="{{instURL}}">{{instName}}</a>.
+    </p>
+    <p>You can learn more about what we do with your data <a href="{{domain}}/about-us">here</a>.</p>
+    <p style="font-size:0.9em">
+        If you no longer wish to be notified when your dream entries are included in datasets, 
+        disable this feature in <a href="{{domain}}/account">account settings</a>.
+    </p>
+{% endblock %}

@@ -1,5 +1,5 @@
+import requests
 from typing import Annotated
-
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
@@ -75,6 +75,12 @@ def research_signup_action(
     if existingReq is not None:
         flash(request, "There is already a pending request with that email - please wait for us to review it.", "warn")
         return RedirectResponse("/signup/research", status_code=303)
+    
+    # make sure ROR ID actually exists
+    rorLookup: dict = requests.get(f"https://api.ror.org/v2/organizations/{form.ror_id}").json()
+    if "errors" in rorLookup:
+        flash(request, "That is not a valid ROR ID.", "warn")
+        return RedirectResponse("/signup/research", status_code=303)
 
     newReq = ResearchRequest(
         name=form.name,
@@ -107,12 +113,23 @@ def research_confirmation_action(
     if req is None:
         flash(request, "Invalid account token. You must request a research account and be approved before you can create the account.", "warn")
         return RedirectResponse("/signup/research", status_code=303)
+    
+    # look up institution name from ROR
+    rorLookup: dict = requests.get(f"https://api.ror.org/v2/organizations/{req.ror_id}").json()
+    if "errors" in rorLookup:
+        flash(request, "Your account request somehow has an invalid ROR ID.", "warn")
+        return RedirectResponse("/signup/research", status_code=303)
+    instName = "[Name not found]"
+    for name in rorLookup["names"]:
+        if "ror_display" in name["types"]:
+            instName = name["value"]
 
     researcher = Researcher(
         username=form.username,
         pw_hash=ph.hash(form.password),
         email=req.email,
-        ror_id=req.ror_id
+        ror_id=req.ror_id,
+        inst_name=instName
     )
     dbSes.add(researcher)
     dbSes.delete(req)

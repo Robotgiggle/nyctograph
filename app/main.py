@@ -42,4 +42,4 @@ app.include_router(research.router)
 def validation_error_handler(request: Request, exc: RequestValidationError):
     for error in exc.errors():
         flash(request, f"Validation error for '{error['loc'][-1]}': {error['msg']}", "warn")
-    return RedirectResponse(request['path'], status_code=303)
+    return RedirectResponse(request.url, status_code=303)

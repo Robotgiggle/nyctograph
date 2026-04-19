@@ -8,12 +8,12 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import Researcher
 
-class DownloadRecord(Base):
-    __tablename__ = "download_records"
+class DataAccessRecord(Base):
+    __tablename__ = "data_access_records"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     researcher_id: Mapped[int] = mapped_column(ForeignKey("researchers.id"))
-    downloaded_at: Mapped[datetime]
+    accessed_at: Mapped[datetime]
     filters_used: Mapped[str]
 
-    researcher: Mapped["Researcher"] = relationship(back_populates="downloads")
+    researcher: Mapped["Researcher"] = relationship(back_populates="data_accesses")

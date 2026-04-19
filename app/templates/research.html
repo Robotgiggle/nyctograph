@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Research Filters</h1>
+    <h1>Research Data Request</h1>
     {% if total_count == None %}
-        <p>You do not have any saved filters yet. Choose some below, then press 'Save filters' to save them.</p>
+        <p>You do not have any filters selected yet. Choose some below, then press 'Update filters' to save them.</p>
     {% else %}
-        <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently saved filters.</p>
+        <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently selected filters.</p>
+        <form id="request_data" action="/research/request" method="post" onsubmit="return confirm('Are you sure these filters are correct? This will permanently replace any data you\'ve previously requested.');">
+            <input type="hidden" name="row_count" value="{{ match_count }}">
+            <label for="submit_request">Request access to view and download these <strong>{{ match_count }}</strong> entries?</label>
+            <input id="submit_request" type="submit" value="Request" {{ disabled if total_count == None }}>
+            <br>
+            <label style="font-size: 0.95em; color: #666;">(This will replace any data you've previously requested)</label>
+        </form>
+        <p id="dirty" style="color:red" hidden>
+            The filters chosen below are <strong>not</strong> yet saved! 
+            Press 'Update filters' to save them before making a data request.
+        </p>
     {% endif %}
-    <p id="dirty" style="color:red" hidden>The filters selected below are <strong>not</strong> yet saved!</p>
 
+    <h1>Filter Configuration</h1>
     <form id="update_filters" action="" method="post">
         <h2>Dream Entry Tags</h2>
         <p>Entries will be included if they have at least one of the selected tags. Leave all unchecked to include any.</p>
@@ -45,10 +56,10 @@
         <h2>Date Range</h2>
         <p>Leave blank to ignore entry timestamps.</p>
         <label for="date_from">From:</label>
-        <input type="date" id="date_from" name="date_from"
+        <input type="date" id="date_from" name="date_from" max="{{today}}"
             value="{{ filters.date_from if filters.date_from is not none }}">
         <label for="date_to">To:</label>
-        <input type="date" id="date_to" name="date_to"
+        <input type="date" id="date_to" name="date_to" max="{{today}}"
             value="{{ filters.date_to if filters.date_to is not none }}">
         <br><br>
 
@@ -111,7 +122,7 @@
         <label for="rfln-no">Without a reflection only</label>
         <br><br>
 
-        <input type="submit" value="Save filters">
+        <input type="submit" value="Update filters">
     </form>
 
     <script>

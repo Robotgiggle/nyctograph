@@ -23,6 +23,12 @@ class ResearchFilterForm(BaseModel):
         if v == "" or v == []:
             return None
         return v
+    
+    @field_validator("date_from", "date_to")
+    @classmethod
+    def no_future_dates(cls, v):
+        if v is not None and v > date.today():
+            raise ValueError("Future dates are not allowed!")
 
     def to_json(self) -> str:
         return self.model_dump_json()

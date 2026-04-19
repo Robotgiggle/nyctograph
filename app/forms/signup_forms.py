@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator, field_validator
 
 
 class StandardSignupForm(BaseModel):
@@ -35,6 +35,13 @@ class ResearchSignupRequestForm(BaseModel):
     email: EmailStr
     ror_id: Annotated[str, Field(min_length=3, max_length=512)]
     reason: Annotated[str, Field(min_length=5)]
+
+    @field_validator("ror_id", mode="after")
+    @classmethod
+    def trim_ror_url(cls, val: str):
+        if val.startswith("https://ror.org/"):
+            val = val[16:]
+        return val
 
 class ResearchSignupConfirmForm(BaseModel):
     """Research account confirmation form (step 2 of the account creation process)."""
