@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from datetime import datetime, timedelta
+from sqlalchemy import select
 from collections import Counter
-from typing import List
 
-from ..models import DreamEntry, User
+from ..models import DreamEntry, User, GlobalStats, TagTotal
 from ..utils import *
 from ..jinja import templates
 
@@ -162,13 +162,35 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
         flash(request, "You don't have permission to view this dream entry!", "warn")
         return RedirectResponse("/my-dreams" if user else "/research", status_code=303)
     
-    # Render the detail page
-    back_url = "/my-dreams" if user else "/research/data"
-    return templates.TemplateResponse(
-        request,
-        "dream-detail.html",
-        {"entry": entry, "is_owner": bool(user and entry.user_id == user.id), "back_url": back_url, "user": user},
+    # Get comparison data from database [fulfills REQ-5]
+    globalData = dbSes.scalar(
+        select(GlobalStats)
+        .where(GlobalStats.age_bracket == "all", GlobalStats.time_slice == "week")
     )
+    tagCounts = dict(list(dbSes.execute(
+        select(TagTotal.tag_val, TagTotal.total)
+        .where(TagTotal.tag_val.in_(tag.value for tag in entry.tags))
+        .where(TagTotal.age_bracket == "all", TagTotal.time_slice == "week")
+    ).tuples()))
+    if globalData:
+        tagRates = []
+        for tag in entry.tags:
+            count = tagCounts.get(tag.value)
+            if count is None: tagRates.append(0)
+            else: tagRates.append(count/globalData.total_entries)
+    else:
+        tagRates = None
+
+    # Render the detail page
+    context = {
+        "entry": entry, 
+        "is_owner": bool(user and entry.user_id == user.id),
+        "back_url": "/my-dreams" if user else "/research/data", 
+        "user": user,
+        "gd": globalData,
+        "tagRates": tagRates
+    }
+    return templates.TemplateResponse(request, "dream-detail.html", context,)
 
 # Update the follow-up reflection on the current entry
 @router.post("/my-dreams/{entry_id}/reflection")
