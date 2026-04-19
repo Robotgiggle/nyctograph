@@ -19,7 +19,7 @@ def admin_page(request: Request, user: UserDep, dbSes: DbSesDep):
         flash(request, "You do not have permission to access this page!", "warn")
         return RedirectResponse("/", status_code=303)
     
-    requests = dbSes.execute(select(ResearchRequest)).scalars().all()
+    requests = dbSes.scalars(select(ResearchRequest)).all()
 
     return templates.TemplateResponse(request, "admin.html", {"requests": requests})
 
@@ -106,12 +106,12 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
         # If changing from public to private, make all existing entries private
         if user.public_enabled and not formData.public_enabled:
             # Get all public dream entries for this user and make them private
-            public_entries = dbSes.execute(
+            public_entries = dbSes.scalars(
                 select(DreamEntry).where(
                     DreamEntry.user_id == user.id,
                     DreamEntry.public == True
                 )
-            ).scalars().all()
+            ).all()
             
             for entry in public_entries:
                 entry.public = False

@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("/global-stats")
 def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all", age_bracket: str = "all"):
     statsQuery = select(GlobalStats).where(GlobalStats.time_slice == time_slice, GlobalStats.age_bracket == age_bracket)
-    statsAll: GlobalStats|None = dbSes.execute(statsQuery).scalar()
+    statsAll: GlobalStats|None = dbSes.scalar(statsQuery)
     tagTotals = {}
     associations = None
 
@@ -22,11 +22,11 @@ def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all"
                 .where(TagTotal.stats_obj == statsAll, TagTotal.tag_cat == cat)
                 .order_by(TagTotal.total.desc())
             ).all()
-        associations = dbSes.execute(
+        associations = dbSes.scalars(
             select(TagAssociation)
             .where(TagAssociation.stats_obj == statsAll)
             .order_by(TagAssociation.association_strength.desc())
-        ).scalars().all()
+        ).all()
         
     context = {
         "stats": statsAll, 

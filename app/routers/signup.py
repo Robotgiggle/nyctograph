@@ -109,7 +109,7 @@ def research_confirmation_action(
         flash(request, "That username is already taken.", "warn")
         return RedirectResponse("/signup/research/confirm?token="+form.token, status_code=303)
     
-    req = dbSes.execute(select(ResearchRequest).where(ResearchRequest.token == form.token)).scalar()
+    req = dbSes.scalar(select(ResearchRequest).where(ResearchRequest.token == form.token))
     if req is None:
         flash(request, "Invalid account token. You must request a research account and be approved before you can create the account.", "warn")
         return RedirectResponse("/signup/research", status_code=303)

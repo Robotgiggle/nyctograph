@@ -63,7 +63,7 @@ async def calculate_general_stats(dbSes: Session):
 
             statResults = dbSes.execute(statQueryFiltered).first()
             fullSleepQuery = select(func.coalesce(func.avg(sleepSubqFiltered.c.per_user), 0))
-            avgSleep = dbSes.execute(fullSleepQuery).scalar() or 0
+            avgSleep = dbSes.scalar(fullSleepQuery) or 0
 
             newStatsObj = GlobalStats(
                 time_slice = {1: "day", 7: "week", 30: "month", None: "all"}[daysIncluded],
@@ -123,7 +123,7 @@ async def calculate_tag_totals(dbSes: Session):
 
 async def calculate_tag_associations(dbSes: Session):
     # calculate new tag associations
-    tags = dbSes.execute(select(Tag)).scalars().all()
+    tags = dbSes.scalars(select(Tag)).all()
     for tagA in tags:
         for tagB in tags:
             # don't compare tags in the same category
@@ -148,9 +148,13 @@ async def calculate_tag_associations(dbSes: Session):
                     queryTotalFiltered = apply_query_filters(queryTotal, daysIncluded, ageBracket)
                     entriesA = dbSes.execute(queryAFiltered).all()
                     entriesB = dbSes.execute(queryBFiltered).all()
-                    totalEntries = dbSes.execute(queryTotalFiltered).scalar()
+                    totalEntries = dbSes.scalar(queryTotalFiltered)
                     if not entriesA or not entriesB or not totalEntries: continue
+
+                    # rate = "how often is Tag B present on entries that have Tag A?"
                     rate = len(set(entriesA) & set(entriesB)) / len(entriesA)
+                    
+                    # strength = "how different is this rate from the base rate of Tag B?"
                     baseRate = len(entriesB) / totalEntries
                     if baseRate == rate == 1: 
                         strength = 1
@@ -158,6 +162,7 @@ async def calculate_tag_associations(dbSes: Session):
                         strength = inv_lerp(baseRate, 1, rate)
                     else:
                         strength = -1*inv_lerp(-1*baseRate, 0, -1*rate)
+
                     newAssociation = TagAssociation(
                         tag_a = tagA,
                         tag_b = tagB,
@@ -182,7 +187,7 @@ async def global_stat_calc_loop(interval_mins: float):
     while True:
         dbSes = Session(engine)
         try:
-            totalEntries = dbSes.execute(select(func.count()).where(DreamEntry.public)).scalar() or 0
+            totalEntries = dbSes.scalar(select(func.count()).where(DreamEntry.public)) or 0
             logger.info("[STATS] Beginning statistics calculation based on %d public entries...", totalEntries)
 
             # delete the data from the last calculation run

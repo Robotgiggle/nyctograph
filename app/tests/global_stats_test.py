@@ -12,7 +12,7 @@ class TestGlobalStats:
         db_obj = db_class.return_value
         select_obj = select_fn.return_value
         query_obj = select_obj.where.return_value
-        stats_obj = db_obj.execute.return_value.scalar.return_value
+        stats_obj = db_obj.scalar.return_value
         tag_list_obj = db_obj.execute.return_value.all.return_value
         
         response = client.get("/global-stats")
@@ -22,7 +22,7 @@ class TestGlobalStats:
         # assert various calls to make sure the page is doing what it should
         select_fn.assert_called()
         select_obj.where.assert_called()
-        db_obj.execute.assert_any_call(query_obj)
+        db_obj.scalar.assert_any_call(query_obj)
         stats_obj.total_entries.__str__.assert_called()
         stats_obj.avg_sleep_duration.__round__.assert_called()
         stats_obj.sight_rate.__mul__.assert_called()
@@ -33,10 +33,12 @@ class TestGlobalStats:
         assert "There are no public entries matching this set of filters!" not in response.text
 
     def test_stats_no_entries(self, select_fn: MagicMock, db_class: MagicMock, client: TestClient):
-        stats_obj = db_class.return_value.execute.return_value.scalar.return_value
+        stats_obj = db_class.return_value.scalar.return_value
         stats_obj.total_entries = 0
         
         response = client.get("/global-stats")
+
+        print(response.text)
 
         assert response.status_code == 200
         assert response.url == "http://testserver/global-stats"

@@ -24,7 +24,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
 
     current_filters = ResearchFilterForm.from_json(res.pending_filters)
 
-    all_tags = dbSes.execute(select(Tag)).scalars().all()
+    all_tags = dbSes.scalars(select(Tag)).all()
     content_tags = [t.value for t in all_tags if t.category == "dream_content"]
     type_tags = [t.value for t in all_tags if t.category == "dream_type"]
     context_tags = [t.value for t in all_tags if t.category == "irl_context"]
@@ -32,8 +32,8 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     if res.pending_filters:
         countQuery = select(func.count()).select_from(ResearchEntry)
         matchQuery = res.filter_query(countQuery, pending=True)
-        total_count = dbSes.execute(countQuery).scalar()
-        match_count = dbSes.execute(matchQuery).scalar()
+        total_count = dbSes.scalar(countQuery)
+        match_count = dbSes.scalar(matchQuery)
     else:
         total_count = match_count = None
 
@@ -141,14 +141,14 @@ def research_data_page(
         per_page = 10
 
     count_query = res.filter_query(select(func.count()).select_from(ResearchEntry))
-    total_count = dbSes.execute(count_query).scalar() or 0
+    total_count = dbSes.scalar(count_query) or 0
 
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
 
     entries_query = res.filter_query(select(ResearchEntry).order_by(ResearchEntry.created_at.desc()))
     entries_query = entries_query.offset((page - 1) * per_page).limit(per_page)
-    entries = dbSes.execute(entries_query).scalars().all()
+    entries = dbSes.scalars(entries_query).all()
 
     return templates.TemplateResponse(request, "research-data.html", {
         "request_dt": res.get_last_access_dt(),
