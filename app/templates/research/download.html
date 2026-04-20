@@ -2,11 +2,17 @@
 {% block body %}
   <h1>Download Requested Data</h1>
 
-  {% if not has_data %}
-    <p>No downloadable data available yet.</p>
-    <p><a href="/request-data">Set filters</a></p>
+  {% if row_count == 0 %}
+    <p>
+      Your dataset does not seem to contain any entries. 
+      Either they have all been deleted or marked private, or an error has occurred.
+    </p>
   {% else %}
-    <p><strong>Entries:</strong> {{ row_count }}</p>
+    <p>
+        You currently have access to <strong>{{ row_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
+        based on your request at {{ request_dt.strftime('%I:%M %p on %Y-%m-%d') }}.<br>
+        Entries created after that date and time are not accessible, even if they match your filters.
+    </p>
     <p><strong>Estimated file size: </strong>{{ est_size }}</p>
 
     <form method="post" action="" onsubmit="return confirm('Download approximately {{est_size}} to your device?');">

@@ -38,7 +38,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     else:
         total_count = match_count = None
 
-    return templates.TemplateResponse(request, "research.html", {
+    return templates.TemplateResponse(request, "research/filters.html", {
         "filters": current_filters,
         "content_tags": content_tags,
         "type_tags": type_tags,
@@ -80,6 +80,10 @@ def research_request_data_action(
         flash(request, "Please configure your filters before making a data request.", "warn")
         return RedirectResponse("/research", status_code=303)
     
+    if row_count == 0:
+        flash(request, "You cannot request an empty dataset.", "warn")
+        return RedirectResponse("/research", status_code=303)
+    
     # create a checkout session with Stripe and redirect the user for payment
     checkoutSes = create_checkout_session(res, row_count, f"/research/request_success?rows={row_count}")
     checkoutURL = checkoutSes.url
@@ -91,7 +95,7 @@ def research_request_data_action(
 
 @router.get("/research/request_success")
 def research_request_data_success(request: Request, rows: int):
-    return templates.TemplateResponse(request, "research-request-success.html", {"rows": rows})
+    return templates.TemplateResponse(request, "research/request-success.html", {"rows": rows})
 
 
 @router.post("/research/fulfill_request")
@@ -173,7 +177,9 @@ def research_data_page(
         per_page = 10
 
     count_query = res.filter_query(select(func.count()).select_from(ResearchEntry))
-    total_count = dbSes.scalar(count_query) or 0
+    total_count = dbSes.scalar(count_query)
+    if not total_count:
+        return templates.TemplateResponse(request, "research/view-data.html", {"total_count": 0})
 
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
@@ -182,7 +188,7 @@ def research_data_page(
     entries_query = entries_query.offset((page - 1) * per_page).limit(per_page)
     entries = dbSes.scalars(entries_query).all()
 
-    return templates.TemplateResponse(request, "research-data.html", {
+    return templates.TemplateResponse(request, "research/view-data.html", {
         "request_dt": res.get_last_access_dt(),
         "entries": entries,
         "page": page,
@@ -208,16 +214,15 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
     count = dbSes.scalar(countQuery)
     sampleRows = dbSes.scalars(sampleQuery).all()
     if not count:
-        flash(request, "No public entries match your current filters.", "warn")
-        return templates.TemplateResponse(request, "research-download.html", {"has_data": False})
+        return templates.TemplateResponse(request, "research/download.html", {"row_count": 0})
 
     estSizeBytes = estimate_download_size(sampleRows, count)
 
     return templates.TemplateResponse(
         request,
-        "research-download.html",
+        "research/download.html",
         {
-            "has_data": True,
+            "request_dt": res.get_last_access_dt(),
             "row_count": count,
             "est_size": sizeof_fmt(estSizeBytes),
             "default_filename": f"nyctograph_entries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",

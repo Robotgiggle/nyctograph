@@ -58,7 +58,7 @@ def signup_action(request: Request, dbSes: DbSesDep, form: Annotated[StandardSig
 
 @router.get("/signup/research")
 def research_signup_form(request: Request):
-    return templates.TemplateResponse(request, "research-signup-request.html", {})
+    return templates.TemplateResponse(request, "research/signup-request.html", {})
 
 
 @router.post("/signup/research")
@@ -97,7 +97,7 @@ def research_signup_action(
 
 @router.get("/signup/research/confirm")
 def research_confirmation_form(request: Request, token: str = ""):
-    return templates.TemplateResponse(request, "research-signup-confirm.html", {"token": token})
+    return templates.TemplateResponse(request, "research/signup-confirm.html", {"token": token})
 
 @router.post("/signup/research/confirm")
 def research_confirmation_action(
