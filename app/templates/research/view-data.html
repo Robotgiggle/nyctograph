@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>View Requested Data</h1>
+    {% if total_count == 0 %}
+        <p>
+        Your dataset does not seem to contain any entries. 
+        Either they have all been deleted or marked private, or an error has occurred.
+        </p>
+    {% else %}
+        <p>
+            You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
+            based on your request at {{ request_dt.strftime('%I:%M %p on %Y-%m-%d') }}.<br>
+            Entries created after that date and time are not accessible, even if they match your filters.
+        </p>
+
+        <div>
+            <strong>Entries per page:</strong>
+            {% for n in [10, 25, 50] %}
+                {% set n_pages = (total_count - 1) // n + 1 if total_count > 0 else 1 %}
+                {% if n == per_page %}
+                    <strong>[{{ n }}]</strong> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
+                {% else %}
+                    <a href="/research/data?page=1&per_page={{ n }}">[{{ n }}]</a> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
+                {% endif %}
+                {% if not loop.last %}&nbsp;|&nbsp;{% endif %}
+            {% endfor %}
+        </div>
+        <br>
+
+        {% if entries %}
+        <table border="1" cellpadding="6" cellspacing="0" style="white-space:nowrap;">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>At Home?</th>
+                    <th>Senses</th>
+                    <th>Content Tags</th>
+                    <th>Type Tags</th>
+                    <th>Context Tags</th>
+                    <th>Sleep Time</th>
+                    <th>Reflection</th>
+                    <th>Author Age</th>
+                    <th>Author Gender</th>
+                    <th>Medical Conditions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr style="cursor:pointer" onclick="window.location='/my-dreams/{{ entry.entry_id }}'">
+                    <td><a href="/my-dreams/{{ entry.entry_id }}">{{ entry.title }}</a></td>
+                    <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}</td>
+                    <td style="white-space:normal">{{"No" if entry.not_at_home else "Yes"}}</td>
+                    <td>{{ ('👁️' if entry.sense_sight else '')+
+                        ('👂' if entry.sense_sound else '')+
+                        ('🫳' if entry.sense_touch else '')+
+                        ('👃' if entry.sense_smell else '') }}<br>
+                        {{ ('👅' if entry.sense_taste else '')+
+                        ('💥' if entry.sense_pain else '')+
+                        ('❓' if entry.sense_other else '') }}</td>
+                    <td style="white-space:normal">{{ entry.content_tags.replace(';', ', ') if entry.content_tags else '—' }}</td>
+                    <td style="white-space:normal">{{ entry.type_tags.replace(';', ', ') if entry.type_tags else '—' }}</td>
+                    <td style="white-space:normal">{{ entry.context_tags.replace(';', ', ') if entry.context_tags else '—' }}</td>
+                    <td>{{ '%0.2f'|format(entry.sleep_hours)+' hrs' if entry.sleep_hours else '—' }}</td>
+                    <td>{{ "Yes" if entry.reflection else "No" }}</td>
+                    <td>{{ '%0.2f'|format(entry.user_age) if entry.user_age else '—' }}</td>
+                    <td>{{ entry.user_gender if entry.user_gender else '—' }}</td>
+                    <td>{{ entry.user_med_conditions if entry.user_med_conditions else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No entries found.</p>
+        {% endif %}
+
+        <br>
+        <div>
+            {% if page > 1 %}
+                <a href="/research/data?page={{ page - 1 }}&per_page={{ per_page }}">&#8592; Previous</a>
+            {% else %}
+                <span style="color:gray">&#8592; Previous</span>
+            {% endif %}
+
+            &nbsp;
+            {% for p in page_range %}
+                {% if p == -1 %}
+                    <span>&hellip;</span>
+                {% elif p == page %}
+                    <strong>{{ p }}</strong>
+                {% else %}
+                    <a href="/research/data?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            &nbsp;
+
+            {% if page < total_pages %}
+                <a href="/research/data?page={{ page + 1 }}&per_page={{ per_page }}">Next &#8594;</a>
+            {% else %}
+                <span style="color:gray">Next &#8594;</span>
+            {% endif %}
+
+            <span style="color:gray; margin-left:12px">Page {{ page }} of {{ total_pages }}</span>
+        </div>
+
+        <div style="margin-top:8px">
+            <form method="get" action="/research/data" style="display:inline">
+                <input type="hidden" name="per_page" value="{{ per_page }}">
+                <label for="goto_page">Go to page:</label>
+                <input type="number" id="goto_page" name="page" min="1" max="{{ total_pages }}"
+                    value="{{ page }}" style="width:60px">
+                <button type="submit">Go</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <p>
+        <a href="/research">Request new data</a> |
+        <a href="/research/download">Download your data</a>
+    </p>
+{% endblock %}

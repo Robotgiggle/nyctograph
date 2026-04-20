@@ -1,18 +1,18 @@
 import math
 import csv
 import io
-import json
 from typing import Annotated, Sequence
 from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
 
-from ..models import Tag, ResearchEntry, DataAccessRecord, User
+from ..models import Tag, ResearchEntry, DataAccessRecord, User, Researcher
 from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
 from ..email import send_data_access_notifs
+from ..payment import create_checkout_session, get_checkout_info
 
 router = APIRouter()
 
@@ -37,7 +37,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     else:
         total_count = match_count = None
 
-    return templates.TemplateResponse(request, "research.html", {
+    return templates.TemplateResponse(request, "research/filters.html", {
         "filters": current_filters,
         "content_tags": content_tags,
         "type_tags": type_tags,
@@ -68,8 +68,7 @@ def research_filter_action(
 @router.post("/research/request")
 def research_request_data_action(
     request: Request, 
-    bgTasks: BackgroundTasks, 
-    dbSes: DbSesDep, 
+    dbSes: DbSesDep,
     res: ResearcherDep,
     row_count: Annotated[int, Form()]
 ):
@@ -81,14 +80,57 @@ def research_request_data_action(
         flash(request, "Please configure your filters before making a data request.", "warn")
         return RedirectResponse("/research", status_code=303)
     
-    # lock in the filter settings
-    res.data_filters = res.pending_filters
+    if row_count == 0:
+        flash(request, "You cannot request an empty dataset.", "warn")
+        return RedirectResponse("/research", status_code=303)
+    
+    # mark pending request on researcher object
+    res.data_request_status = "Pending"
+    dbSes.commit()
+    
+    # create a checkout session with Stripe and redirect the user for payment
+    checkoutSes = create_checkout_session(res, row_count, f"/research/request_landing?rows={row_count}")
+    checkoutURL = checkoutSes.url
+    if checkoutURL is None:
+        flash(request, "Checkout session creation failed.", "warn")
+        return RedirectResponse("/research", status_code=303)
+    return RedirectResponse(checkoutURL, status_code=303)
 
-    # store a record of the data access for transparency purposes
+
+@router.get("/research/request_landing")
+def research_request_landing_page(request: Request, res: ResearcherDep, rows: int):
+    if not res:
+        flash(request, "This page requires a research account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+    
+    request_ok = res.data_request_status == "Fulfilled"
+    return templates.TemplateResponse(request, "research/request-landing.html", {"rows": rows, "ok": request_ok})
+
+
+@router.post("/research/fulfill_request")
+async def research_request_data_fulfillment(request: Request, bgTasks: BackgroundTasks, dbSes: DbSesDep):
+    # get checkout info from Stripe
+    checkout = await get_checkout_info(request)
+
+    # make sure the payment and request data are valid
+    if checkout.fulfilled:
+        return {"status": "error", "message": "This request has already been fulfilled."}
+    if checkout.payment_status == "unpaid":
+        return {"status": "error", "message": "This request has not yet been paid for."}
+    res = dbSes.get(Researcher, checkout.res_id)
+    if res is None:
+        return {"status": "error", "message": "The researcher associated with this request cannot be found."}
+
+    # mark the checkout session as fulfilled to avoid double fulfillment
+    checkout.mark_fulfilled()
+
+    # lock in the filter settings, then store a record of the data access
+    res.data_request_status = "Fulfilled"
+    res.data_filters = checkout.filters
     dbSes.add(DataAccessRecord(
         researcher_id=res.id,
         accessed_at=datetime.now(),
-        filters_used=res.data_filters,
+        filters_used=checkout.filters,
     ))
     dbSes.commit()
 
@@ -99,10 +141,9 @@ def research_request_data_action(
         .where(User.username == ResearchEntry.username)
     )
     userRows = dbSes.execute(notifQuery).all()
-    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, row_count)
+    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, checkout.rows)
 
-    flash(request, "Request successful. You may now view and download your requested data.", "success")
-    return RedirectResponse("/research", status_code=303)
+    return {"status": "success", "message": "Request successfully fulfilled!"}
 
 
 def _page_range(page: int, total_pages: int) -> list[int]:
@@ -141,7 +182,9 @@ def research_data_page(
         per_page = 10
 
     count_query = res.filter_query(select(func.count()).select_from(ResearchEntry))
-    total_count = dbSes.scalar(count_query) or 0
+    total_count = dbSes.scalar(count_query)
+    if not total_count:
+        return templates.TemplateResponse(request, "research/view-data.html", {"total_count": 0})
 
     total_pages = max(1, math.ceil(total_count / per_page))
     page = max(1, min(page, total_pages))
@@ -150,7 +193,7 @@ def research_data_page(
     entries_query = entries_query.offset((page - 1) * per_page).limit(per_page)
     entries = dbSes.scalars(entries_query).all()
 
-    return templates.TemplateResponse(request, "research-data.html", {
+    return templates.TemplateResponse(request, "research/view-data.html", {
         "request_dt": res.get_last_access_dt(),
         "entries": entries,
         "page": page,
@@ -176,16 +219,15 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
     count = dbSes.scalar(countQuery)
     sampleRows = dbSes.scalars(sampleQuery).all()
     if not count:
-        flash(request, "No public entries match your current filters.", "warn")
-        return templates.TemplateResponse(request, "research-download.html", {"has_data": False})
+        return templates.TemplateResponse(request, "research/download.html", {"row_count": 0})
 
     estSizeBytes = estimate_download_size(sampleRows, count)
 
     return templates.TemplateResponse(
         request,
-        "research-download.html",
+        "research/download.html",
         {
-            "has_data": True,
+            "request_dt": res.get_last_access_dt(),
             "row_count": count,
             "est_size": sizeof_fmt(estSizeBytes),
             "default_filename": f"nyctograph_entries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
