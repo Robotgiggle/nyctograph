@@ -3,7 +3,7 @@ import csv
 import io
 import json
 from typing import Annotated, Sequence
-from fastapi import BackgroundTasks, APIRouter, Request, HTTPException, Body, Form
+from fastapi import BackgroundTasks, APIRouter, Request, HTTPException, Body, Header, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
@@ -99,9 +99,13 @@ def research_request_data_success(request: Request, rows: int):
 
 
 @router.post("/research/fulfill_request")
-def research_request_data_fulfillment(payload: Annotated[dict, Body()], bgTasks: BackgroundTasks, dbSes: DbSesDep):
+async def research_request_data_fulfillment(request: Request, bgTasks: BackgroundTasks, dbSes: DbSesDep):
     # get the checkout session from Stripe
-    checkoutSes = get_checkout_session(payload)
+    payload = await request.body()
+    signature = request.headers.get("stripe-signature")
+    if signature is None: 
+        raise HTTPException(status_code=403, detail="Missing signature header.")
+    checkoutSes = get_checkout_session(payload, signature)
     checkoutData = checkoutSes.metadata
 
     # make sure the payment and request data are valid
