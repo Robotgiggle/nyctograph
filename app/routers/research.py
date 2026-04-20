@@ -3,16 +3,17 @@ import csv
 import io
 import json
 from typing import Annotated, Sequence
-from fastapi import BackgroundTasks, APIRouter, Request, Form
+from fastapi import BackgroundTasks, APIRouter, Request, HTTPException, Body, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
 
-from ..models import Tag, ResearchEntry, DataAccessRecord, User
+from ..models import Tag, ResearchEntry, DataAccessRecord, User, Researcher
 from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
 from ..email import send_data_access_notifs
+from ..payment import create_checkout_session, get_checkout_session, mark_fulfilled
 
 router = APIRouter()
 
@@ -68,8 +69,6 @@ def research_filter_action(
 @router.post("/research/request")
 def research_request_data_action(
     request: Request, 
-    bgTasks: BackgroundTasks, 
-    dbSes: DbSesDep, 
     res: ResearcherDep,
     row_count: Annotated[int, Form()]
 ):
@@ -81,8 +80,42 @@ def research_request_data_action(
         flash(request, "Please configure your filters before making a data request.", "warn")
         return RedirectResponse("/research", status_code=303)
     
+    # create a checkout session with Stripe and redirect the user for payment
+    checkoutSes = create_checkout_session(res, row_count, f"/research/request_success?rows={row_count}")
+    checkoutURL = checkoutSes.url
+    if checkoutURL is None:
+        flash(request, "Checkout session creation failed.", "warn")
+        return RedirectResponse("/research", status_code=303)
+    return RedirectResponse(checkoutURL, status_code=303)
+
+
+@router.get("/research/request_success")
+def research_request_data_success(request: Request, rows: int):
+    return templates.TemplateResponse(request, "research-request-success.html", {"rows": rows})
+
+
+@router.post("/research/fulfill_request")
+def research_request_data_fulfillment(payload: Annotated[dict, Body()], bgTasks: BackgroundTasks, dbSes: DbSesDep):
+    # get the checkout session from Stripe
+    checkoutSes = get_checkout_session(payload)
+    checkoutData = checkoutSes.metadata
+
+    # make sure the payment and request data are valid
+    if checkoutData is None:
+        raise HTTPException(status_code=400, detail="Checkout metadata is missing.")
+    if checkoutData["fulfilled"] == "true":
+        raise HTTPException(status_code=400, detail="This request has already been fulfilled.")
+    if checkoutSes.payment_status == "unpaid":
+        raise HTTPException(status_code=400, detail="This request has not yet been paid for.")
+    res = dbSes.get(Researcher, checkoutData["res_id"])
+    if res is None:
+        raise HTTPException(status_code=400, detail="The researcher associated with this request cannot be found.")
+
+    # mark the checkout session as fulfilled to avoid double fulfillment
+    mark_fulfilled(checkoutSes)
+
     # lock in the filter settings
-    res.data_filters = res.pending_filters
+    res.data_filters = checkoutData["filters"]
 
     # store a record of the data access for transparency purposes
     dbSes.add(DataAccessRecord(
@@ -99,10 +132,9 @@ def research_request_data_action(
         .where(User.username == ResearchEntry.username)
     )
     userRows = dbSes.execute(notifQuery).all()
-    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, row_count)
+    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, checkoutData["rows"])
 
-    flash(request, "Request successful. You may now view and download your requested data.", "success")
-    return RedirectResponse("/research", status_code=303)
+    return {"status": "success", "message": "Request successfully fulfilled!"}
 
 
 def _page_range(page: int, total_pages: int) -> list[int]:
