@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 from datetime import date, time, datetime
-from typing import Any, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
-from sqlalchemy import Select, false, or_, select
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy import Select, CheckConstraint, false, or_
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
 from .research_entry import ResearchEntry
@@ -21,6 +21,9 @@ def date_str_to_datetime(d: str, max: bool):
 
 class Researcher(Base):
     __tablename__ = "researchers"
+    __table_args__ = (
+        CheckConstraint("data_request_status IN ('Pending', 'Fulfilled')"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(index=True, unique=True)
@@ -30,6 +33,7 @@ class Researcher(Base):
     inst_name: Mapped[str]
     pending_filters: Mapped[str|None]
     data_filters: Mapped[str|None]
+    data_request_status: Mapped[str|None]
 
     data_accesses: Mapped[List["DataAccessRecord"]] = relationship(back_populates="researcher")
 

@@ -68,6 +68,7 @@ def research_filter_action(
 @router.post("/research/request")
 def research_request_data_action(
     request: Request, 
+    dbSes: DbSesDep,
     res: ResearcherDep,
     row_count: Annotated[int, Form()]
 ):
@@ -83,8 +84,12 @@ def research_request_data_action(
         flash(request, "You cannot request an empty dataset.", "warn")
         return RedirectResponse("/research", status_code=303)
     
+    # mark pending request on researcher object
+    res.data_request_status = "Pending"
+    dbSes.commit()
+    
     # create a checkout session with Stripe and redirect the user for payment
-    checkoutSes = create_checkout_session(res, row_count, f"/research/request_success?rows={row_count}")
+    checkoutSes = create_checkout_session(res, row_count, f"/research/request_landing?rows={row_count}")
     checkoutURL = checkoutSes.url
     if checkoutURL is None:
         flash(request, "Checkout session creation failed.", "warn")
@@ -92,9 +97,14 @@ def research_request_data_action(
     return RedirectResponse(checkoutURL, status_code=303)
 
 
-@router.get("/research/request_success")
-def research_request_data_success(request: Request, rows: int):
-    return templates.TemplateResponse(request, "research/request-success.html", {"rows": rows})
+@router.get("/research/request_landing")
+def research_request_landing_page(request: Request, res: ResearcherDep, rows: int):
+    if not res:
+        flash(request, "This page requires a research account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+    
+    request_ok = res.data_request_status == "Fulfilled"
+    return templates.TemplateResponse(request, "research/request-landing.html", {"rows": rows, "ok": request_ok})
 
 
 @router.post("/research/fulfill_request")
@@ -115,6 +125,7 @@ async def research_request_data_fulfillment(request: Request, bgTasks: Backgroun
     checkout.mark_fulfilled()
 
     # lock in the filter settings, then store a record of the data access
+    res.data_request_status = "Fulfilled"
     res.data_filters = checkout.filters
     dbSes.add(DataAccessRecord(
         researcher_id=res.id,
