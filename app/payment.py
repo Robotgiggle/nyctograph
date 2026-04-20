@@ -1,7 +1,8 @@
 import stripe
-from dotenv import load_dotenv
 from os import getenv
-from fastapi import HTTPException
+from dotenv import load_dotenv
+from fastapi import Request, HTTPException
+from pydantic import BaseModel
 
 from .models import Researcher
 
@@ -36,18 +37,43 @@ def create_checkout_session(res: Researcher, rows_accessed: int, success_path: s
     )
     return session
 
-def get_checkout_session(payload: str|bytes, signature: str):
+async def get_checkout_info(request: Request):
+    # extract webhook payload and signature header
+    payload = await request.body()
+    signature = request.headers.get("stripe-signature")
+    if signature is None: 
+        raise HTTPException(status_code=403, detail="Missing signature header.")
+    
+    # verify signature
     try:
         event = client.construct_event(payload, signature, webhook_secret)
     except stripe.SignatureVerificationError:
         raise HTTPException(status_code=403, detail="Signature verification failed.")
-    checkSesID = event["data"]["object"]["id"]
-    return client.v1.checkout.sessions.retrieve(checkSesID)
-
-def mark_fulfilled(check_ses: stripe.checkout.Session):
-    client.v1.checkout.sessions.update(
-        check_ses.id, 
-        params = {
-            "metadata": {"fulfilled": "true"}
-        }
+    
+    # transfer relevant info to pydantic model
+    checkoutSes = client.v1.checkout.sessions.retrieve(event["data"]["object"]["id"])
+    if checkoutSes.metadata is None:
+        raise HTTPException(status_code=400, detail="Checkout metadata is missing.")
+    info = CheckoutModel(
+        session_id=checkoutSes.id,
+        payment_status=checkoutSes.payment_status,
+        **checkoutSes.metadata.to_dict()
     )
+
+    return info
+
+class CheckoutModel(BaseModel):
+    session_id: str
+    payment_status: str
+    res_id: str
+    filters: str
+    rows: int
+    fulfilled: bool
+
+    def mark_fulfilled(self):
+        client.v1.checkout.sessions.update(
+            self.session_id, 
+            params = {
+                "metadata": {"fulfilled": "true"}
+            }
+        )

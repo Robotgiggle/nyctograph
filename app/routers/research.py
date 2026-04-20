@@ -1,9 +1,8 @@
 import math
 import csv
 import io
-import json
 from typing import Annotated, Sequence
-from fastapi import BackgroundTasks, APIRouter, Request, HTTPException, Body, Header, Form
+from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select, func
 from datetime import datetime, date
@@ -13,7 +12,7 @@ from ..forms import ResearchFilterForm
 from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
 from ..email import send_data_access_notifs
-from ..payment import create_checkout_session, get_checkout_session, mark_fulfilled
+from ..payment import create_checkout_session, get_checkout_info
 
 router = APIRouter()
 
@@ -100,36 +99,27 @@ def research_request_data_success(request: Request, rows: int):
 
 @router.post("/research/fulfill_request")
 async def research_request_data_fulfillment(request: Request, bgTasks: BackgroundTasks, dbSes: DbSesDep):
-    # get the checkout session from Stripe
-    payload = await request.body()
-    signature = request.headers.get("stripe-signature")
-    if signature is None: 
-        raise HTTPException(status_code=403, detail="Missing signature header.")
-    checkoutSes = get_checkout_session(payload, signature)
-    checkoutData = checkoutSes.metadata
+    # get checkout info from Stripe
+    checkout = await get_checkout_info(request)
 
     # make sure the payment and request data are valid
-    if checkoutData is None:
-        raise HTTPException(status_code=400, detail="Checkout metadata is missing.")
-    if checkoutData["fulfilled"] == "true":
-        raise HTTPException(status_code=400, detail="This request has already been fulfilled.")
-    if checkoutSes.payment_status == "unpaid":
-        raise HTTPException(status_code=400, detail="This request has not yet been paid for.")
-    res = dbSes.get(Researcher, checkoutData["res_id"])
+    if checkout.fulfilled:
+        return {"status": "error", "message": "This request has already been fulfilled."}
+    if checkout.payment_status == "unpaid":
+        return {"status": "error", "message": "This request has not yet been paid for."}
+    res = dbSes.get(Researcher, checkout.res_id)
     if res is None:
-        raise HTTPException(status_code=400, detail="The researcher associated with this request cannot be found.")
+        return {"status": "error", "message": "The researcher associated with this request cannot be found."}
 
     # mark the checkout session as fulfilled to avoid double fulfillment
-    mark_fulfilled(checkoutSes)
+    checkout.mark_fulfilled()
 
-    # lock in the filter settings
-    res.data_filters = checkoutData["filters"]
-
-    # store a record of the data access for transparency purposes
+    # lock in the filter settings, then store a record of the data access
+    res.data_filters = checkout.filters
     dbSes.add(DataAccessRecord(
         researcher_id=res.id,
         accessed_at=datetime.now(),
-        filters_used=res.data_filters,
+        filters_used=checkout.filters,
     ))
     dbSes.commit()
 
@@ -140,7 +130,7 @@ async def research_request_data_fulfillment(request: Request, bgTasks: Backgroun
         .where(User.username == ResearchEntry.username)
     )
     userRows = dbSes.execute(notifQuery).all()
-    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, checkoutData["rows"])
+    bgTasks.add_task(send_data_access_notifs, userRows, res.ror_id, res.inst_name, checkout.rows)
 
     return {"status": "success", "message": "Request successfully fulfilled!"}
 
