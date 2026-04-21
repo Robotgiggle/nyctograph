@@ -18,7 +18,7 @@ class DreamEntry(Base):
 
     # core entry data
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     title: Mapped[str]
     description: Mapped[str]
     created_at: Mapped[datetime]
