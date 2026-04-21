@@ -247,6 +247,24 @@ def toggle_entry_public_status(request: Request,
     flash(request, f"Dream entry is now {status}.", "success")
     return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
 
+# Delete a dream entry [right-of-removal]
+@router.post("/my-dreams/{entry_id}/delete")
+def delete_entry(request: Request, entry_id: int, dbSes: DbSesDep, user: UserDep):
+    if not user:
+        flash(request, "You must be logged in to modify entries.", "warn")
+        return RedirectResponse("/login", status_code=303)
+
+    entry = dbSes.get(DreamEntry, entry_id)
+    if not entry or entry.user_id != user.id:
+        flash(request, "You don't have permission to modify this entry.", "warn")
+        return RedirectResponse("/my-dreams", status_code=303)
+    
+    dbSes.delete(entry)
+    dbSes.commit()
+
+    flash(request, f"Dream entry has been deleted.", "success")
+    return RedirectResponse(f"/my-dreams", status_code=303)
+
 # Page to display personal statistics
 @router.get("/personal-stats")
 def view_personal_stats(request: Request, dbSes: DbSesDep, user: UserDep):

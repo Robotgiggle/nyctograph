@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 entry_tag_association_table = Table(
     "dream_entry_tags",
     Base.metadata,
-    Column("entry_id", ForeignKey("dream_entries.id"), primary_key=True),
+    Column("entry_id", ForeignKey("dream_entries.id", ondelete="CASCADE"), primary_key=True),
     Column("tag_val", ForeignKey("tags.value"), primary_key=True),
 )
 

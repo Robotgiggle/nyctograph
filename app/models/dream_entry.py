@@ -44,7 +44,12 @@ class DreamEntry(Base):
 
     # relations
     user: Mapped["User"] = relationship(back_populates="dream_entries")
-    tags: Mapped[List["Tag"]] = relationship(back_populates="entries", secondary=entry_tag_association_table)
+    tags: Mapped[List["Tag"]] = relationship(
+        back_populates="entries", 
+        secondary=entry_tag_association_table, 
+        cascade="all",
+        passive_deletes=True
+    )
 
     def __repr__(self) -> str:
         return f"DreamEntry(id: {self.id}, user_id: {self.user_id}, title: {self.title}, desc: {self.description[:30]+'...'})"
