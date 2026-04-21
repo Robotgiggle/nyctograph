@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     STRIPE_API_KEY: str
     STRIPE_WEBHOOK_SECRET: str
     COOKIE_SECRET_KEY: str
+    ADMIN_ACCOUNT_PW: str
     GLOBAL_CALC_INTERVAL: int = 2
     ROW_PRICE_CENTS: int = 1
 

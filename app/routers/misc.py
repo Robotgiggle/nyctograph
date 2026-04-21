@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from os import urandom
 
-from ..utils import UserDep, DbSesDep, flash, verify_pw, ph, not_implemented_yet
+from ..utils import DbSesDep, UserDep, ResearcherDep, flash, verify_pw, ph
 from ..jinja import templates
 from ..forms import AccountConfigForm
 from ..models import User, ResearchRequest, DreamEntry
@@ -14,8 +14,8 @@ router = APIRouter()
 
 # Admin control page
 @router.get("/admin")
-def admin_page(request: Request, user: UserDep, dbSes: DbSesDep):
-    if not user or user.username != "admin":
+def admin_page(request: Request, dbSes: DbSesDep, user: UserDep, res: ResearcherDep):
+    if not ((user and user.username == "admin") or (res and res.username == "resAdmin")):
         flash(request, "You do not have permission to access this page!", "warn")
         return RedirectResponse("/", status_code=303)
     
@@ -28,13 +28,14 @@ def admin_page(request: Request, user: UserDep, dbSes: DbSesDep):
 def admin_action(
     request: Request, 
     bg_tasks: BackgroundTasks,
-    user: UserDep, 
     dbSes: DbSesDep, 
+    user: UserDep, 
+    res: ResearcherDep,
     req_id: Annotated[int, Form()], 
     approval: Annotated[str, Form()],
     deny_msg: Annotated[str, Form()] = ""
 ):
-    if not user or user.username != "admin":
+    if not ((user and user.username == "admin") or (res and res.username == "resAdmin")):
         flash(request, "You do not have permission for this action!", "warn")
         return RedirectResponse("/", status_code=303)
     

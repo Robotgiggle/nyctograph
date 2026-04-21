@@ -24,6 +24,7 @@ jobs:
       STRIPE_API_KEY: ""
       STRIPE_WEBHOOK_SECRET: ""
       COOKIE_SECRET_KEY: "testkey"
+      ADMIN_ACCOUNT_PW: "testpw"
       GLOBAL_CALC_INTERVAL: "2"
       ROW_PRICE_CENTS: "1"
 

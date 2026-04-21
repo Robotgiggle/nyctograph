@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from .models import *
 from .database import Base, engine
 from .utils import ph
+from .config import settings
 
 # Run this with 'python -m app.build_db' from outside the app folder to avoid relative import errors
 
@@ -48,7 +49,19 @@ def main():
             ses.add(Tag(category="irl_context", value=item))
         for item in calcs:
             ses.add(Tag(category="calculated", value=item))
-        ses.add(User(username="admin", pw_hash=ph.hash("dream"), email="fake@fake.com", public_enabled=True))
+        ses.add(User(
+            username="admin", 
+            pw_hash=ph.hash(settings.ADMIN_ACCOUNT_PW), 
+            email="admin@nyctograph.org", 
+            public_enabled=True
+        ))
+        ses.add(Researcher(
+            username="resAdmin",
+            pw_hash=ph.hash(settings.ADMIN_ACCOUNT_PW), 
+            email="admin@nyctograph.org", 
+            ror_id="0190ak572",
+            inst_name="New York University"
+        ))
         ses.commit()
 
 if __name__ == "__main__":
