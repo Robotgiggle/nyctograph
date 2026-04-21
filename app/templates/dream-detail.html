@@ -165,7 +165,7 @@
                     placeholder="Did this dream have any impact on your life?"
                     >{{ entry.reflection if entry.reflection }}</textarea>
                 <br>
-                <button type="submit">Save reflection</button>
+                <input type="submit" value="Save reflection">
                 {% if entry.rfln_timestamp %}
                     <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
                 {% endif %}
@@ -177,6 +177,15 @@
             <p>No saved reflection.</p>
         {% endif %}
     </section>
+
+    {% if is_owner %}
+        <section>
+            <h2>Deletion</h2>
+            <form method="post" action="/my-dreams/{{ entry.id }}/delete" onsubmit="return confirm('Are you sure you want to permanently delete this entry?');">
+                <input type="submit" id="delete-entry" value="Delete this entry" style="width:125px;height:35px">
+            </form>
+        </section>
+    {% endif %}
 
     <p><a href="{{ back_url }}">← Back</a></p>
 {% endblock %}

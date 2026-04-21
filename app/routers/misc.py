@@ -139,3 +139,20 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
     dbSes.commit()
     flash(request, "Account settings updated.", "success")
     return RedirectResponse("/account", status_code=303)
+
+# Account deletion handler method [right-of-removal]
+@router.post("/account/delete")
+def account_delete_action(request: Request, dbSes: DbSesDep, user: UserDep):
+    if not user:
+        flash(request, "You must be logged in to delete your account.", "warn")
+        return RedirectResponse("/login", status_code=303)
+    
+    dbSes.delete(user)
+    dbSes.commit()
+
+    request.session.pop("user_id", None)
+    request.session.pop("username", None)
+
+    flash(request, "Account successfully deleted.", "success")
+    return RedirectResponse("/login", status_code=303)
+

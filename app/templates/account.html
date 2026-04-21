@@ -77,4 +77,14 @@
             }
         }
     </script>
+
+    <br><hr>
+    <h2>Account Deletion</h2>
+    <form method="post" action="/account/delete" onsubmit="return confirm('Are you sure you want to delete your account? This will permanently delete all of your dream entries, and cannot be undone!');">
+        <p>
+            Deleting your account will also delete all associated dream entries.<br>
+            <strong>This cannot be reversed!</strong>
+        </p>
+        <input type="submit" value="Delete this account" style="width:140px;height:35px">
+    </form>
 {% endblock %}

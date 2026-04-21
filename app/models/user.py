@@ -29,7 +29,11 @@ class User(Base):
     state: Mapped[str|None]
     city: Mapped[str|None]
 
-    dream_entries: Mapped[List["DreamEntry"]] = relationship(back_populates="user")
+    dream_entries: Mapped[List["DreamEntry"]] = relationship(
+        back_populates="user", 
+        cascade="all, delete-orphan", 
+        passive_deletes=True
+    )
 
     @property
     def age(self):
