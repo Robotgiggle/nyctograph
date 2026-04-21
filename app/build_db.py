@@ -56,6 +56,7 @@ def main():
             public_enabled=True
         ))
         ses.add(Researcher(
+            name="Research Admin",
             username="resAdmin",
             pw_hash=ph.hash(settings.ADMIN_ACCOUNT_PW), 
             email="admin@nyctograph.org", 

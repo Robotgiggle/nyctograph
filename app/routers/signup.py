@@ -125,6 +125,7 @@ def research_confirmation_action(
             instName = name["value"]
 
     researcher = Researcher(
+        name=req.name,
         username=form.username,
         pw_hash=ph.hash(form.password),
         email=req.email,
