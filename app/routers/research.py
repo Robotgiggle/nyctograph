@@ -13,6 +13,7 @@ from ..utils import ResearcherDep, DbSesDep, flash
 from ..jinja import templates
 from ..email import send_data_access_notifs
 from ..payment import create_checkout_session, get_checkout_info
+from ..config import settings
 
 router = APIRouter()
 
@@ -44,6 +45,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
         "context_tags": context_tags,
         "match_count": match_count,
         "total_count": total_count,
+        "row_price": settings.ROW_PRICE_CENTS,
         "today": date.today()
     })
 

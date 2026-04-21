@@ -1,18 +1,14 @@
 import stripe
-from os import getenv
-from dotenv import load_dotenv
 from fastapi import Request, HTTPException
 from pydantic import BaseModel
 
 from .models import Researcher
+from .config import settings
 
-load_dotenv(".env")
-
-client = stripe.StripeClient(api_key=getenv("STRIPE_API_KEY", ""))
-webhook_secret = getenv("STRIPE_WEBHOOK_SECRET", "")
+client = stripe.StripeClient(settings.STRIPE_API_KEY)
 
 def create_checkout_session(res: Researcher, rows_accessed: int, success_path: str):
-    costCents = max(50, rows_accessed)
+    costCents = max(50, rows_accessed*settings.ROW_PRICE_CENTS)
     session = client.v1.checkout.sessions.create(
         params = {
             "line_items": [{
@@ -32,7 +28,7 @@ def create_checkout_session(res: Researcher, rows_accessed: int, success_path: s
                 "fulfilled": "false"
             },
             "mode": "payment",
-            "success_url": getenv("APP_DOMAIN", "")+success_path
+            "success_url": settings.APP_DOMAIN + success_path
         }
     )
     return session
@@ -46,7 +42,7 @@ async def get_checkout_info(request: Request):
     
     # verify signature
     try:
-        event = client.construct_event(payload, signature, webhook_secret)
+        event = client.construct_event(payload, signature, settings.STRIPE_WEBHOOK_SECRET)
     except stripe.SignatureVerificationError:
         raise HTTPException(status_code=403, detail="Signature verification failed.")
     

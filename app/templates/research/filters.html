@@ -8,7 +8,7 @@
         <form id="request_data" action="/research/request" method="post" onsubmit="return confirm('Are you sure these filters are correct? This will permanently replace any data you\'ve previously requested.');">
             <input type="hidden" name="row_count" value="{{ match_count }}">
             <p>
-                Requesting data costs $0.01 per entry, with a minimum price of $0.50.<br>
+                Requesting data costs ${{ "%.2f"|format(row_price/100) }} per entry, with a minimum price of $0.50.<br>
                 If you already have access to a dataset, it will be replaced.
             </p>
             <label for="submit_request">Request access to view and download these <strong>{{ match_count }}</strong> entries for <strong>${{ "%.2f"|format(([match_count,50]|max)/100) }}</strong>?</label>
