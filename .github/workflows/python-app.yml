@@ -17,6 +17,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      APP_DOMAIN: ""
+      DATABASE_URL: "postgresql://fakeuser:fakepw@fakeip/fakedb"
+      RESEND_API_KEY: ""
+      STRIPE_API_KEY: ""
+      STRIPE_WEBHOOK_SECRET: ""
+      COOKIE_SECRET_KEY: "testkey"
+      GLOBAL_CALC_INTERVAL: "2"
+      ROW_PRICE_CENTS: "1"
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.14
@@ -28,8 +38,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Set fake DB url
-      run: echo "DATABASE_URL=postgresql://fakeuser:fakepw@fakeip/fakedb" >> $GITHUB_ENV
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
