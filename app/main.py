@@ -11,14 +11,19 @@ from .routers import homepage, login, my_dreams, signup, global_stats, misc, res
 from .utils import flash
 from .stat_calc import global_stat_calc_loop
 from .config import settings
+from .build_db import build_db
 
 # ===== CORE APP SETUP =====
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # set up the database if necessary
+    build_db(skip_if_exists=True)
+
     # start the stat calc loop in the background
     interval_mins = settings.GLOBAL_CALC_INTERVAL
     asyncio.create_task(global_stat_calc_loop(interval_mins))
+
     yield
 
 app = FastAPI(lifespan=lifespan)

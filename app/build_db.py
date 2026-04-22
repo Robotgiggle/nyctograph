@@ -1,5 +1,6 @@
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 from sqlalchemy.orm import Session
+import logging
 
 from .models import *
 from .database import Base, engine
@@ -28,7 +29,20 @@ calcs = [
     "Short Sleep", "Very Short Sleep", "Long Sleep", "Daytime Sleep", "Atypical Location"
 ]
 
-def main():
+logger = logging.getLogger("uvicorn")
+
+def build_db(skip_if_exists: bool):    
+    insp = inspect(engine)
+    exists = insp.has_table("users")
+    
+    if skip_if_exists and exists:
+        logger.info("[BUILD-DB] Database has already been built, no action necessary.")
+        return
+    elif exists:
+        logger.info("[BUILD-DB] Starting database rebuild...")
+    else:
+        logger.info("[BUILD-DB] Starting database build...")
+    
     # Postgres: drop_all() can fail when leftover tables/views/constraints exist outside
     # SQLAlchemy metadata (e.g. old migrations). Reset the public schema for a clean dev DB.
     with Session(engine) as ses:
@@ -65,5 +79,7 @@ def main():
         ))
         ses.commit()
 
+    logger.info("[BUILD-DB] Database is ready.")
+
 if __name__ == "__main__":
-    main()
+    build_db(skip_if_exists=False)
