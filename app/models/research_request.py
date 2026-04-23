@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from ..database import Base
 
+# Represents a request by a potential client to create a research account
 class ResearchRequest(Base):
     __tablename__ = "research_requests"
     __table_args__ = (

@@ -7,13 +7,10 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import Tag, GlobalStats
 
-#
+# Records the association between two tags, based on prevalence across all public dream entries. [REQ-4]
 # The association rate represents "how often is Tag B present on entries that have Tag A?"
-#
 # The association strength (between 1 and -1) represents the degree to which the association rate
 # varies from the base rate of Tag B. Strength is 0 if rate = total B / total entries.
-#
-
 class TagAssociation(Base):
     __tablename__ = "tag_associations"
     __table_args__ = (

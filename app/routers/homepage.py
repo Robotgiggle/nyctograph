@@ -51,6 +51,7 @@ def save_dream_entry(dbSes: Session, user: User, formDataModel: DreamEntryForm) 
     dbSes.commit()
     return (True, flashes)
 
+# Page with a form to record a dream entry [REQ-1]
 @router.get("/")
 def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep, researcher: ResearcherDep):
     if researcher:
@@ -104,6 +105,7 @@ def record_dream_form(request: Request, dbSes: DbSesDep, user: UserDep, research
     # Display the dream entry creation form
     return templates.TemplateResponse(request, "record-dream.html", context)
 
+# Handler method that processes the dream entry form [REQ-1]
 @router.post("/")
 def record_dream_action(request: Request, dbSes: DbSesDep, user: UserDep, researcher: ResearcherDep, formDataModel: Annotated[DreamEntryForm, Form()]):#, title: Annotated[str, Form()], description: Annotated[str, Form()]):
     if user:

@@ -182,6 +182,7 @@ async def calculate_tag_associations(dbSes: Session):
             logger.info("[STATS] Tag associations %.0f percent complete...",completion)
     logger.info("[STATS] Tag associations complete.")
 
+# Periodically calculates a variety of statistics from all public dream entries [REQ-4]
 async def global_stat_calc_loop(interval_mins: float):
     await asyncio.sleep(1)
     while True:

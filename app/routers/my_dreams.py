@@ -132,7 +132,7 @@ def calculate_personal_stats(user: User, time_slice: str = 'all'):
         'reflection_ratio': reflection_count / total_entries,
     }
 
-# Page listing stored dream entries and local stats
+# Page listing stored dream entries [REQ-2]
 @router.get("/my-dreams")
 def list_dream_entries(request: Request, dbSes: DbSesDep, user: UserDep):
     if not user:
@@ -140,7 +140,7 @@ def list_dream_entries(request: Request, dbSes: DbSesDep, user: UserDep):
         return RedirectResponse("/login", status_code=303)
     return templates.TemplateResponse(request, "my-dreams.html", {"entries": user.dream_entries})
 
-# Page to display the full details of a specific dream entry
+# Page to display the full details of a specific dream entry [REQ-2]
 @router.get("/my-dreams/{entry_id}")
 def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: UserDep, res: ResearcherDep):
     if not (user or res):
@@ -162,7 +162,7 @@ def dream_entry_detail(request: Request, entry_id: int, dbSes: DbSesDep, user: U
         flash(request, "You don't have permission to view this dream entry!", "warn")
         return RedirectResponse("/my-dreams" if user else "/research", status_code=303)
     
-    # Get comparison data from database [fulfills REQ-5]
+    # Get comparison data from database [REQ-5]
     globalData = dbSes.scalar(
         select(GlobalStats)
         .where(GlobalStats.age_bracket == "all", GlobalStats.time_slice == "week")
@@ -217,7 +217,7 @@ def update_reflection(request: Request,
     flash(request, "Follow-up reflection saved.", "success")
     return RedirectResponse(f"/my-dreams/{entry_id}", status_code=303)
 
-# Toggle the public/private status of a dream entry
+# Toggle the public/private status of a dream entry [REQ-3]
 @router.post("/my-dreams/{entry_id}/toggle-public")
 def toggle_entry_public_status(request: Request,
     entry_id: int,
@@ -265,7 +265,7 @@ def delete_entry(request: Request, entry_id: int, dbSes: DbSesDep, user: UserDep
     flash(request, f"Dream entry has been deleted.", "success")
     return RedirectResponse(f"/my-dreams", status_code=303)
 
-# Page to display personal statistics
+# Page to display personal statistics [REQ-2]
 @router.get("/personal-stats")
 def view_personal_stats(request: Request, dbSes: DbSesDep, user: UserDep):
     if not user:

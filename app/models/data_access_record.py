@@ -8,6 +8,7 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import Researcher
 
+# Created whenever data is requested, to record exactly what data was provided to whom [REQ-6]
 class DataAccessRecord(Base):
     __tablename__ = "data_access_records"
 

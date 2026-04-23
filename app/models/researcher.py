@@ -18,7 +18,7 @@ def date_str_to_datetime(d: str, max: bool):
     theDate = date.fromisoformat(d[:10])
     return datetime.combine(theDate, time.max if max else time.min)
 
-
+# Represents a research account, which is tied to an institution and can request public data
 class Researcher(Base):
     __tablename__ = "researchers"
     __table_args__ = (

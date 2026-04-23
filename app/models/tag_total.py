@@ -7,6 +7,8 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import Tag, GlobalStats
 
+# Records the total number of entries with the specified tag in the specified category. [REQ-4]
+# This could be easily queried on-demand, but with lots of entries that could be very slow.
 class TagTotal(Base):
     __tablename__ = "tag_totals"
     __table_args__ = (

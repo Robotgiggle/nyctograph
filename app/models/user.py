@@ -8,6 +8,7 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import DreamEntry
 
+# Represents a standard user account, which can create dream entries and view personal stats
 class User(Base):
     __tablename__ = "users"
     __table_args__ = (

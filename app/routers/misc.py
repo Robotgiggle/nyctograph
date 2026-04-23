@@ -104,7 +104,7 @@ def account_config_action(request: Request, user: UserDep, dbSes: DbSesDep, form
         user.username = formData.new_username
         request.session["username"] = formData.new_username
     if formData.public_enabled is not None:
-        # If changing from public to private, make all existing entries private
+        # If changing from public to private, make all existing entries private [REQ-3]
         if user.public_enabled and not formData.public_enabled:
             # Get all public dream entries for this user and make them private
             public_entries = dbSes.scalars(

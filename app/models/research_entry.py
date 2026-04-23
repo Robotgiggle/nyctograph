@@ -8,6 +8,10 @@ from ..database import Base
 #       The view is created based on the code found in app/research_entries_view.sql.
 #       *DO NOT* attempt to create or modify instances of this class.
 
+# Represents the data made available to researchers for downloading and online viewing. [REQ-6]
+# Mostly based on a DreamEntry but also includes user info and calculated fields.
+# The username is *not* provided to researchers, but is included here to make it easier to 
+# determine the set of users whose data has been accessed in a given data request.
 class ResearchEntry(Base):
     __tablename__ = "research_entries"
     metadata = MetaData()

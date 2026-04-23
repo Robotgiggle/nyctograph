@@ -7,7 +7,7 @@ from ..models import GlobalStats, TagTotal, TagAssociation
 
 router = APIRouter()
 
-# Page to display global stats
+# Page to display global stats [REQ-4]
 @router.get("/global-stats")
 def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all", age_bracket: str = "all"):
     statsQuery = select(GlobalStats).where(GlobalStats.time_slice == time_slice, GlobalStats.age_bracket == age_bracket)

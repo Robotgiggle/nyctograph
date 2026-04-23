@@ -15,6 +15,9 @@ entry_tag_association_table = Table(
     Column("tag_val", ForeignKey("tags.value"), primary_key=True),
 )
 
+# Represents a common dream attribute within a specific category, and can be linked to a DreamEntry to indicate
+# the presence of that attribute in the dream. [REQ-1]
+# The database should always contain a fixed set of these, based on the lists found in the build_db script.
 class Tag(Base):
     __tablename__ = "tags"
 

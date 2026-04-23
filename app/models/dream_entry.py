@@ -9,6 +9,7 @@ from .tag import entry_tag_association_table
 if TYPE_CHECKING:
     from . import User, Tag
 
+# Stores a variety of information about a user's dream [REQ-1]
 class DreamEntry(Base):
     __tablename__ = "dream_entries"
     __table_args__ = (

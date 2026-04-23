@@ -17,6 +17,7 @@ from ..config import settings
 
 router = APIRouter()
 
+# Page that allows a researcher to configure their filters and request access to data [REQ-6]
 @router.get("/research")
 def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     if not res:
@@ -50,6 +51,7 @@ def research_filter_page(request: Request, res: ResearcherDep, dbSes: DbSesDep):
     })
 
 
+# Handler method for saving a given set of filters [REQ-6]
 @router.post("/research")
 def research_filter_action(
     request: Request,
@@ -67,6 +69,7 @@ def research_filter_action(
     return RedirectResponse("/research", status_code=303)
 
 
+# Handler method for making a data access request [REQ-6]
 @router.post("/research/request")
 def research_request_data_action(
     request: Request, 
@@ -99,6 +102,7 @@ def research_request_data_action(
     return RedirectResponse(checkoutURL, status_code=303)
 
 
+# Landing page after completing the data purchase form
 @router.get("/research/request_landing")
 def research_request_landing_page(request: Request, res: ResearcherDep, rows: int):
     if not res:
@@ -109,6 +113,7 @@ def research_request_landing_page(request: Request, res: ResearcherDep, rows: in
     return templates.TemplateResponse(request, "research/request-landing.html", {"rows": rows, "ok": request_ok})
 
 
+# Handler method that recieves webhook events when a data purchase is made
 @router.post("/research/fulfill_request")
 async def research_request_data_fulfillment(request: Request, bgTasks: BackgroundTasks, dbSes: DbSesDep):
     # get checkout info from Stripe
@@ -164,6 +169,7 @@ def _page_range(page: int, total_pages: int) -> list[int]:
     return pages
 
 
+# Page that displays data obtained via the latest access request [REQ-6]
 @router.get("/research/data")
 def research_data_page(
     request: Request,
@@ -206,6 +212,7 @@ def research_data_page(
     })
 
 
+# Page with a form to download data obtained via the latest access request [REQ-7]
 @router.get("/research/download")
 def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep):
     if not res:
@@ -237,6 +244,7 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
     )
 
 
+# Handler method for downloading data obtained via the latest access request [REQ-7]
 @router.post("/research/download")
 def research_download_action(
     request: Request,

@@ -109,6 +109,8 @@ def research_confirmation_action(
         flash(request, "That username is already taken.", "warn")
         return RedirectResponse("/signup/research/confirm?token="+form.token, status_code=303)
     
+    # The token is set when the account request is approved (misc.py:49), and included in the link in the approval
+    # notification email. It can then be used here to connect a given form submission to an approved request.
     req = dbSes.scalar(select(ResearchRequest).where(ResearchRequest.token == form.token))
     if req is None:
         flash(request, "Invalid account token. You must request a research account and be approved before you can create the account.", "warn")

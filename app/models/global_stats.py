@@ -7,9 +7,9 @@ from ..database import Base
 if TYPE_CHECKING:
     from . import TagTotal, TagAssociation
 
+# Stores general statistics that are not associated with a specific tag [REQ-4]
 # There will only ever be sixteen of these, one with each combination of time_slice and age_bracket
 # Whenever the global stats are recalculated, they'll be replaced
-
 class GlobalStats(Base):
     __tablename__ = "global_stats"
     __table_args__ = (
