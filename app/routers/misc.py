@@ -47,11 +47,11 @@ def admin_action(
     if approval == "Approve":
         req.status = "Approved"
         req.token = ph.hash(urandom(20))[31:]
-        bg_tasks.add_task(send_research_approval, req.email, req.name, req.token or "")
+        bg_tasks.add_task(send_research_approval, req)
         flash(request, "Research request approved.", "success")
     elif approval == "Deny":
         dbSes.delete(req)
-        bg_tasks.add_task(send_research_denial, req.email, req.name, req.reason, deny_msg)
+        bg_tasks.add_task(send_research_denial, req, deny_msg)
         flash(request, "Research request denied.", "success")
     dbSes.commit()
 

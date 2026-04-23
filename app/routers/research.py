@@ -9,7 +9,7 @@ from datetime import datetime, date
 
 from ..models import Tag, ResearchEntry, DataAccessRecord, User, Researcher
 from ..forms import ResearchFilterForm
-from ..utils import ResearcherDep, DbSesDep, flash
+from ..utils import ResearcherDep, DbSesDep, flash, page_range, sizeof_fmt
 from ..jinja import templates
 from ..email import send_data_access_notifs
 from ..payment import create_checkout_session, get_checkout_info
@@ -153,22 +153,6 @@ async def research_request_data_fulfillment(request: Request, bgTasks: Backgroun
     return {"status": "success", "message": "Request successfully fulfilled!"}
 
 
-def _page_range(page: int, total_pages: int) -> list[int]:
-    """Return page numbers to display, using -1 as an ellipsis marker."""
-    if total_pages <= 7:
-        return list(range(1, total_pages + 1))
-    pages: list[int] = [1]
-    if page > 3:
-        pages.append(-1)
-    for p in range(max(2, page - 1), min(total_pages, page + 2)):
-        pages.append(p)
-    if page < total_pages - 2:
-        pages.append(-1)
-    if total_pages not in pages:
-        pages.append(total_pages)
-    return pages
-
-
 # Page that displays data obtained via the latest access request [REQ-6]
 @router.get("/research/data")
 def research_data_page(
@@ -208,7 +192,7 @@ def research_data_page(
         "per_page": per_page,
         "total_count": total_count,
         "total_pages": total_pages,
-        "page_range": _page_range(page, total_pages),
+        "page_range": page_range(page, total_pages),
     })
 
 
@@ -281,7 +265,7 @@ def research_download_action(
         headers=headers,
     )
 
-
+# Column names to include in the CSV output (anything in a ResearchEntry apart from these will be ignored)
 orderedColNames = [
     "title", "description", "content_tags", "type_tags", "sense_sight", "sense_sound", "sense_touch", 
     "sense_smell", "sense_taste", "sense_pain", "sense_other", "created_at", "context", "context_tags",
@@ -289,20 +273,10 @@ orderedColNames = [
     "rfln_timestamp", "user_gender", "user_age", "user_med_conditions"
 ]
 
-
-# Convert a number of bytes to a human-readable file size
-def sizeof_fmt(num, suffix="B"):
-    if num < 1000.0: return f"{num:d} bytes"
-    for unit in ("K", "M", "G", "T", "P", "E", "Z"):
-        num /= 1000.0
-        if num < 1000.0:
-            return f"{num:3.1f} {unit}{suffix}"
-    return f"{num:.1f} Y{suffix}"
-
-
-# Estimate the size of the file by averaging the size of a small sample of rows and multiplying by total row count
 def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) -> int:
-    # Write them to a test CSV
+    """Estimate the size of the file by averaging the size of a small sample of rows and multiplying by total row count"""
+
+    # Write the sample rows to a test CSV
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
     writer.writerows(map(lambda entry: entry.__dict__, sampleRows))
@@ -312,10 +286,9 @@ def estimate_download_size(sampleRows: Sequence[ResearchEntry], totalRows: int) 
     avgPerRow = len(full.encode("utf-8")) / len(sampleRows)
     return int(avgPerRow * totalRows) + 295
 
-
-# Convert a list of ResearchEntry objects into a StringIO representing a CSV file.
-# The output from this can be sent back to the client to make them download the file.
 def generate_csv_iter(rows: Sequence[ResearchEntry]) -> io.StringIO:
+    """Convert a list of ResearchEntry objects into a StringIO representing a CSV file."""
+
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=orderedColNames, extrasaction="ignore")
     writer.writeheader()
