@@ -11,10 +11,7 @@
             <textarea rows="10" cols="50" id="description" name="description" required>{{entry.description if entry}}</textarea>
             <br>
             <label for="content_tags">Select one or more dream content tags:</label>
-            <!-- TODO: use something better to make this form element work -->
-            <!-- https://www.jqueryscript.net/blog/best-multiple-select.html -->
-            <!-- https://www.jqueryscript.net/demo/jQuery-Multiple-Select-Plugin-For-Bootstrap-Bootstrap-Multiselect/ -->
-            <select id="content_tags" name="content_tags" multiple size="1">
+            <select id="content_tags" name="content_tags" multiple="multiple" size="1">
                 {% for tag in contentTags %}
                     <option {%if tag in entry.content_tags%}selected{%endif%}>{{tag}}</option>
                 {% endfor %}
@@ -45,7 +42,7 @@
             <textarea rows="10" cols="50" id="context" name="context">{{entry.context if entry}}</textarea>
             <br>
             <label for="context_tags">Select one or more real-world context tags:</label>
-            <select id="context_tags" name="context_tags" multiple size="1">
+            <select id="context_tags" name="context_tags" multiple="multiple" size="1">
                 {% for tag in contextTags %}
                     <option {%if tag in entry.context_tags%}selected{%endif%}>{{tag}}</option>
                 {% endfor %}
@@ -84,4 +81,15 @@
         <br>
         <input type="submit" value="Save Dream Entry">
     </form>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#content_tags').multiselect({
+                maxHeight: 400
+            });
+            $('#context_tags').multiselect({
+                maxHeight: 400
+            });
+        });
+    </script>
 {% endblock %}
