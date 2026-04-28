@@ -88,7 +88,10 @@
     background-color: white;
     border-radius: 5px;
     padding: .375rem .75rem;
-    width: 65%;
     border: var(--bs-border-width) solid var(--bs-border-color);
     margin-bottom: 0px;
+}
+
+.btn.btn-secondary {
+    padding: 0.2rem 0.6rem;
 }

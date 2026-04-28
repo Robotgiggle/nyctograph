@@ -1,191 +1,220 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/dream_detail.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>{{ entry.title }}</h1>
-    
-    <section>
-        <h2>Description</h2>
-        <p style="white-space: pre-line;">{{ entry.description }}</p>
-    </section>
-
-    <section>
-        <h2>Basic Information</h2>
-        <p><strong>Created:</strong> {{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p>
-            <strong>Visibility:</strong> {{ "Public" if entry.public else "Private" }}
-            {% if is_owner %}
-                <button id="edit-visibility-btn" onclick="toggleVisibilityEdit()" {%if not user.public_enabled%}disabled{%endif%}>
-                    Edit
-                </button>
-                {% if not user.public_enabled %}
-                    <span style="font-size: 0.9em; color: #666;">
-                        (Enable public data sharing in <a href="/account">account settings</a> first)
-                    </span>
+    <div class="mx-auto main-column-wide">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <h1>{{ entry.title }}</h1>
+            <a href="{{ back_url }}">← Back to list</a>
+        </div>
+        <hr>
+        <div class="layer-box">
+            <section style="width:73%;height:stretch">
+                <h2>Description</h2>
+                <div style="border-radius:8px;overflow:hidden">
+                    <p class="text-display" style="overflow:auto;height:200px">{{ entry.description }}</p>
+                </div>  
+            </section>
+            <section>
+                <h2>Basic Information</h2>
+                <p><strong>Created:</strong> {{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <div style="display:flex;align-items:top;margin-bottom:1rem">
+                    <div style="padding-top:3px;margin-right:6px">
+                        <strong>Visibility:</strong>
+                        <span id="visibility-status">{{ "Public" if entry.public else "Private" }}</span>
+                    </div>
+                    <div>
+                        {% if is_owner %}
+                            <button id="edit-visibility-btn" class="btn btn-secondary" onclick="toggleVisibilityEdit()" {%if not user.public_enabled%}disabled{%endif%}>
+                                Edit
+                            </button>
+                            {% if not user.public_enabled %}
+                                <span style="font-size: 0.9em; color: #666;">
+                                    (Enable public data sharing in <a href="/account">account settings</a> first)
+                                </span>
+                            {% endif %}
+                            <form id="visibility-edit-form" method="post" action="/my-dreams/{{ entry.id }}/toggle-public" style="padding: 1em; background-color: #DADAF0; border-radius: 4px;" hidden>
+                                <input type="radio" class="form-check-input" id="make-public" name="make_public" value="True" {%if entry.public%}checked{%endif%}>
+                                <label for="make-public">Public</label>
+                                <input type="radio" class="form-check-input" id="make-private" name="make_public" value="False" {%if not entry.public%}checked{%endif%}>
+                                <label for="make-private">Private</label>
+                                <br>
+                                <button type="submit" class="btn btn-secondary" style="margin-top:5px">Save</button>
+                                <button type="button" class="btn btn-secondary" style="margin-top:5px" onclick="toggleVisibilityEdit()">Cancel</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if entry.sense_sight or entry.sleep_hours or entry.tags %}
+                    <p>
+                        <strong>Comparisons:</strong>
+                        <span id="compare-status">Hidden</span>
+                        <button class="btn btn-secondary" onclick="toggleComps()">Toggle</button>
+                    </p>
                 {% endif %}
-            {% endif %}
-        </p>
-        
-        {% if is_owner %}
-            <form id="visibility-edit-form" method="post" action="/my-dreams/{{ entry.id }}/toggle-public" style="display: none; margin-top: 1em; padding: 1em; background-color: #f5f5f5; border-radius: 4px;">
-                <strong>Change visibility:</strong><br>
-                <input type="radio" id="make-private" name="make_public" value="False" 
-                    {%if not entry.public%}checked{%endif%}>
-                <label for="make-private">Private</label>
-                
-                <input type="radio" id="make-public" name="make_public" value="True" 
-                    {%if entry.public%}checked{%endif%}>
-                <label for="make-public">Public</label>
-                <br><br>
-                <button type="submit">Save</button>
-                <button type="button" onclick="toggleVisibilityEdit()">Cancel</button>
-            </form>
-            
-            <script>
-                function toggleVisibilityEdit() {
-                    const form = document.getElementById('visibility-edit-form');
-                    const btn = document.getElementById('edit-visibility-btn');
-                    if (form.style.display === 'none') {
-                        form.style.display = 'block';
-                        btn.style.display = 'none';
-                    } else {
-                        form.style.display = 'none';
-                        btn.style.display = 'inline';
-                    }
-                }
-            </script>
-        {% endif %}
-
-        {% if entry.sense_sight or entry.sleep_hours or entry.tags %}
-            <p>
-                <strong>Comparisons:</strong>
-                <span id="compare-status">Hidden</span>
-                <button onclick="toggleComps()">Toggle</button>
-            </p>
-            <script>
-                function toggleComps() {
-                    span = document.getElementById("compare-status");
-                    comps = document.querySelectorAll(".compare");
-                    if (span.innerHTML == "Shown") {
-                        comps.forEach(comp => {comp.hidden = true})
-                        span.innerHTML = "Hidden"
-                    } else {
-                        comps.forEach(comp => {comp.hidden = false})
-                        span.innerHTML = "Shown"
-                    }
-                }
-            </script>
-        {% endif %}
-    </section>
-
-    {% if entry.sense_sight is not none %} {# either they're all None or they all have a value #}
-    <section>
-        <h2>Sensory Experiences</h2>
-        <table style="width:700px;text-align:center">
-            <tr style="font-size:3em">
-                <style>.off{filter: grayscale(100%) opacity(0.5);}</style>
-                <td {%if entry.sense_sight%}title="Sight"{%else%}title="No sight"class="off"{%endif%}>👁️</td>
-                <td {%if entry.sense_sound%}title="Sound"{%else%}title="No sound"class="off"{%endif%}>👂</td>
-                <td {%if entry.sense_touch%}title="Touch"{%else%}title="No touch"class="off"{%endif%}>🫳</td>
-                <td {%if entry.sense_smell%}title="Smell"{%else%}title="No smell"class="off"{%endif%}>👃</td>
-                <td {%if entry.sense_taste%}title="Taste"{%else%}title="No taste"class="off"{%endif%}>👅</td>
-                <td {%if entry.sense_pain%}title="Pain"{%else%}title="No pain"class="off"{%endif%}>💥</td>
-                <td {%if entry.sense_other%}title="Other"{%else%}title="No other"class="off"{%endif%}>❓</td>
-            </tr>
-            <tr class="compare" style="font-size:0.9em;background-color:lightgray" hidden>
-                {% if gd %}
-                    <td>{{(100*(gd.sight_rate if entry.sense_sight else 1-gd.sight_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.sound_rate if entry.sense_sound else 1-gd.sound_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.touch_rate if entry.sense_touch else 1-gd.touch_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.smell_rate if entry.sense_smell else 1-gd.smell_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.taste_rate if entry.sense_taste else 1-gd.taste_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.pain_rate if entry.sense_pain else 1-gd.pain_rate))|int}}% of weekly entries match</td>
-                    <td>{{(100*(gd.other_rate if entry.sense_other else 1-gd.other_rate))|int}}% of weekly entries match</td>
+            </section>
+        </div>
+        <hr>
+        <div class="layer-box">
+            <section style="width:100%">
+                <h2>Sensory Experiences</h2>
+                {% if entry.sense_sight is not none %} {# either they're all None or they all have a value #}
+                    <table style="width:stretch;text-align:center;border-spacing:6px 6px;border-collapse:separate;table-layout:fixed">
+                        <tr class="compare" style="font-size:0.9em;" hidden>
+                            {% if gd %}
+                            {% else %}
+                                <td colspan="7">ERROR: Global statistics not found, cannot compare!</td>
+                            {% endif %}
+                        </tr>
+                        <tr class="senses">
+                            <td class="{{' off' if not entry.sense_sight}}">
+                                <div class="compare" hidden>{{(100*(gd.sight_rate if entry.sense_sight else 1-gd.sight_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">👁️</p>
+                                <p>Sight</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_sound}}">
+                                <div class="compare" hidden>{{(100*(gd.sound_rate if entry.sense_sound else 1-gd.sound_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">👂</p>
+                                <p>Sound</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_touch}}">
+                                <div class="compare" hidden>{{(100*(gd.touch_rate if entry.sense_touch else 1-gd.touch_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">🫳</p>
+                                <p>Touch</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_smell}}">
+                                <div class="compare" hidden>{{(100*(gd.smell_rate if entry.sense_smell else 1-gd.smell_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">👃</p>
+                                <p>Smell</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_taste}}">
+                                <div class="compare" hidden>{{(100*(gd.taste_rate if entry.sense_taste else 1-gd.taste_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">👅</p>
+                                <p>Taste</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_pain}}">
+                                <div class="compare" hidden>{{(100*(gd.pain_rate if entry.sense_pain else 1-gd.pain_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">💥</p>
+                                <p>Pain</p>
+                            </td>
+                            <td class="{{' off' if not entry.sense_other}}">
+                                <div class="compare" hidden>{{(100*(gd.other_rate if entry.sense_other else 1-gd.other_rate))|int}}% of weekly entries match</div>
+                                <p class="emoji">❓</p>
+                                <p>Other</p>
+                            </td>
+                        </tr>
+                    </table>
                 {% else %}
-                    <td colspan="7">ERROR: Global statistics not found, cannot compare!</td>
+                    <p>No sensory data recorded.</p>
                 {% endif %}
-            </tr>
-        </table>
-    </section>
-    {% endif %}
-
-    {% if entry.context or entry.bed_time or entry.wake_time or entry.country or entry.state or entry.city %}
-    <section>
-        <h2>Context & Location</h2>
-        {% if entry.context %}<strong>General context:</strong><p style="white-space:pre-line;margin-top:0">{{ entry.context }}</p>{% endif %}
-        {% if entry.sleep_hours %}
-            <p><strong>Slept from:</strong> {{ entry.bed_time.strftime('%I:%M %p') }} - {{ entry.wake_time.strftime('%I:%M %p') }}</p>
-            <p>
-                <strong>Hours of sleep:</strong> {{ entry.sleep_hours|round(2) }}
-                <span class="compare" style="margin-left:3px;padding:3px;background-color:lightgray" hidden>
-                    {% if gd %}
-                        {% set diff = entry.sleep_hours-gd.avg_sleep_duration %}
-                        {{ diff|abs|round(2) }} {{"more" if diff >= 0 else "less"}} than the average for the past week
-                    {% else %}
-                        ERROR: Global statistics not found, cannot compare!
-                    {% endif %}
-                </span>
-            </p>
-        {% elif entry.bed_time %}
-            <p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%I:%M %p') }}</p>
-        {% elif entry.wake_time %}
-            <p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%I:%M %p') }}</p>
-        {% endif %}
-        {% if entry.city or entry.state or entry.country %}
-            <p><strong>Location:</strong> 
-                {{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}
-            </p>
-        {% endif %}
-    </section>
-    {% endif %}
-
-    {% if entry.tags %}
-    <section>
-        <h2>Tags</h2>
-        <ul>
-            {% for i in range(entry.tags|length) %}
-                <li>
-                    {{ entry.tags[i].value }} ({{ entry.tags[i].category }})
+            </section>
+        </div>
+        <hr>
+        {% if entry.context or entry.bed_time or entry.wake_time or entry.country or entry.state or entry.city %}
+        <section>
+            <h2>Context & Location</h2>
+            {% if entry.context %}<strong>General context:</strong><p style="white-space:pre-line;margin-top:0">{{ entry.context }}</p>{% endif %}
+            {% if entry.sleep_hours %}
+                <p><strong>Slept from:</strong> {{ entry.bed_time.strftime('%I:%M %p') }} - {{ entry.wake_time.strftime('%I:%M %p') }}</p>
+                <p>
+                    <strong>Hours of sleep:</strong> {{ entry.sleep_hours|round(2) }}
                     <span class="compare" style="margin-left:3px;padding:3px;background-color:lightgray" hidden>
-                        {% if tagRates %}
-                            {{ (tagRates[i]*100)|round(2) }}% of entries from the past week also included this
+                        {% if gd %}
+                            {% set diff = entry.sleep_hours-gd.avg_sleep_duration %}
+                            {{ diff|abs|round(2) }} {{"more" if diff >= 0 else "less"}} than the average for the past week
                         {% else %}
                             ERROR: Global statistics not found, cannot compare!
                         {% endif %}
                     </span>
-                </li>
-            {% endfor %}
-        </ul>
-    </section>
-    {% endif %}
-
-    <section>
-        <h2>Follow-Up Reflection</h2>
-        {% if is_owner %}
-            <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
-                <textarea name="rfln" rows="6" cols="50" 
-                    placeholder="Did this dream have any impact on your life?"
-                    >{{ entry.reflection if entry.reflection }}</textarea>
-                <br>
-                <input type="submit" value="Save reflection">
-                {% if entry.rfln_timestamp %}
-                    <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
-                {% endif %}
-            </form>
-        {% elif entry.reflection %}
-            <p style="white-space: pre-line;">{{ entry.reflection }}</p>
-            <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        {% else %}
-            <p>No saved reflection.</p>
-        {% endif %}
-    </section>
-
-    {% if is_owner %}
-        <section>
-            <h2>Deletion</h2>
-            <form method="post" action="/my-dreams/{{ entry.id }}/delete" onsubmit="return confirm('Are you sure you want to permanently delete this entry?');">
-                <input type="submit" id="delete-entry" value="Delete this entry" style="width:125px;height:35px">
-            </form>
+                </p>
+            {% elif entry.bed_time %}
+                <p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%I:%M %p') }}</p>
+            {% elif entry.wake_time %}
+                <p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%I:%M %p') }}</p>
+            {% endif %}
+            {% if entry.city or entry.state or entry.country %}
+                <p><strong>Location:</strong> 
+                    {{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}
+                </p>
+            {% endif %}
         </section>
-    {% endif %}
+        {% endif %}
 
-    <p><a href="{{ back_url }}">← Back</a></p>
+        {% if entry.tags %}
+        <section>
+            <h2>Tags</h2>
+            <ul>
+                {% for i in range(entry.tags|length) %}
+                    <li>
+                        {{ entry.tags[i].value }} ({{ entry.tags[i].category }})
+                        <span class="compare" style="margin-left:3px;padding:3px;background-color:lightgray" hidden>
+                            {% if tagRates %}
+                                {{ (tagRates[i]*100)|round(2) }}% of entries from the past week also included this
+                            {% else %}
+                                ERROR: Global statistics not found, cannot compare!
+                            {% endif %}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <section>
+            <h2>Follow-Up Reflection</h2>
+            {% if is_owner %}
+                <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
+                    <textarea name="rfln" rows="6" cols="50" 
+                        placeholder="Did this dream have any impact on your life?"
+                        >{{ entry.reflection if entry.reflection }}</textarea>
+                    <br>
+                    <input type="submit" value="Save reflection">
+                    {% if entry.rfln_timestamp %}
+                        <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                    {% endif %}
+                </form>
+            {% elif entry.reflection %}
+                <p style="white-space: pre-line;">{{ entry.reflection }}</p>
+                <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            {% else %}
+                <p>No saved reflection.</p>
+            {% endif %}
+        </section>
+
+        {% if is_owner %}
+            <section>
+                <h2>Deletion</h2>
+                <form method="post" action="/my-dreams/{{ entry.id }}/delete" onsubmit="return confirm('Are you sure you want to permanently delete this entry?');">
+                    <input type="submit" id="delete-entry" value="Delete this entry" style="width:125px;height:35px">
+                </form>
+            </section>
+        {% endif %}
+    </div>  
+    
+    <script>
+        function toggleVisibilityEdit() {
+            const form = document.getElementById('visibility-edit-form');
+            const btn = document.getElementById('edit-visibility-btn');
+            const status = document.getElementById('visibility-status');
+            if (form.hidden) {
+                form.hidden = false;
+                btn.hidden = status.hidden = true;
+            } else {
+                form.hidden = true;
+                btn.hidden = status.hidden = false;
+            }
+        }
+        function toggleComps() {
+            span = document.getElementById("compare-status");
+            comps = document.querySelectorAll(".compare");
+            if (span.innerHTML == "Shown") {
+                comps.forEach(comp => {comp.hidden = true})
+                span.innerHTML = "Hidden"
+            } else {
+                comps.forEach(comp => {comp.hidden = false})
+                span.innerHTML = "Shown"
+            }
+        }
+    </script>
 {% endblock %}

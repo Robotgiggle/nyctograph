@@ -1,0 +1,45 @@
+.dream-box {
+    display: block;
+    max-height: 192px;
+    overflow: hidden;
+    text-decoration: inherit;
+    color: inherit;
+    background-color: #DADAF0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    transition: all .15s ease-in-out;
+}
+
+.dream-box:hover {
+    background-color: #D1D1EB;
+}
+
+.desc-preview { 
+    white-space: pre-line;
+    margin-bottom:7px;
+    max-height: 114px;
+}
+
+.desc-preview.fade-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+.privacy-tag {
+    border: 1px solid;
+    border-radius: 0.375rem;
+    padding: 5px 10px;
+}
+
+.public {
+    color: var(--bs-success-text-emphasis);
+    background-color: var(--bs-success-bg-subtle);
+    border-color: var(--bs-success-border-subtle);
+}
+
+.private {
+    color: var(--bs-secondary-text-emphasis);
+    background-color: var(--bs-secondary-bg-subtle);
+    border-color: var(--bs-secondary-border-subtle);
+}

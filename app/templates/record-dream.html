@@ -2,12 +2,12 @@
 {% block body %}
     <div class="mx-auto main-column">
         <h1>Record a dream</h1>
+        <hr>
         <form action="" method="post">
             <div id="basics">
-                <label for="title" class="form-label">Title:</label>
+                <label for="title" class="form-label">Title: <span style="font-size:72%">(required)</span></label>
                 <input type="text" class="form-control" id="title" name="title" value="{{entry.title if entry}}" required>
-                <br>
-                <label for="description" class="form-label">Describe your dream:</label>
+                <label for="description" class="form-label" style="margin-top:10px">Describe your dream: <span style="font-size:72%">(required)</span></label>
                 <br>
                 <textarea class="form-control" rows="10" id="description" name="description" required>{{entry.description if entry}}</textarea>
                 <label for="content_tags" class="form-label" style="margin-top:15px">Select one or more dream content tags:</label>
@@ -17,7 +17,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <br>
+            <hr>
             <div id="senses">
                 <label class="form-label">Check any sensations that were involved in the dream:</label>
                 <br>
@@ -35,7 +35,7 @@
                     <label for="{{tag}}" class="form-check-label" style="margin-right:5px">{{tag}}</label>
                 {% endfor %}
             </div>
-            <br>
+            <hr>
             <div id="context">
                 <label for="context" class="form-label">Describe any real-world context that may have inspired the dream:</label>
                 <br>
@@ -47,7 +47,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <br>
+            <hr>
             <div id="sleep_times" style="display:flex;">
                 <div style="margin-right:30px">
                     <label for="bed_time" class="form-label">When did you go to bed?</label>
@@ -58,7 +58,7 @@
                     <input type="time" class="form-control" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry.wake_time }}">
                 </div>
             </div>
-            <br>
+            <hr>
             <div id="location">
                 <label class="form-label">Where were you when you had the dream?</label>
                 <br>
@@ -75,7 +75,7 @@
                     <input type="text" class="form-control" id="city" name="city" value="{{defaultLocation[2]}}" aria-describedby="city-label">
                 </div>
             </div>
-            <br>
+            <hr>
             <div id="public">
                 <label class="form-label">Allow this entry to be included in global statistics and made available to researchers?</label>
                 <br>
