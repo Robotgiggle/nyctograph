@@ -1,86 +1,93 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Record a dream</h1>
-    <form action="" method="post">
-        <div id="basics">
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" value="{{entry.title if entry}}" required>
+    <div class="mx-auto main-column">
+        <h1>Record a dream</h1>
+        <form action="" method="post">
+            <div id="basics">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{entry.title if entry}}" required>
+                <br>
+                <label for="description" class="form-label">Describe your dream:</label>
+                <br>
+                <textarea class="form-control" rows="10" id="description" name="description" required>{{entry.description if entry}}</textarea>
+                <label for="content_tags" class="form-label" style="margin-top:15px">Select one or more dream content tags:</label>
+                <select id="content_tags" name="content_tags" multiple="multiple" size="1">
+                    {% for tag in contentTags %}
+                        <option {%if tag in entry.content_tags%}selected{%endif%}>{{tag}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <br>
-            <label for="description">Describe your dream:</label>
-            <br>
-            <textarea rows="10" cols="50" id="description" name="description" required>{{entry.description if entry}}</textarea>
-            <br>
-            <label for="content_tags">Select one or more dream content tags:</label>
-            <select id="content_tags" name="content_tags" multiple="multiple" size="1">
-                {% for tag in contentTags %}
-                    <option {%if tag in entry.content_tags%}selected{%endif%}>{{tag}}</option>
+            <div id="senses">
+                <label class="form-label">Check any sensations that were involved in the dream:</label>
+                <br>
+                {% for sense in senses %}
+                    <input type="checkbox" class="form-check-input" id="{{'sense_'+sense}}" name="{{'sense_'+sense}}" {%if entry['sense_'+sense]%}checked{%endif%}>
+                    <label for="{{'sense_'+sense}}" class="form-check-label" style="margin-right:5px">{{sense.capitalize()}}</label>
                 {% endfor %}
-            </select>
-        </div>
-        <br>
-        <div id="senses">
-            <label>Check any sensations that were involved in the dream:</label>
+            </div>
             <br>
-            {% for sense in senses %}
-                <label for="{{'sense_'+sense}}">{{sense.capitalize()}}</label>
-                <input type="checkbox" id="{{'sense_'+sense}}" name="{{'sense_'+sense}}" {%if entry['sense_'+sense]%}checked{%endif%}>
-            {% endfor %}
-        </div>
-        <br>
-        <div id="types">
-            <label>Check any relevant dream types:</label>
-            <br>
-            {% for tag in typeTags %}
-                <label for="{{tag}}">{{tag}}</label>
-                <input type="checkbox" id="{{tag}}" name="type_tags", value="{{tag}}" {%if tag in entry.type_tags%}checked{%endif%}>
-            {% endfor %}
-        </div>
-        <br>
-        <div id="context">
-            <label for="context">Describe any real-world context that may have inspired the dream:</label>
-            <br>
-            <textarea rows="10" cols="50" id="context" name="context">{{entry.context if entry}}</textarea>
-            <br>
-            <label for="context_tags">Select one or more real-world context tags:</label>
-            <select id="context_tags" name="context_tags" multiple="multiple" size="1">
-                {% for tag in contextTags %}
-                    <option {%if tag in entry.context_tags%}selected{%endif%}>{{tag}}</option>
+            <div id="types">
+                <label class="form-label">Check any relevant dream types:</label>
+                <br>
+                {% for tag in typeTags %}
+                    <input type="checkbox" class="form-check-input" id="{{tag}}" name="type_tags", value="{{tag}}" {%if tag in entry.type_tags%}checked{%endif%}>
+                    <label for="{{tag}}" class="form-check-label" style="margin-right:5px">{{tag}}</label>
                 {% endfor %}
-            </select>
-        </div>
-        <br>
-        <div id="sleep_times">
-            <label for="bed_time">When did you go to bed?</label>
-            <input type="time" id="bed_time" name="bed_time" value="{{ entry.bed_time.strftime('%H:%M') if entry.bed_time }}">
+            </div>
             <br>
-            <label for="wake_time">When did you wake up?</label>
-            <input type="time" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry.wake_time }}">
-        </div>
-        <br>
-        <div id="location">
-            <label>Where were you when you had the dream?</label>
+            <div id="context">
+                <label for="context" class="form-label">Describe any real-world context that may have inspired the dream:</label>
+                <br>
+                <textarea rows="10" class="form-control" id="context" name="context">{{entry.context if entry}}</textarea>
+                <label for="context_tags" class="form-label" style="margin-top:15px">Select one or more real-world context tags:</label>
+                <select id="context_tags" name="context_tags" multiple="multiple" size="1">
+                    {% for tag in contextTags %}
+                        <option {%if tag in entry.context_tags%}selected{%endif%}>{{tag}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <br>
-            <label for="country">Country:</label>
-            <input type="text" id="country" name="country" value="{{defaultLocation[0]}}">
+            <div id="sleep_times" style="display:flex;">
+                <div style="margin-right:30px">
+                    <label for="bed_time" class="form-label">When did you go to bed?</label>
+                    <input type="time" class="form-control" id="bed_time" name="bed_time" value="{{ entry.bed_time.strftime('%H:%M') if entry.bed_time }}">
+                </div>
+                <div>
+                    <label for="wake_time" class="form-label">When did you wake up?</label>
+                    <input type="time" class="form-control" id="wake_time" name="wake_time" value="{{ entry.wake_time.strftime('%H:%M') if entry.wake_time }}">
+                </div>
+            </div>
             <br>
-            <label for="state">State/Province:</label>
-            <input type="text" id="state" name="state" value="{{defaultLocation[1]}}">
+            <div id="location">
+                <label class="form-label">Where were you when you had the dream?</label>
+                <br>
+                <div class="input-group" style="margin-bottom:10px">
+                    <span id="country-label" class="input-group-text">Country:</span>
+                    <input type="text" class="form-control" id="country" name="country" value="{{defaultLocation[0]}}" aria-describedby="country-label">
+                </div>
+                <div class="input-group" style="margin-bottom:10px">
+                    <span id="state-label" class="input-group-text">State:</span>
+                    <input type="text" class="form-control" id="state" name="state" value="{{defaultLocation[1]}}" aria-describedby="state-label">
+                </div>
+                <div class="input-group">
+                    <span id="city-label" class="input-group-text">City:</span>
+                    <input type="text" class="form-control" id="city" name="city" value="{{defaultLocation[2]}}" aria-describedby="city-label">
+                </div>
+            </div>
             <br>
-            <label for="city">City:</label>
-            <input type="text" id="city" name="city" value="{{defaultLocation[2]}}">
-        </div>
-        <br>
-        <div id="public">
-            <label>Allow this entry to be included in global statistics and made available to researchers?</label>
+            <div id="public">
+                <label class="form-label">Allow this entry to be included in global statistics and made available to researchers?</label>
+                <br>
+                <input type="radio" class="form-check-input" id="public-yes" name="public" value="True" required {%if entry.public and not publicDisabled%}checked{%endif%} {%if publicDisabled%}disabled{%endif%}>
+                <label for="public-yes" class="form-check-label" style="margin-right:5px">Yes</label>
+                <input type="radio" class="form-check-input" id="public-no" name="public" value="False" required {%if entry and not entry.public%}checked{%endif%}>
+                <label for="public-no" class="form-check-label">No</label>
+            </div>
             <br>
-            <input type="radio" id="public-yes" name="public" value="True" required {%if entry.public and not publicDisabled%}checked{%endif%} {%if publicDisabled%}disabled{%endif%}>
-            <label for="public-yes">Yes</label>
-            <input type="radio" id="public-no" name="public" value="False" required {%if entry and not entry.public%}checked{%endif%}>
-            <label for="public-no">No</label>
-        </div>
-        <br>
-        <input type="submit" value="Save Dream Entry">
-    </form>
+            <input type="submit" class="btn btn-primary" value="Save Dream Entry">
+        </form>
+    </div>
 
     <script type="text/javascript">
         $(document).ready(function() {

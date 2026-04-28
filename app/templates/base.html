@@ -64,13 +64,13 @@
         </nav>
         {% for msg, type in flash %}
             {% if type == "info" %}
-                <p class="flash-info">{{msg}}</p>
+                <p class="alert alert-info">{{msg}}</p>
             {% endif %}
             {% if type == "warn" %}
-                <p class="flash-warn">{{msg}}</p>
+                <p class="alert alert-danger">{{msg}}</p>
             {% endif %}
             {% if type == "success" %}
-                <p class="flash-success">{{msg}}</p>
+                <p class="alert alert-success">{{msg}}</p>
             {% endif %}
         {% endfor %}
         {% block body %}{% endblock %}
