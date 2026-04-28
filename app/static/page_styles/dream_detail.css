@@ -4,6 +4,16 @@
     align-items: top;
 }
 
+.btn.btn-back {
+    background-color: #DADAF0;
+    font-weight: 500;
+    font-size: 17px;
+}
+
+.btn.btn-back:hover {
+    background-color: #D1D1EB;
+}
+
 .senses > td {
     border-radius: 8px;
     background-color: #DADAF0;
@@ -19,6 +29,12 @@
     color: var(--bs-body-color);
 }
 
+.compare {
+    border-radius: 8px;
+    background-color: #D1D1EB;
+    padding: 5px 10px;
+}
+
 .emoji {
     font-size: 3em;
     margin-bottom: 0px;
@@ -30,4 +46,22 @@
 
 .off {
     color: #888
+}
+
+.tag {
+    padding: 3px 9px;
+    border-radius: 16px;
+    font-size: larger;
+}
+
+.tag-label {
+    border-radius: 8px;
+    padding: 1px 6px;
+    font-size: 14px;
+}
+
+@media only screen and (max-width: 1111px) {
+  .rfln-submit {
+    flex-direction: column;
+  }
 }

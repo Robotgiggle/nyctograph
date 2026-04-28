@@ -15,8 +15,16 @@
                         <span class="privacy-tag private">Private</span>
                     {% endif %}
                 </div>
-                <p style="white-space: pre-line;margin-bottom:7px">{{ entry.description }}</p>
+                <p class="desc-preview">{{ entry.description }}</p>
             </a>
         {% endfor %}
     </div>
+
+    <script>
+        $(".desc-preview").each((i, obj) => {
+            if (obj.scrollHeight > obj.clientHeight) {
+                obj.classList.add("fade-bottom")
+            }
+        })
+    </script>
 {% endblock %}

@@ -5,8 +5,8 @@
 {% block body %}
     <div class="mx-auto main-column-wide">
         <div style="display:flex;justify-content:space-between;align-items:center">
-            <h1>{{ entry.title }}</h1>
-            <a href="{{ back_url }}">← Back to list</a>
+            <h1 style="margin-bottom:0px">{{ entry.title }}</h1>
+            <a href="{{ back_url }}" class="btn btn-back" style="height:48px;padding-top:10px">❮&nbsp;&nbsp;Back to list</a>
         </div>
         <hr>
         <div class="layer-box">
@@ -34,7 +34,7 @@
                                     (Enable public data sharing in <a href="/account">account settings</a> first)
                                 </span>
                             {% endif %}
-                            <form id="visibility-edit-form" method="post" action="/my-dreams/{{ entry.id }}/toggle-public" style="padding: 1em; background-color: #DADAF0; border-radius: 4px;" hidden>
+                            <form id="visibility-edit-form" method="post" action="/my-dreams/{{ entry.id }}/toggle-public" style="padding: 1em; background-color: #DADAF0; border-radius: 7px;" hidden>
                                 <input type="radio" class="form-check-input" id="make-public" name="make_public" value="True" {%if entry.public%}checked{%endif%}>
                                 <label for="make-public">Public</label>
                                 <input type="radio" class="form-check-input" id="make-private" name="make_public" value="False" {%if not entry.public%}checked{%endif%}>
@@ -61,45 +61,81 @@
                 <h2>Sensory Experiences</h2>
                 {% if entry.sense_sight is not none %} {# either they're all None or they all have a value #}
                     <table style="width:stretch;text-align:center;border-spacing:6px 6px;border-collapse:separate;table-layout:fixed">
-                        <tr class="compare" style="font-size:0.9em;" hidden>
-                            {% if gd %}
-                            {% else %}
-                                <td colspan="7">ERROR: Global statistics not found, cannot compare!</td>
-                            {% endif %}
-                        </tr>
                         <tr class="senses">
-                            <td class="{{' off' if not entry.sense_sight}}">
-                                <div class="compare" hidden>{{(100*(gd.sight_rate if entry.sense_sight else 1-gd.sight_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_sight}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.sight_rate if entry.sense_sight else 1-gd.sight_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">👁️</p>
                                 <p>Sight</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_sound}}">
-                                <div class="compare" hidden>{{(100*(gd.sound_rate if entry.sense_sound else 1-gd.sound_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_sound}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.sound_rate if entry.sense_sound else 1-gd.sound_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">👂</p>
                                 <p>Sound</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_touch}}">
-                                <div class="compare" hidden>{{(100*(gd.touch_rate if entry.sense_touch else 1-gd.touch_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_touch}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.touch_rate if entry.sense_touch else 1-gd.touch_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">🫳</p>
                                 <p>Touch</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_smell}}">
-                                <div class="compare" hidden>{{(100*(gd.smell_rate if entry.sense_smell else 1-gd.smell_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_smell}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.smell_rate if entry.sense_smell else 1-gd.smell_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">👃</p>
                                 <p>Smell</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_taste}}">
-                                <div class="compare" hidden>{{(100*(gd.taste_rate if entry.sense_taste else 1-gd.taste_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_taste}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.taste_rate if entry.sense_taste else 1-gd.taste_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">👅</p>
                                 <p>Taste</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_pain}}">
-                                <div class="compare" hidden>{{(100*(gd.pain_rate if entry.sense_pain else 1-gd.pain_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_pain}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.pain_rate if entry.sense_pain else 1-gd.pain_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">💥</p>
                                 <p>Pain</p>
                             </td>
-                            <td class="{{' off' if not entry.sense_other}}">
-                                <div class="compare" hidden>{{(100*(gd.other_rate if entry.sense_other else 1-gd.other_rate))|int}}% of weekly entries match</div>
+                            <td class="{{'off' if not entry.sense_other}}">
+                                <div class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{(100*(gd.other_rate if entry.sense_other else 1-gd.other_rate))|int}}% of weekly entries match
+                                    {% endif %}
+                                </div>
                                 <p class="emoji">❓</p>
                                 <p>Other</p>
                             </td>
@@ -111,82 +147,114 @@
             </section>
         </div>
         <hr>
-        {% if entry.context or entry.bed_time or entry.wake_time or entry.country or entry.state or entry.city %}
-        <section>
-            <h2>Context & Location</h2>
-            {% if entry.context %}<strong>General context:</strong><p style="white-space:pre-line;margin-top:0">{{ entry.context }}</p>{% endif %}
-            {% if entry.sleep_hours %}
-                <p><strong>Slept from:</strong> {{ entry.bed_time.strftime('%I:%M %p') }} - {{ entry.wake_time.strftime('%I:%M %p') }}</p>
-                <p>
-                    <strong>Hours of sleep:</strong> {{ entry.sleep_hours|round(2) }}
-                    <span class="compare" style="margin-left:3px;padding:3px;background-color:lightgray" hidden>
-                        {% if gd %}
-                            {% set diff = entry.sleep_hours-gd.avg_sleep_duration %}
-                            {{ diff|abs|round(2) }} {{"more" if diff >= 0 else "less"}} than the average for the past week
-                        {% else %}
-                            ERROR: Global statistics not found, cannot compare!
-                        {% endif %}
-                    </span>
-                </p>
-            {% elif entry.bed_time %}
-                <p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%I:%M %p') }}</p>
-            {% elif entry.wake_time %}
-                <p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%I:%M %p') }}</p>
-            {% endif %}
-            {% if entry.city or entry.state or entry.country %}
-                <p><strong>Location:</strong> 
-                    {{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}
-                </p>
-            {% endif %}
-        </section>
-        {% endif %}
-
-        {% if entry.tags %}
-        <section>
-            <h2>Tags</h2>
-            <ul>
-                {% for i in range(entry.tags|length) %}
-                    <li>
-                        {{ entry.tags[i].value }} ({{ entry.tags[i].category }})
-                        <span class="compare" style="margin-left:3px;padding:3px;background-color:lightgray" hidden>
-                            {% if tagRates %}
-                                {{ (tagRates[i]*100)|round(2) }}% of entries from the past week also included this
+        <div class="layer-box">
+            <section style="width:65%;height:stretch">
+                <h2>Real-World Context</h2>
+                <div style="border-radius:8px;overflow:hidden">
+                    <p class="text-display" style="overflow:auto;height:160px">{{ entry.context if entry.context }}</p>
+                </div>  
+            </section>
+            <section style="width:33%;">
+                <h2>Contextual Details</h2>
+                {% if entry.sleep_hours %}
+                    <p><strong>Slept from:</strong> {{ entry.bed_time.strftime('%I:%M %p') }} - {{ entry.wake_time.strftime('%I:%M %p') }}</p>
+                    <div style="display:flex">
+                        <p><strong>Hours of sleep:</strong> {{ entry.sleep_hours|round(2) }}</p>
+                        <div class="compare" style="margin-left:6px;width:48%;" hidden>
+                            {% if not gd or gd.total_entries == 0 %}
+                                No data from the past 7 days
                             {% else %}
-                                ERROR: Global statistics not found, cannot compare!
+                                {% set diff = entry.sleep_hours-gd.avg_sleep_duration %}
+                                {{ diff|abs|round(2) }} {{"more" if diff >= 0 else "less"}} than this week's average
                             {% endif %}
-                        </span>
-                    </li>
-                {% endfor %}
-            </ul>
-        </section>
-        {% endif %}
-
-        <section>
-            <h2>Follow-Up Reflection</h2>
-            {% if is_owner %}
-                <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
-                    <textarea name="rfln" rows="6" cols="50" 
-                        placeholder="Did this dream have any impact on your life?"
-                        >{{ entry.reflection if entry.reflection }}</textarea>
-                    <br>
-                    <input type="submit" value="Save reflection">
-                    {% if entry.rfln_timestamp %}
-                        <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
-                    {% endif %}
-                </form>
-            {% elif entry.reflection %}
-                <p style="white-space: pre-line;">{{ entry.reflection }}</p>
-                <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-            {% else %}
-                <p>No saved reflection.</p>
-            {% endif %}
-        </section>
-
+                        </div>
+                    </div>
+                {% elif entry.bed_time %}
+                    <p><strong>Bed time:</strong> {{ entry.bed_time.strftime('%I:%M %p') }}</p>
+                {% elif entry.wake_time %}
+                    <p><strong>Wake time:</strong> {{ entry.wake_time.strftime('%I:%M %p') }}</p>
+                {% else %}
+                    <p>No sleep data recorded.</p>
+                {% endif %}
+                {% if entry.city or entry.state or entry.country %}
+                    <p><strong>Location:</strong> 
+                        {{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}
+                    </p>
+                {% else %}
+                    <p>No location data recorded.</p>
+                {% endif %}
+            </section>
+        </div>
+        <hr>
+        <div class="layer-box">
+            <section style="width:50%">
+                <div style="display:flex;justify-content:space-between">
+                    <h2>Tags</h2>
+                    <div style="margin-top:5px;">
+                        <span class="tag-label" style="background-color:#EBD1EB">Dream Content</span>
+                        <span class="tag-label" style="background-color:#EBEBD1">Dream Type</span>
+                        <span class="tag-label" style="background-color:#D1EBD1">IRL Context</span>
+                        <span class="tag-label" style="background-color:#D1DEEB">Auto-Generated</span>
+                    </div>
+                </div>
+                {% if not entry.tags %}
+                    <p>No tags applied.</p>
+                {% else %}
+                    <div style="display:flex;flex-wrap:wrap">
+                        {% for i in range(entry.tags|length) %}
+                            {% if entry.tags[i].category == 'dream_content' %}
+                                {% set color = '#EBD1EB' %}
+                            {% elif entry.tags[i].category == 'dream_type' %}
+                                {% set color = '#EBEBD1' %}
+                            {% elif entry.tags[i].category == 'irl_context' %}
+                                {% set color = '#D1EBD1' %}
+                            {% elif entry.tags[i].category == 'calculated' %}
+                                {% set color = '#D1DEEB' %}
+                            {% endif %}
+                            <div style="margin: 3px 2px;">
+                                <span class="tag" style="background-color:{{color}}">{{ entry.tags[i].value }}</span>
+                                <span class="compare" hidden>
+                                    {% if not gd or gd.total_entries == 0 %}
+                                        No data from the past 7 days
+                                    {% else %}
+                                        {{ (tagRates[i]*100)|round(2) }}% of weekly entries have this
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
+            <section style="width:48%">
+                <h2>Follow-Up Reflection</h2>
+                {% if is_owner %}
+                    <form method="post" action="/my-dreams/{{ entry.id }}/reflection">
+                        <textarea class="form-control" name="rfln" rows="4" 
+                            placeholder="Did this dream have any impact on your life?"
+                            >{{ entry.reflection if entry.reflection }}</textarea>
+                        <div style="display:flex;align-items:baseline" class="rfln-submit">
+                            <input type="submit" class="btn btn-primary" style="margin-top:10px" value="Save reflection">
+                            {% if entry.rfln_timestamp %}
+                                <span style="margin-left:7px">
+                                    <strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </form>
+                {% elif entry.reflection %}
+                    <p style="white-space: pre-line;">{{ entry.reflection }}</p>
+                    <p><strong>Last updated:</strong> {{ entry.rfln_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                {% else %}
+                    <p>No saved reflection.</p>
+                {% endif %}
+            </section>
+        </div>
         {% if is_owner %}
+            <hr>
             <section>
                 <h2>Deletion</h2>
                 <form method="post" action="/my-dreams/{{ entry.id }}/delete" onsubmit="return confirm('Are you sure you want to permanently delete this entry?');">
-                    <input type="submit" id="delete-entry" value="Delete this entry" style="width:125px;height:35px">
+                    <input type="submit" class="btn btn-danger" style="margin-top:6px" id="delete-entry" value="Delete this entry">
                 </form>
             </section>
         {% endif %}
