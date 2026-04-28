@@ -42,7 +42,7 @@
 }
 
 .auth-link {
-    margin: 10px;
+    margin-bottom: 10px;
     padding: 7px 15px;
     border-radius: 5px;
     text-decoration: none;
@@ -55,16 +55,23 @@
     background-color: #CACAED;
 }
 
-.main-column {
+.main-column, .main-column-thin {
     display:flex; 
     justify-content:center; 
     flex-direction:column; 
-    width: 650px;
     margin-top: 15px;
 }
 
-@media only screen and (max-width: 684px) {
-  .main-column {
+.main-column {
+    width: 650px;
+}
+
+.main-column-thin {
+    width: 400px;
+}
+
+@media only screen and (max-width: 722px) {
+  .main-column, .main-column-thin {
     width: 90%;
   }
 }

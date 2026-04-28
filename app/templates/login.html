@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Log In</h1>
-    <form action="" method="post">
-        <label for="uname">Username:</label>
-        <input type="text" id="uname" name="uname">
+    <div class="mx-auto main-column-thin">
+        <h1>Log In</h1>
+        <form action="" method="post">
+            <label for="uname" class="form-label">Username:</label>
+            <input type="text" class="form-control" id="uname" name="uname">
+            <label for="pword" class="form-label" style="margin-top:10px">Password:</label>
+            <input type="password" class="form-control" id="pword" name="pword">
+            <br>
+            <input type="submit" class="btn btn-primary" value="Log in">
+        </form>
         <br>
-        <label for="pword">Password:</label>
-        <input type="password" id="pword" name="pword">
-        <br><br>
-        <input type="submit" value="Log in">
-    </form>
-    <div>
-        <p style="margin-top:1rem"><a class="auth-link" href="/signup">Create a standard account</a></p>
-        <p style="margin-top:1.3rem"><a class="auth-link" href="/signup/research">Request a research account</a></p>
-    </div>
+        <div>
+            <p style="margin-top:1rem"><a class="auth-link" href="/signup">Create a standard account</a></p>
+            <p style="margin-top:1.3rem"><a class="auth-link" href="/signup/research">Request a research account</a></p>
+        </div>
+    </div>    
 {% endblock %}
