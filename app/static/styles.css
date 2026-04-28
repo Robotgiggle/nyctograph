@@ -25,6 +25,34 @@
     margin-bottom: 8px;
 }
 
+.nav-link {
+    border-radius: 5px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.nav-link:hover {
+    background-color: rgba(202,193,224,0.9);
+}
+
+.nav-link.active {
+    background-color: rgba(202,193,224,0.9);
+}
+
+.auth-link {
+    margin: 10px;
+    padding: 7px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #444;
+    background-color: #D7D7F5;
+    transition: all .15s ease-in-out;
+}
+
+.auth-link:hover {
+    background-color: #CACAED;
+}
+
 /* About-us page styles */
 section {
     margin-bottom: 2em;
