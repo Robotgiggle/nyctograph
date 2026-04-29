@@ -36,6 +36,12 @@
     display: none!important; 
 }
 
+.layer-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: top;
+}
+
 @media only screen and (max-width: 722px) {
   .main-column, .main-column-thin {
     width: 90%;
@@ -46,18 +52,18 @@
   .mobile-show {
     display: inherit!important;
   }
+  .layer-box {
+    flex-direction: column;
+  }
+  .layer-box > section {
+    width: 100%!important;
+  }
 }
 
 @media only screen and (max-width: 1111px) {
   .main-column-wide {
     width: 90%;
   }
-}
-
-.layer-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: top;
 }
 
 .auth-link {

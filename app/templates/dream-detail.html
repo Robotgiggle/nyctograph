@@ -16,6 +16,7 @@
                     <p class="text-display" style="overflow:auto;height:200px">{{ entry.description }}</p>
                 </div>  
             </section>
+            <hr class="mobile-show">
             <section>
                 <h2>Basic Information</h2>
                 <p><strong>Created:</strong> {{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
@@ -154,6 +155,7 @@
                     <p class="text-display" style="overflow:auto;height:160px">{{ entry.context if entry.context }}</p>
                 </div>  
             </section>
+            <hr class="mobile-show">
             <section style="width:33%;">
                 <h2>Contextual Details</h2>
                 {% if entry.sleep_hours %}
@@ -225,6 +227,7 @@
                     </div>
                 {% endif %}
             </section>
+            <hr class="mobile-show">
             <section style="width:48%">
                 <h2>Follow-Up Reflection</h2>
                 {% if is_owner %}

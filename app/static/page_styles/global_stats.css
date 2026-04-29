@@ -1,0 +1,26 @@
+.tag-table, .tag-table > div > table {
+    width: 100%;
+    text-align: center;
+    border-spacing: 0px 3px;
+    border-collapse: separate;
+    background-color: #DADAF0;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.tag-table > div, .tag-table > ul {
+    overflow-y: auto;
+    scrollbar-color: gray transparent;
+    padding-right: 2px;
+}
+
+.tag {
+    padding: 2px 8px;
+    border-radius: 16px;
+}
+
+@media only screen and (max-width: 1000px) {
+  .filter-form {
+    width: 90%
+  }
+}

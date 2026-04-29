@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
     <div class="mx-auto main-column-wide">
-        <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="layer-box">
             <h1>Personal Statistics</h1>
             <section style="display:flex;align-items:center">
                 <label for="time_slice" style="margin-right:4px">Time range:</label>
@@ -10,8 +10,7 @@
                     <option value="month" {%if time_slice == "month"%}selected{%endif%}>Past month</option>
                     <option value="week" {%if time_slice == "week"%}selected{%endif%}>Past week</option>
                 </select>
-                <button class="btn btn-secondary mobile-hide" style="height:35px;margin-left:4px" onclick="showSelectedStats()">Filter Statistics</button>
-                <button class="btn btn-secondary mobile-show" style="height:35px;margin-left:4px" onclick="showSelectedStats()">Filter</button>
+                <button class="btn btn-secondary" style="height:35px;margin-left:4px" onclick="showSelectedStats()">Filter Statistics</button>
             </section>
         </div>
         <hr>
@@ -33,6 +32,7 @@
                                 {% endif %}
                             </ul>
                         </section>
+                        <hr class="mobile-show">
                         <section style="width:40%">
                             <h2>Common Themes</h2>
                             <div style="display:flex;justify-content:space-between">
@@ -125,14 +125,13 @@
                                     </td>
                                 </tr>
                             </table></div>
+                            <script>
+                                {% for sense in ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'] %}
+                                    $("#{{sense}}-pie-{{time_slice}}").css({ "background-image": "conic-gradient(#D1EBD1 {{data[sense+'_rate'] * 100}}%, #D1D1EB {{data[sense+'_rate'] * 100}}%)" });
+                                {% endfor %}
+                            </script>
                         </section>
                     </div>
-
-                    <script>
-                        {% for sense in ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'] %}
-                            $("#{{sense}}-pie-{{time_slice}}").css({ "background-image": "conic-gradient(#D1EBD1 {{data[sense+'_rate'] * 100}}%, #D1D1EB {{data[sense+'_rate'] * 100}}%)" });
-                        {% endfor %}
-                    </script>
                 {% endif %}
             </section>
         {% endfor %}

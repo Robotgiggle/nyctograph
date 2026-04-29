@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from ..utils import DbSesDep
 from ..jinja import templates
@@ -13,6 +13,7 @@ def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all"
     statsQuery = select(GlobalStats).where(GlobalStats.time_slice == time_slice, GlobalStats.age_bracket == age_bracket)
     statsAll: GlobalStats|None = dbSes.scalar(statsQuery)
     tagTotals = {}
+    tagCount = None
     associations = None
 
     if statsAll is not None:
@@ -22,6 +23,10 @@ def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all"
                 .where(TagTotal.stats_obj == statsAll, TagTotal.tag_cat == cat)
                 .order_by(TagTotal.total.desc())
             ).all()
+        tagCount = dbSes.scalar(
+            select(func.sum(TagTotal.total))
+            .where(TagTotal.stats_obj == statsAll)
+        )
         associations = dbSes.scalars(
             select(TagAssociation)
             .where(TagAssociation.stats_obj == statsAll)
@@ -31,6 +36,7 @@ def view_global_stats(request: Request, dbSes: DbSesDep, time_slice: str = "all"
     context = {
         "stats": statsAll, 
         "totals": tagTotals, 
+        "tagCount": tagCount,
         "associations": associations,
         "time_slice": time_slice,
         "age_bracket": age_bracket
