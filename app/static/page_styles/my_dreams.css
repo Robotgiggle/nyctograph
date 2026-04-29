@@ -1,6 +1,6 @@
 .dream-box {
     display: block;
-    max-height: 192px;
+    max-height: 170px;
     overflow: hidden;
     text-decoration: inherit;
     color: inherit;
@@ -18,7 +18,7 @@
 .desc-preview { 
     white-space: pre-line;
     margin-bottom:7px;
-    max-height: 114px;
+    max-height: 90px;
 }
 
 .desc-preview.fade-bottom {

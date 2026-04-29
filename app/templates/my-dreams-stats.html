@@ -1,80 +1,143 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Personal Stats</h1>
-
-    <section>
-        <label for="time_slice">Time range:</label>
-        <select id="time_slice" name="time_slice">
-            <option value="all" {%if time_slice == "all"%}selected{%endif%}>All time</option>
-            <option value="month" {%if time_slice == "month"%}selected{%endif%}>Past month</option>
-            <option value="week" {%if time_slice == "week"%}selected{%endif%}>Past week</option>
-        </select>
-        <button onclick="showSelectedStats()">Filter Statistics</button>
-    </section>
-
-    {% for time_slice in ["all", "month", "week"] %}
-        {% set data = stats[time_slice] %}
-        <section id="stats_{{ time_slice }}" class="stats" {% if time_slice != "all" %}hidden{% endif %}>
-            {% if data.total_entries == 0 %}
-                <p><em>No dream entries found for this time period.</em></p>
-            {% else %}
-                <h2>Overview</h2>
-                <ul>
-                    <li>Total Dreams: {{ data.total_entries }}</li>
-                    <li>Public Dreams: {{ "%.1f"|format(data.public_ratio * 100) }}%</li>
-                    <li>Dreams with Reflection: {{ "%.1f"|format(data.reflection_ratio * 100) }}%</li>
-                    {% if data.avg_sleep_duration > 0 %}
-                        <li>Average Sleep Duration: {{ "%.1f"|format(data.avg_sleep_duration) }} hours</li>
-                    {% endif %}
-                </ul>
-
-                <h2>Common Themes</h2>
-                <p><strong>Dream Content:</strong><br>
-                {% if data.top_content_tag %}
-                    1. {{ data.top_content_tag }}
-                    {% if data.second_content_tag %}
-                        <br>2. {{ data.second_content_tag }}
-                    {% endif %}
+    <div class="mx-auto main-column-wide">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <h1>Personal Statistics</h1>
+            <section style="display:flex;align-items:center">
+                <label for="time_slice" style="margin-right:4px">Time range:</label>
+                <select class="form-select" style="width:130px" id="time_slice" name="time_slice">
+                    <option value="all" {%if time_slice == "all"%}selected{%endif%}>All time</option>
+                    <option value="month" {%if time_slice == "month"%}selected{%endif%}>Past month</option>
+                    <option value="week" {%if time_slice == "week"%}selected{%endif%}>Past week</option>
+                </select>
+                <button class="btn btn-secondary mobile-hide" style="height:35px;margin-left:4px" onclick="showSelectedStats()">Filter Statistics</button>
+                <button class="btn btn-secondary mobile-show" style="height:35px;margin-left:4px" onclick="showSelectedStats()">Filter</button>
+            </section>
+        </div>
+        <hr>
+        {% for time_slice in ["all", "month", "week"] %}
+            {% set data = stats[time_slice] %}
+            <section id="stats_{{ time_slice }}" class="stats" {% if time_slice != "all" %}hidden{% endif %}>
+                {% if data.total_entries == 0 %}
+                    <p><em>No dream entries found for this time period.</em></p>
                 {% else %}
-                    <em>No tags yet</em>
-                {% endif %}
-                </p>
-                
-                <p><strong>Dream Type:</strong><br>
-                {% if data.top_type_tag %}
-                    1. {{ data.top_type_tag }}
-                    {% if data.second_type_tag %}
-                        <br>2. {{ data.second_type_tag }}
-                    {% endif %}
-                {% else %}
-                    <em>No tags yet</em>
-                {% endif %}
-                </p>
-                
-                <p><strong>Life Context:</strong><br>
-                {% if data.top_context_tag %}
-                    1. {{ data.top_context_tag }}
-                    {% if data.second_context_tag %}
-                        <br>2. {{ data.second_context_tag }}
-                    {% endif %}
-                {% else %}
-                    <em>No tags yet</em>
-                {% endif %}
-                </p>
+                    <div class="layer-box">
+                        <section>
+                            <h2>Overview</h2>
+                            <ul>
+                                <li>Total Dreams: {{ data.total_entries }}</li>
+                                <li>Public Dreams: {{ "%.1f"|format(data.public_ratio * 100) }}%</li>
+                                <li>Dreams with Reflection: {{ "%.1f"|format(data.reflection_ratio * 100) }}%</li>
+                                {% if data.avg_sleep_duration > 0 %}
+                                    <li>Average Sleep Duration: {{ "%.1f"|format(data.avg_sleep_duration) }} hours</li>
+                                {% endif %}
+                            </ul>
+                        </section>
+                        <section style="width:40%">
+                            <h2>Common Themes</h2>
+                            <div style="display:flex;justify-content:space-between">
+                                <div>
+                                    <p><strong>Dream Content:</strong><br>
+                                    {% if data.top_content_tag %}
+                                        1. {{ data.top_content_tag }}
+                                        {% if data.second_content_tag %}
+                                            <br>2. {{ data.second_content_tag }}
+                                        {% endif %}
+                                    {% else %}
+                                        <em>No tags yet</em>
+                                    {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p><strong>Dream Type:</strong><br>
+                                    {% if data.top_type_tag %}
+                                        1. {{ data.top_type_tag }}
+                                        {% if data.second_type_tag %}
+                                            <br>2. {{ data.second_type_tag }}
+                                        {% endif %}
+                                    {% else %}
+                                        <em>No tags yet</em>
+                                    {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p><strong>Life Context:</strong><br>
+                                    {% if data.top_context_tag %}
+                                        1. {{ data.top_context_tag }}
+                                        {% if data.second_context_tag %}
+                                            <br>2. {{ data.second_context_tag }}
+                                        {% endif %}
+                                    {% else %}
+                                        <em>No tags yet</em>
+                                    {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <hr>
+                    <div class="layer-box">
+                        <section style="width:100%">
+                            <h2>Sensory Experience Rates</h2>
+                            <div class="sense-table-wrapper"><table>
+                                <tr class="senses">
+                                    <td>
+                                        <div id="sight-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">👁️</p>
+                                        </div>
+                                        <p>Sight: {{"%.1f"|format(data.sight_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="sound-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">👂</p>
+                                        </div>
+                                        <p>Sound: {{"%.1f"|format(data.sound_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="touch-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">🫳</p>
+                                        </div>
+                                        <p>Touch: {{"%.1f"|format(data.touch_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="smell-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">👃</p>
+                                        </div>
+                                        <p>Smell: {{"%.1f"|format(data.smell_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="taste-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">👅</p>
+                                        </div>
+                                        <p>Taste: {{"%.1f"|format(data.taste_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="pain-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">💥</p>
+                                        </div>
+                                        <p>Pain: {{"%.1f"|format(data.pain_rate * 100)}}%</p>
+                                    </td>
+                                    <td>
+                                        <div id="other-pie-{{time_slice}}" class="pie">
+                                            <p class="emoji">❓</p>
+                                        </div>
+                                        <p>Other: {{"%.1f"|format(data.other_rate * 100)}}%</p>
+                                    </td>
+                                </tr>
+                            </table></div>
+                        </section>
+                    </div>
 
-                <h2>Sensory Experience Rates</h2>
-                <ul>
-                    <li>Sight: {{ "%.1f"|format(data.sight_rate * 100) }}%</li>
-                    <li>Sound: {{ "%.1f"|format(data.sound_rate * 100) }}%</li>
-                    <li>Touch: {{ "%.1f"|format(data.touch_rate * 100) }}%</li>
-                    <li>Smell: {{ "%.1f"|format(data.smell_rate * 100) }}%</li>
-                    <li>Taste: {{ "%.1f"|format(data.taste_rate * 100) }}%</li>
-                    <li>Pain: {{ "%.1f"|format(data.pain_rate * 100) }}%</li>
-                </ul>
-            {% endif %}
-        </section>
-    {% endfor %}
-
+                    <script>
+                        {% for sense in ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'] %}
+                            $("#{{sense}}-pie-{{time_slice}}").css({ "background-image": "conic-gradient(#D1EBD1 {{data[sense+'_rate'] * 100}}%, #D1D1EB {{data[sense+'_rate'] * 100}}%)" });
+                        {% endfor %}
+                    </script>
+                {% endif %}
+            </section>
+        {% endfor %}
+    </div>
+    
     <script>
         function showSelectedStats() {
             chosenSlice = document.getElementById("time_slice").value;
@@ -84,5 +147,4 @@
             })
         }
     </script>
-
 {% endblock %}

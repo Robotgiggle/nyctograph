@@ -60,7 +60,7 @@
             <section style="width:100%">
                 <h2>Sensory Experiences</h2>
                 {% if entry.sense_sight is not none %} {# either they're all None or they all have a value #}
-                    <table style="width:stretch;text-align:center;border-spacing:6px 6px;border-collapse:separate;table-layout:fixed">
+                    <div class="sense-table-wrapper"><table>
                         <tr class="senses">
                             <td class="{{'off' if not entry.sense_sight}}">
                                 <div class="compare" hidden>
@@ -140,7 +140,7 @@
                                 <p>Other</p>
                             </td>
                         </tr>
-                    </table>
+                    </table></div>
                 {% else %}
                     <p>No sensory data recorded.</p>
                 {% endif %}

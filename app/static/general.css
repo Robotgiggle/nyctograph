@@ -32,9 +32,19 @@
     width: 1000px;
 }
 
+.mobile-show {
+    display: none!important; 
+}
+
 @media only screen and (max-width: 722px) {
   .main-column, .main-column-thin {
     width: 90%;
+  }
+  .mobile-hide {
+    display: none!important;
+  }
+  .mobile-show {
+    display: inherit!important;
   }
 }
 
@@ -42,6 +52,12 @@
   .main-column-wide {
     width: 90%;
   }
+}
+
+.layer-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: top;
 }
 
 .auth-link {
@@ -94,4 +110,37 @@
 
 .btn.btn-secondary {
     padding: 0.2rem 0.6rem;
+}
+
+/* used for the sense displays in dream-detail, personal stats, and global stats */
+
+.sense-table-wrapper > table {
+    width: stretch;
+    text-align: center;
+    border-spacing: 6px 6px;
+    border-collapse: separate;
+    table-layout: fixed
+}
+
+@media only screen and (max-width: 1000px) {
+  .sense-table-wrapper {
+    overflow-x: scroll;
+  }
+}
+
+.senses > td {
+    border-radius: 8px;
+    background-color: #DADAF0;
+}
+
+.emoji {
+    font-size: 3em;
+    margin-bottom: 0px;
+}
+
+.pie {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 10px auto;
 }

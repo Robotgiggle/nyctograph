@@ -1,9 +1,3 @@
-.layer-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: top;
-}
-
 .btn.btn-back {
     background-color: #DADAF0;
     font-weight: 500;
@@ -12,11 +6,6 @@
 
 .btn.btn-back:hover {
     background-color: #D1D1EB;
-}
-
-.senses > td {
-    border-radius: 8px;
-    background-color: #DADAF0;
 }
 
 .senses > td > .compare {
@@ -33,11 +22,6 @@
     border-radius: 8px;
     background-color: #D1D1EB;
     padding: 5px 10px;
-}
-
-.emoji {
-    font-size: 3em;
-    margin-bottom: 0px;
 }
 
 .off > .emoji {
