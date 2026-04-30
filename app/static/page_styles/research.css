@@ -1,0 +1,18 @@
+.tag {
+    padding: 3px 9px;
+    border-radius: 16px;
+    margin-bottom: 4px;
+}
+
+.table {
+    --bs-table-bg: #DCDCF7;
+    border-color: #C5C0CF;
+}
+
+.active-button-link {
+    margin-bottom: 10px;
+    padding: 7px 15px;
+    border-radius: 5px;
+    color: #444;
+    background-color: #B4B4E0;
+}

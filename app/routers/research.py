@@ -4,7 +4,7 @@ import io
 from typing import Annotated, Sequence
 from fastapi import BackgroundTasks, APIRouter, Request, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
-from sqlalchemy import select, func
+from sqlalchemy import select, text, func
 from datetime import datetime, date
 
 from ..models import Tag, ResearchEntry, DataAccessRecord, User, Researcher
@@ -208,13 +208,11 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
         return RedirectResponse("/research", status_code=303)
 
     countQuery = res.filter_query(select(func.count()).select_from(ResearchEntry))
-    sampleQuery = res.filter_query(select(ResearchEntry).order_by(func.random()).limit(10))
+    sizeQuery = res.filter_query(select(func.sum(text("pg_column_size(research_entries)"))))
     count = dbSes.scalar(countQuery)
-    sampleRows = dbSes.scalars(sampleQuery).all()
-    if not count:
+    size = dbSes.scalar(sizeQuery)
+    if not count or not size:
         return templates.TemplateResponse(request, "research/download.html", {"row_count": 0})
-
-    estSizeBytes = estimate_download_size(sampleRows, count)
 
     return templates.TemplateResponse(
         request,
@@ -222,7 +220,7 @@ def research_download_page(request: Request, dbSes: DbSesDep, res: ResearcherDep
         {
             "request_dt": res.get_last_access_dt(),
             "row_count": count,
-            "est_size": sizeof_fmt(estSizeBytes),
+            "est_size": sizeof_fmt(size + 295), # extra 295 bytes for header
             "default_filename": f"nyctograph_entries_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         },
     )

@@ -1,137 +1,151 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/research.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>Research Data Request</h1>
-    {% if total_count == None %}
-        <p>You do not have any filters selected yet. Choose some below, then press 'Update filters' to save them.</p>
-    {% else %}
-        <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently selected filters.</p>
-        <form id="request_data" action="/research/request" method="post" onsubmit="return confirm('Are you sure these filters are correct? This will permanently replace any data you\'ve previously requested.');">
-            <input type="hidden" name="row_count" value="{{ match_count }}">
-            <p>
-                Requesting data costs ${{ "%.2f"|format(row_price/100) }} per entry, with a minimum price of $0.50.<br>
-                If you already have access to a dataset, it will be replaced.
+    <div class="mx-auto main-column-wide">
+        <h1>Research Data Request</h1>
+        <hr>
+        {% if total_count == None %}
+            <p>You do not have any filters selected yet. Choose some below, then press 'Update filters' to save them.</p>
+        {% else %}
+            <p><strong>{{ match_count }}</strong> of <strong>{{ total_count }}</strong> public entries match your currently selected filters.</p>
+            <form id="request_data_form" action="/research/request" method="post" onsubmit="return confirm('Are you sure these filters are correct? This will permanently replace any data you\'ve previously requested.');">
+                <input type="hidden" name="row_count" value="{{ match_count }}">
+                <p>
+                    Requesting data costs <strong>${{ "%.2f"|format(row_price/100) }}</strong> per entry, with a minimum price of <strong>$0.50</strong>.<br>
+                    If you already have access to a dataset, it will be replaced.
+                </p>
+                <label for="submit_request">Request access to view and download these <strong>{{ match_count }}</strong> entries for <strong>${{ "%.2f"|format(([match_count,50]|max)/100) }}</strong>?</label>
+                <input id="submit_request" type="submit" class="btn btn-primary" value="Request" {{ "disabled" if total_count == None or match_count == 0 }}>
+            </form>
+            <p id="dirty" style="color:red;margin-bottom:0px;margin-top:10px" hidden>
+                The filters chosen below are <strong>not</strong> yet saved! 
+                Press 'Update filters' to save them before making a data request.
             </p>
-            <label for="submit_request">Request access to view and download these <strong>{{ match_count }}</strong> entries for <strong>${{ "%.2f"|format(([match_count,50]|max)/100) }}</strong>?</label>
-            <input id="submit_request" type="submit" value="Request" {{ "disabled" if total_count == None or match_count == 0 }}>
+        {% endif %}
+        <br><br>
+        <h1>Filter Configuration</h1>
+        <hr>
+        <form id="update_filter_form" action="" method="post">
+            <h2>Dream Entry Tags</h2>
+            <p>Entries will be included if they have at least one of the selected tags. Leave all unchecked to include any.</p>
+
+            <h3>Dream Content</h3>
+            {% for tag in content_tags %}
+                <label class="tag" style="background-color:#EBD1EB">
+                    <input type="checkbox" class="form-check-input" name="content_tags" value="{{ tag }}"
+                        {{ "checked" if tag in filters.content_tags }}>
+                    {{ tag }}
+                </label>
+            {% endfor %}
+            <br>
+
+            <h3 style="margin-top:10px">Dream Type</h3>
+            {% for tag in type_tags %}
+                <label class="tag" style="background-color:#EBEBD1">
+                    <input type="checkbox" class="form-check-input" name="type_tags" value="{{ tag }}"
+                        {{ "checked" if tag in filters.type_tags }}>
+                    {{ tag }}
+                </label>
+            {% endfor %}
+            <br>
+
+            <h3 style="margin-top:10px">Real-World Context</h3>
+            {% for tag in context_tags %}
+                <label class="tag" style="background-color:#D1EBD1">
+                    <input type="checkbox" class="form-check-input" name="context_tags" value="{{ tag }}"
+                        {{ "checked" if tag in filters.context_tags }}>
+                    {{ tag }}
+                </label>
+            {% endfor %}
+            <br><br>
+            <hr>
+            <div class="layer-box">
+                <div style="width:25%">
+                    <h2>Date Range</h2>
+                    <p>Leave blank to ignore entry timestamps.</p>
+                    <label for="date_from">From:</label>
+                    <input type="date" class="form-control" style="width:150px;display:inline" id="date_from" name="date_from" 
+                        max="{{today}}" value="{{ filters.date_from if filters.date_from is not none }}">
+                    <br>
+                    <label for="date_to">To:</label>
+                    <input type="date" class="form-control" style="width:150px;display:inline" id="date_to" name="date_to" 
+                        max="{{today}}" value="{{ filters.date_to if filters.date_to is not none }}">
+                </div>
+                <div style="width:35%">
+                    <h2>User Demographics</h2>
+                    <p>Leave blank to ignore user demographics.</p>
+                    <label for="age_min">Min age:</label>
+                    <input type="number" class="form-control" style="width:75px;display:inline" id="age_min" name="age_min"
+                        min="13" max="120" value="{{ filters.age_min if filters.age_min is not none }}">
+                    <label for="age_max">Max age:</label>
+                    <input type="number" class="form-control" style="width:75px;display:inline" id="age_max" name="age_max" 
+                        min="13" max="120" value="{{ filters.age_max if filters.age_max is not none }}">
+                    <label>Gender (uncheck all to ignore gender):</label>
+                    <br>
+                    <label>
+                        <input type="checkbox" class="form-check-input" name="gender" value="Male"
+                            {{ "checked" if filters.gender and "Male" in filters.gender }}>
+                        Male
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-check-input" name="gender" value="Female"
+                            {{ "checked" if filters.gender and "Female" in filters.gender }}>
+                        Female
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-check-input" name="gender" value="Other"
+                            {{ "checked" if filters.gender and "Other" in filters.gender }}>
+                        Other
+                    </label>
+                </div>
+                <div style="width:30%">
+                    <h2>Location</h2>
+                    <p>Leave blank to ignore location data.</p>
+                    <div class="input-group" style="width:250px">
+                        <span id="country-label" class="input-group-text">Country:</span>
+                        <input type="text" class="form-control" id="country" name="country" 
+                            value="{{filters.country if filters.country is not none}}" aria-describedby="country-label">
+                    </div>
+                    <div class="input-group" style="width:250px">
+                        <span id="state-label" class="input-group-text">State:</span>
+                        <input type="text" class="form-control" id="state" name="state" 
+                            value="{{filters.state if filters.state is not none}}" aria-describedby="state-label">
+                    </div>
+                    <div class="input-group" style="width:250px">
+                        <span id="city-label" class="input-group-text">City:</span>
+                        <input type="text" class="form-control" id="city" name="city" 
+                            value="{{filters.city if filters.city is not none}}" aria-describedby="city-label">
+                    </div>
+                </div>
+                <div style="width:20%">
+                    <h2>Reflection</h2>
+                    <label>Include entries:</label>
+                    <br>
+                    <input type="radio" class="form-check-input" id="rfln-any" name="has_reflection" value=""
+                        {{ "checked" if filters.has_reflection is none }}>
+                    <label for="rfln-any" style="width:155px">With or without a reflection</label>
+                    <br>
+                    <input type="radio" class="form-check-input" id="rfln-yes" name="has_reflection" value="yes"
+                        {{ "checked" if filters.has_reflection == "yes" }}>
+                    <label for="rfln-yes">With a reflection</label>
+                    <br>
+                    <input type="radio" class="form-check-input" id="rfln-no" name="has_reflection" value="no"
+                        {{ "checked" if filters.has_reflection == "no" }}>
+                    <label for="rfln-no">Without a reflection</label>
+                </div>
+            </div>
+            <hr>
+            <input type="submit" class="btn btn-primary"  value="Update filters">
         </form>
-        <p id="dirty" style="color:red" hidden>
-            The filters chosen below are <strong>not</strong> yet saved! 
-            Press 'Update filters' to save them before making a data request.
-        </p>
-    {% endif %}
 
-    <h1>Filter Configuration</h1>
-    <form id="update_filters" action="" method="post">
-        <h2>Dream Entry Tags</h2>
-        <p>Entries will be included if they have at least one of the selected tags. Leave all unchecked to include any.</p>
-
-        <h3>Dream Content</h3>
-        {% for tag in content_tags %}
-            <label>
-                <input type="checkbox" name="content_tags" value="{{ tag }}"
-                    {{ "checked" if tag in filters.content_tags }}>
-                {{ tag }}
-            </label>
-        {% endfor %}
-        <br>
-
-        <h3>Dream Type</h3>
-        {% for tag in type_tags %}
-            <label>
-                <input type="checkbox" name="type_tags" value="{{ tag }}"
-                    {{ "checked" if tag in filters.type_tags }}>
-                {{ tag }}
-            </label>
-        {% endfor %}
-        <br>
-
-        <h3>Real-World Context</h3>
-        {% for tag in context_tags %}
-            <label>
-                <input type="checkbox" name="context_tags" value="{{ tag }}"
-                    {{ "checked" if tag in filters.context_tags }}>
-                {{ tag }}
-            </label>
-        {% endfor %}
-        <br><br>
-
-        <h2>Date Range</h2>
-        <p>Leave blank to ignore entry timestamps.</p>
-        <label for="date_from">From:</label>
-        <input type="date" id="date_from" name="date_from" max="{{today}}"
-            value="{{ filters.date_from if filters.date_from is not none }}">
-        <label for="date_to">To:</label>
-        <input type="date" id="date_to" name="date_to" max="{{today}}"
-            value="{{ filters.date_to if filters.date_to is not none }}">
-        <br><br>
-
-        <h2>User Demographics</h2>
-        <p>Leave blank to ignore user demographics.</p>
-        <label for="age_min">Min age:</label>
-        <input type="number" id="age_min" name="age_min" min="13" max="120"
-            value="{{ filters.age_min if filters.age_min is not none }}">
-        <label for="age_max">Max age:</label>
-        <input type="number" id="age_max" name="age_max" min="13" max="120"
-            value="{{ filters.age_max if filters.age_max is not none }}">
-        <br>
-        <label>Gender (uncheck all to ignore gender):</label>
-        <br>
-        <label>
-            <input type="checkbox" name="gender" value="Male"
-                {{ "checked" if filters.gender and "Male" in filters.gender }}>
-            Male
-        </label>
-        <label>
-            <input type="checkbox" name="gender" value="Female"
-                {{ "checked" if filters.gender and "Female" in filters.gender }}>
-            Female
-        </label>
-        <label>
-            <input type="checkbox" name="gender" value="Other"
-                {{ "checked" if filters.gender and "Other" in filters.gender }}>
-            Other
-        </label>
-        <br><br>
-
-        <h2>Location</h2>
-        <p>Leave blank to ignore location data.</p>
-        <label for="country">Country:</label>
-        <input type="text" id="country" name="country"
-            value="{{ filters.country if filters.country is not none }}">
-        <br>
-        <label for="state">State/Province:</label>
-        <input type="text" id="state" name="state"
-            value="{{ filters.state if filters.state is not none }}">
-        <br>
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city"
-            value="{{ filters.city if filters.city is not none }}">
-        <br><br>
-
-        <h2>Reflection</h2>
-        <label>Include entries:</label>
-        <br>
-        <input type="radio" id="rfln-any" name="has_reflection" value=""
-            {{ "checked" if filters.has_reflection is none }}>
-        <label for="rfln-any">With or without a reflection</label>
-        <br>
-        <input type="radio" id="rfln-yes" name="has_reflection" value="yes"
-            {{ "checked" if filters.has_reflection == "yes" }}>
-        <label for="rfln-yes">With a reflection only</label>
-        <br>
-        <input type="radio" id="rfln-no" name="has_reflection" value="no"
-            {{ "checked" if filters.has_reflection == "no" }}>
-        <label for="rfln-no">Without a reflection only</label>
-        <br><br>
-
-        <input type="submit" value="Update filters">
-    </form>
-
-    <script>
-        form = document.getElementById("update_filters");
-        warning = document.getElementById("dirty");
-        form.addEventListener("input", function (event) {
-            warning.hidden = false;
-        })
-    </script>
+        <script>
+            form = $("#update_filter_form")[0]
+            form.addEventListener("input", function (event) {
+                $("#dirty")[0].hidden = false;
+                $("#submit_request")[0].disabled = true;
+            })
+        </script>
+    </div>
 {% endblock %}

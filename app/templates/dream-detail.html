@@ -6,7 +6,7 @@
     <div class="mx-auto main-column-wide">
         <div style="display:flex;justify-content:space-between;align-items:center">
             <h1 style="margin-bottom:0px">{{ entry.title }}</h1>
-            <a href="{{ back_url }}" class="btn btn-back" style="height:48px;padding-top:10px">❮&nbsp;&nbsp;Back to list</a>
+            <a href="{{ back_url }}" class="btn btn-back" style="height:48px;padding-top:10px">❮&nbsp;&nbsp;Back to {{'list' if is_owner else 'data'}}</a>
         </div>
         <hr>
         <div class="layer-box">

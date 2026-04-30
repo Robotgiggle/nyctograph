@@ -1,34 +1,31 @@
 {% extends "base.html" %}
 {% block body %}
-  <h1>Download Requested Data</h1>
+  <div class="mx-auto main-column">
+    <h1>Download Requested Data</h1>
 
-  {% if row_count == 0 %}
-    <p>
-      Your dataset does not seem to contain any entries. 
-      Either they have all been deleted or marked private, or an error has occurred.
-    </p>
-  {% else %}
-    <p>
+    {% if row_count == 0 %}
+      <p>
+        Your dataset does not seem to contain any entries. 
+        Either they have all been deleted or marked private, or an error has occurred.
+      </p>
+    {% else %}
+      <p>
         You currently have access to <strong>{{ row_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
-        based on your request at {{ request_dt.strftime('%I:%M %p on %Y-%m-%d') }}.<br>
+        based on your request at <strong>{{request_dt.strftime('%I:%M %p')}}</strong> on <strong>{{request_dt.strftime('%Y-%m-%d')}}</strong>.
         Entries created after that date and time are not accessible, even if they match your filters.
-    </p>
-    <p><strong>Estimated file size: </strong>{{ est_size }}</p>
+      </p>
+      <p>
+        Downloading your data will <u>not</u> cause you to lose access to it. 
+        You will still be able to view the data online, and you can even download it again if you wish.
+      </p>
+      <p><strong>Estimated file size: </strong>{{ est_size }}</p>
 
-    <form method="post" action="" onsubmit="return confirm('Download approximately {{est_size}} to your device?');">
-      <label for="filename">File name:</label>
-      <input type="text" id="filename" name="filename" value="{{ default_filename }}" size="35" required>
-      <button type="submit">Download CSV</button>
-    </form>
-
-    <p><small>
-      Note: browsers control the actual save location. Your browser will download to its configured download folder (or prompt you).
-    </small></p>
-  {% endif %}
-
-  <p>
-    <a href="/research">Request new data</a> |
-    <a href="/research/data">View your data online</a>
-  </p>
+      <form method="post" action="" onsubmit="return confirm('Download approximately {{est_size}} to your device?');">
+        <label for="filename">File name:</label>
+        <input type="text" class="form-control" style="display:inline;width:320px" id="filename" name="filename" value="{{ default_filename }}" size="35" required>
+        <button type="submit" class="btn btn-primary">Download CSV</button>
+      </form>
+    {% endif %}
+  </div>
 {% endblock %}
 
