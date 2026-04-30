@@ -34,8 +34,12 @@
                     <p>These statistics were generated from <strong>{{ stats.total_entries }}</strong> total dream entries.</p>
                     <p>The average user got about <strong>{{ stats.avg_sleep_duration|round(2) }}</strong> hours of sleep per recorded dream.</p>
                     <p>A total of <strong>{{ tagCount }}</strong> dream tags were applied, with an average of <strong>{{(tagCount/stats.total_entries)|round(1)}}</strong> per entry.</p>
-                    <p>The most popular dream content tag was <span class="tag" style="background-color:#EBD1EB">{{ totals.dream_content[0][0] }}</span>.</p>
-                    <p style="margin-bottom:0px">The most popular real-world context tag was <span class="tag" style="background-color:#D1EBD1">{{ totals.irl_context[0][0] }}</span>.</p>
+                    {% if totals.dream_content %}
+                        <p>The most popular dream content tag was <span class="tag" style="background-color:#EBD1EB">{{ totals.dream_content[0][0] }}</span>.</p>
+                    {% endif %}
+                    {% if totals.irl_content %}
+                        <p style="margin-bottom:0px">The most popular real-world context tag was <span class="tag" style="background-color:#D1EBD1">{{ totals.irl_context[0][0] }}</span>.</p>
+                    {% endif %}
                 </section>
                 <hr class="mobile-show">
                 <section style="width:30%">
@@ -160,7 +164,7 @@
                                 </div>
                             {% else %}
                                 {% if cat == "dream_content" %}
-                                    <p>No dream content tags found.</p>
+                                    <p style="margin-right:15px">No dream content tags found.</p>
                                 {% else %}
                                     <p>No real-world context tags found.</p>
                                 {% endif %}
@@ -171,7 +175,9 @@
                 <hr class="mobile-show">
                 <section style="width:48%">
                     <h2>Tag Associations</h2>
-                    {% if associations|length %}
+                    {% if not associations or associations|length == 0 %}
+                        <p>No tag associations found.</p>
+                    {% else %}
                         <div class="tag-table">
                             <ul style='height:266px;text-align:left;margin:4px'>
                                 {% for asso in associations %}
@@ -204,8 +210,6 @@
                                 {% endfor %}
                             </ul>
                         </div>
-                    {% else %}
-                        <p>No tag associations found.</p>
                     {% endif %}
                 </section>
             </div>
