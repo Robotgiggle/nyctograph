@@ -33,7 +33,8 @@ class User(Base):
     dream_entries: Mapped[List["DreamEntry"]] = relationship(
         back_populates="user", 
         cascade="all, delete-orphan", 
-        passive_deletes=True
+        passive_deletes=True,
+        order_by="DreamEntry.created_at.desc()"
     )
 
     @property
