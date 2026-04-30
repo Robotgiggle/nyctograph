@@ -1,0 +1,51 @@
+.btn.btn-back {
+    background-color: #DADAF0;
+    font-weight: 500;
+    font-size: 17px;
+}
+
+.btn.btn-back:hover {
+    background-color: #D1D1EB;
+}
+
+.senses > td > .compare {
+    border-radius: 8px;
+    background-color: #D1D1EB;
+    width: 88%;
+    margin: auto;
+    margin-top: 8px;
+    padding: 4px;
+    color: var(--bs-body-color);
+}
+
+.compare {
+    border-radius: 8px;
+    background-color: #D1D1EB;
+    padding: 5px 10px;
+}
+
+.off > .emoji {
+    filter: grayscale(100%) opacity(0.5);
+}
+
+.off {
+    color: #888
+}
+
+.tag {
+    padding: 3px 9px;
+    border-radius: 16px;
+    font-size: larger;
+}
+
+.tag-label {
+    border-radius: 8px;
+    padding: 1px 6px;
+    font-size: 14px;
+}
+
+@media only screen and (max-width: 1111px) {
+  .rfln-submit {
+    flex-direction: column;
+  }
+}

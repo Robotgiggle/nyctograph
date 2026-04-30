@@ -87,6 +87,7 @@ def calculate_personal_stats(user: User, time_slice: str = 'all'):
         'smell': sum(1 for e in entries if e.sense_smell),
         'taste': sum(1 for e in entries if e.sense_taste),
         'pain': sum(1 for e in entries if e.sense_pain),
+        'other': sum(1 for e in entries if e.sense_other),
     }
     
     sense_rates = {k: v / total_entries for k, v in sense_counts.items()}
@@ -127,6 +128,7 @@ def calculate_personal_stats(user: User, time_slice: str = 'all'):
         'smell_rate': sense_rates['smell'],
         'taste_rate': sense_rates['taste'],
         'pain_rate': sense_rates['pain'],
+        'other_rate': sense_rates['other'],
         'avg_sleep_duration': avg_sleep,
         'public_ratio': public_count / total_entries,
         'reflection_ratio': reflection_count / total_entries,

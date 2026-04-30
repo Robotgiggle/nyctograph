@@ -29,7 +29,7 @@ class TestGlobalStats:
         tag_list_obj.__bool__.assert_called()
         tag_list_obj.__iter__.assert_called()
         # page should not show no-entries error
-        assert "Sensory Experiences" in response.text
+        assert "Sensory Experience Rates" in response.text
         assert "There are no public entries matching this set of filters!" not in response.text
 
     def test_stats_no_entries(self, select_fn: MagicMock, db_class: MagicMock, client: TestClient):
@@ -43,8 +43,8 @@ class TestGlobalStats:
         assert response.status_code == 200
         assert response.url == "http://testserver/global-stats"
         # page *should* show no-entries error
-        assert "Sensory Experiences" not in response.text
-        assert "There are no public entries matching this set of filters!" in response.text
+        assert "Sensory Experience Rates" not in response.text
+        assert "There are no public entries matching these filters." in response.text
 
     def test_stats_no_tags(self, select_fn: MagicMock, db_class: MagicMock, client: TestClient):
         db_obj = db_class.return_value
@@ -55,7 +55,7 @@ class TestGlobalStats:
         assert response.status_code == 200
         assert response.url == "http://testserver/global-stats"
         # page should not show no-entries error
-        assert "Sensory Experiences" in response.text
+        assert "Sensory Experience Rates" in response.text
         assert "There are no public entries matching this set of filters!" not in response.text
         # page *should* show no-tags and no-associations errors
         assert "No special dream types recorded." in response.text

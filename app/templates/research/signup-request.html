@@ -1,30 +1,33 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Request a research account</h1>
-    <p>
-        This account is for researchers who need access to the statistics and public dream data gathered by Nyctograph. 
-        To request an account, please provide your name and email, a <strong>Research Organization Registry (ROR)</strong> identifier, and your reason for requesting access to our data.
-    </p>
-    <p>
-        Once your request is approved, we will send a confirmation message to the provided email, allowing you to complete the account creation process.
-    </p>
-    <form action="" method="post">
-        <label for="name">Name:</label>
-        <input type="name" id="name" name="name" required>
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required autocomplete="email">
-        <br>
-        <label for="ror_id">ROR ID:</label>
-        <input type="text" id="ror_id" name="ror_id" required minlength="3" maxlength="512" placeholder="https://ror.org/xxxxxxxx">
-        <br>
-        <label for="reason">Reason for requesting data:</label>
-        <br>
-        <textarea id="reason" name="reason" rows="5" cols="40" required></textarea>
-        <br><br>
-        <input type="submit" value="Request research account">
-    </form>
-    <p>
-        <a href="/login">Log in</a> | <a href="/signup">Standard user sign up</a>
-    </p>
+    <div class="mx-auto main-column">
+        <h1>Request a research account</h1>
+        <p>
+            If you are a researcher who needs access to the statistics and public dream data gathered by Nyctograph, you can request a research account.
+            To do so, please provide your name and email, a <strong>Research Organization Registry (ROR)</strong> identifier, and your reason for requesting access to our data.
+        </p>
+        <p>
+            Once your request is approved, we will send a confirmation message to the provided email, allowing you to complete the account creation process.
+        </p>
+        <form action="" method="post">
+            <label for="name" class="form-label">Name:</label>
+            <input type="name" class="form-control" id="name" name="name" required>
+            
+            <label for="email" class="form-label" style="margin-top:10px">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" required autocomplete="email">
+            
+            <label for="ror_id" class="form-label" style="margin-top:10px">ROR ID:</label>
+            <input type="text" class="form-control" id="ror_id" name="ror_id" required minlength="3" maxlength="512" placeholder="https://ror.org/xxxxxxxx">
+            
+            <label for="reason" class="form-label" style="margin-top:10px">Reason for requesting an account:</label>
+            <br>
+            <textarea id="reason" class="form-control" name="reason" rows="5" cols="40" required></textarea>
+            
+            <br>
+            <input type="submit"  class="btn btn-primary" value="Request research account">
+        </form>
+        <p style="margin-top:1.5rem">
+            <a class="button-link" href="/login">Already have a research account? Log in</a><br>
+        </p>
+    </div>
 {% endblock %}

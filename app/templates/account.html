@@ -1,70 +1,112 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Account Settings</h1>
+    <div class="mx-auto main-column">
+        <h1>Account Settings</h1>
 
-    <form action="" method="post" onsubmit="return warnWhenSettingPrivate()">
-        <h2>Basic Info</h2>
-        <label for="new_username">Username:</label>
-        <input type="text" id="new_username" name="new_username" value="{{ user.username }}">
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ user.email }}">
-        <br><br>
+        <form id="basic-form" style="margin-top:10px" action="" method="post">
+            <div style="display:flex; align-items:center">
+                <h2>Basic Info</h2>
+                <p id="basic-dirty" class="warning-tag" hidden>Unsaved changes!</p>
+            </div>
+            <label for="new_username" class="form-label">Username:</label>
+            <input type="text" class="form-control" id="new_username" name="new_username" value="{{ user.username }}">
+            
+            <label for="email" class="form-label" style="margin-top:10px">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+            <br>
+            <input type="submit" class="btn btn-primary" value="Save changes">
+            <br><br>
+        </form>
 
-        <h2>Change Password</h2>
-        <label for="current_password">Current password:</label>
-        <input type="password" id="current_password" name="current_password">
-        <br>
-        <label for="new_password">New password:</label>
-        <input type="password" id="new_password" name="new_password">
-        <br><br>
+        <form id="password-form" action="" method="post">
+            <div style="display:flex; align-items:center">
+                <h2>Change Password</h2>
+                <p id="password-dirty" class="warning-tag" hidden>Unsaved changes!</p>
+            </div>
+            <label for="current_password" class="form-label">Current password:</label>
+            <input type="password" class="form-control" id="current_password" name="current_password">
+            
+            <label for="new_password" class="form-label" style="margin-top:10px">New password:</label>
+            <input type="password" class="form-control" id="new_password" name="new_password">
+            <br>
+            <input type="submit" class="btn btn-primary" value="Update password">
+            <br><br>
+        </form>
 
-        <h2>Privacy Settings</h2>
-        <label for="public_enabled">Allow my dream data to be included in global statistics and made available to researchers</label>
-        <br>
-        <input type="radio" id="public_yes" name="public_enabled" value="True" required {%if user.public_enabled%}checked{%endif%}>
-        <label for="public_yes">Yes</label>
-        <input type="radio" id="public_no" name="public_enabled" value="False" required {%if not user.public_enabled%}checked{%endif%}>
-        <label for="public_no">No</label>
-        <br>
-        <label style="font-size: 0.95em; color: #666;">(Entries still need to be individually marked as public for the above to apply)</label>
-        <br><br>
-        <label for="notif_enabled">Notify me when my dream entries are included in a dataset provided to a researcher</label>
-        <br>
-        <input type="radio" id="notif_yes" name="notif_enabled" value="True" required {%if user.notif_enabled%}checked{%endif%}>
-        <label for="notif_yes">Yes</label>
-        <input type="radio" id="notig_no" name="notif_enabled" value="False" required {%if not user.notif_enabled%}checked{%endif%}>
-        <label for="notif_no">No</label>
-        <br><br>
+        <form id="privacy-form" action="" method="post" onsubmit="return warnWhenSettingPrivate()">
+            <div style="display:flex; align-items:center">
+                <h2>Privacy Settings</h2>
+                <p id="privacy-dirty" class="warning-tag" hidden>Unsaved changes!</p>
+            </div>
+            <label for="public_enabled" class="form-label">Allow my dream data to be included in global statistics and made available to researchers</label>
+            <br>
+            <input type="radio" class="form-check-input" id="public_yes" name="public_enabled" value="True" required {%if user.public_enabled%}checked{%endif%}>
+            <label for="public_yes" class="form-check-label">Yes</label>
+            <input type="radio" class="form-check-input" id="public_no" name="public_enabled" value="False" required {%if not user.public_enabled%}checked{%endif%}>
+            <label for="public_no" class="form-check-label">No</label>
+            <br>
+            <label style="font-size: 0.95em; color: #666;">(Entries still need to be individually marked as public for the above to apply)</label>
+            <br><br>
+            <label for="notif_enabled" class="form-label">Notify me when my dream entries are included in a dataset provided to a researcher</label>
+            <br>
+            <input type="radio" class="form-check-input" id="notif_yes" name="notif_enabled" value="True" required {%if user.notif_enabled%}checked{%endif%}>
+            <label for="notif_yes" class="form-check-label">Yes</label>
+            <input type="radio" class="form-check-input" id="notig_no" name="notif_enabled" value="False" required {%if not user.notif_enabled%}checked{%endif%}>
+            <label for="notif_no" class="form-check-label">No</label>
+            <br><br>
+            <input type="submit" class="btn btn-primary" value="Save changes">
+            <br>
+            <br>
+        </form>
 
-        <h2>Profile Details</h2>
-        <label for="birth_date">Birth date:</label>
-        <input type="date" id="birth_date" name="birth_date" value="{{ user.birth_date if user.birth_date is not none }}">
-        <br>
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender">
-            <option value="" {{"selected" if not user.gender}}>---</option>
-            <option {{"selected" if user.gender=="Male"}}>Male</option>
-            <option {{"selected" if user.gender=="Female"}}>Female</option>
-            <option {{"selected" if user.gender=="Other"}}>Other</option>
-        </select>
-        <br>
-        <label for="med_conditions">Medical conditions:</label>
-        <br>
-        <textarea rows="3" cols="50" id="med_conditions" name="med_conditions">{{ user.med_conditions if user.med_conditions is not none }}</textarea>
-        <br><br>
-        <label for="country">Country:</label>
-        <input type="text" id="country" name="country" value="{{ user.country if user.country is not none }}">
-        <br>
-        <label for="state">State/Province:</label>
-        <input type="text" id="state" name="state" value="{{ user.state if user.state is not none }}">
-        <br>
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city" value="{{ user.city if user.city is not none }}">
-        <br><br>
+        <form id="profile-form" action="" method="post">
+            <div style="display:flex; align-items:center">
+                <h2>Profile Details</h2>
+                <p id="profile-dirty" class="warning-tag" hidden>Unsaved changes!</p>
+            </div>
+            <label for="birth_date" class="form-label">Birth date:</label>
+            <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ user.birth_date if user.birth_date is not none }}">
+            
+            <label for="gender" class="form-label" style="margin-top:10px">Gender:</label>
+            <select id="gender" class="form-control" name="gender">
+                <option value="" {{"selected" if not user.gender}}>---</option>
+                <option {{"selected" if user.gender=="Male"}}>Male</option>
+                <option {{"selected" if user.gender=="Female"}}>Female</option>
+                <option {{"selected" if user.gender=="Other"}}>Other</option>
+            </select>
 
-        <input type="submit" value="Save changes">
-    </form>
+            <label for="med_conditions" class="form-label" style="margin-top:10px">Medical conditions:</label>
+            <br>
+            <textarea rows="3" class="form-control" id="med_conditions" name="med_conditions">{{ user.med_conditions if user.med_conditions is not none }}</textarea>
+
+            <label class="form-label" style="margin-top:10px">Location:</label>
+            <div class="input-group" style="margin-bottom:10px">
+                <span id="country-label" class="input-group-text">Country:</span>
+                <input type="text" class="form-control" id="country" name="country" value="{{user.country if user.country is not none}}" aria-describedby="country-label">
+            </div>
+            <div class="input-group" style="margin-bottom:10px">
+                <span id="state-label" class="input-group-text">State:</span>
+                <input type="text" class="form-control" id="state" name="state" value="{{user.state if user.state is not none}}" aria-describedby="state-label">
+            </div>
+            <div class="input-group">
+                <span id="city-label" class="input-group-text">City:</span>
+                <input type="text" class="form-control" id="city" name="city" value="{{user.city if user.city is not none}}" aria-describedby="city-label">
+            </div>
+
+            <br>
+            <input type="submit" class="btn btn-primary" value="Save changes">
+        </form>
+
+        <br><hr>
+        <h2>Account Deletion</h2>
+        <form method="post" action="/account/delete" onsubmit="return confirm('Are you sure you want to delete your account? This will permanently delete all of your dream entries, and cannot be undone!');">
+            <p>
+                Deleting your account will also delete all associated dream entries.<br>
+                <strong>This cannot be reversed!</strong>
+            </p>
+            <input type="submit" class="btn btn-danger" value="Delete this account">
+        </form>
+    </div>
 
     <script>
         function warnWhenSettingPrivate() {
@@ -76,15 +118,14 @@
                 return ok;
             }
         }
+        for (const type of ["basic", "password", "privacy", "profile"]) {
+            form = document.getElementById(type + "-form");
+            warning = document.getElementById(type + "-dirty");
+            (function (warningObj) { // wrapped in a function so each eventlistener gets its own warning object
+                form.addEventListener("input", function (event) {
+                    warningObj.hidden = false;
+                })
+            })(warning);
+        }
     </script>
-
-    <br><hr>
-    <h2>Account Deletion</h2>
-    <form method="post" action="/account/delete" onsubmit="return confirm('Are you sure you want to delete your account? This will permanently delete all of your dream entries, and cannot be undone!');">
-        <p>
-            Deleting your account will also delete all associated dream entries.<br>
-            <strong>This cannot be reversed!</strong>
-        </p>
-        <input type="submit" value="Delete this account" style="width:140px;height:35px">
-    </form>
 {% endblock %}

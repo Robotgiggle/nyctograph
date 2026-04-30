@@ -1,10 +1,30 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/my_dreams.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>My dreams</h1>
-    {% for entry in entries %}
-        <div>
-            <h2><a href="/my-dreams/{{ entry.id }}">{{ entry.title }}</a></h2>
-            <p style="white-space: pre-line;">{{ entry.description }}</p>
-        </div>
-    {% endfor %}
+    <div class="mx-auto main-column">
+        <h1>My dreams</h1>
+        {% for entry in entries %}
+            <a href="/my-dreams/{{ entry.id }}" class="dream-box">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <h2>{{ entry.title }}</h2>
+                    {% if entry.public %}
+                        <span class="privacy-tag public">Public</span>
+                    {% else %}
+                        <span class="privacy-tag private">Private</span>
+                    {% endif %}
+                </div>
+                <p class="desc-preview">{{ entry.description }}</p>
+            </a>
+        {% endfor %}
+    </div>
+
+    <script>
+        $(".desc-preview").each((i, obj) => {
+            if (obj.scrollHeight > obj.clientHeight) {
+                obj.classList.add("fade-bottom")
+            }
+        })
+    </script>
 {% endblock %}

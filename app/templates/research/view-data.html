@@ -1,123 +1,124 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/research.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>View Requested Data</h1>
-    {% if total_count == 0 %}
-        <p>
-        Your dataset does not seem to contain any entries. 
-        Either they have all been deleted or marked private, or an error has occurred.
-        </p>
-    {% else %}
-        <p>
-            You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
-            based on your request at {{ request_dt.strftime('%I:%M %p on %Y-%m-%d') }}.<br>
-            Entries created after that date and time are not accessible, even if they match your filters.
-        </p>
-
-        <div>
-            <strong>Entries per page:</strong>
-            {% for n in [10, 25, 50] %}
-                {% set n_pages = (total_count - 1) // n + 1 if total_count > 0 else 1 %}
-                {% if n == per_page %}
-                    <strong>[{{ n }}]</strong> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
-                {% else %}
-                    <a href="/research/data?page=1&per_page={{ n }}">[{{ n }}]</a> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
-                {% endif %}
-                {% if not loop.last %}&nbsp;|&nbsp;{% endif %}
-            {% endfor %}
-        </div>
-        <br>
-
-        {% if entries %}
-        <table border="1" cellpadding="6" cellspacing="0" style="white-space:nowrap;">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Date</th>
-                    <th>Location</th>
-                    <th>At Home?</th>
-                    <th>Senses</th>
-                    <th>Content Tags</th>
-                    <th>Type Tags</th>
-                    <th>Context Tags</th>
-                    <th>Sleep Time</th>
-                    <th>Reflection</th>
-                    <th>Author Age</th>
-                    <th>Author Gender</th>
-                    <th>Medical Conditions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in entries %}
-                <tr style="cursor:pointer" onclick="window.location='/my-dreams/{{ entry.entry_id }}'">
-                    <td><a href="/my-dreams/{{ entry.entry_id }}">{{ entry.title }}</a></td>
-                    <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
-                    <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') }}</td>
-                    <td style="white-space:normal">{{"No" if entry.not_at_home else "Yes"}}</td>
-                    <td>{{ ('👁️' if entry.sense_sight else '')+
-                        ('👂' if entry.sense_sound else '')+
-                        ('🫳' if entry.sense_touch else '')+
-                        ('👃' if entry.sense_smell else '') }}<br>
-                        {{ ('👅' if entry.sense_taste else '')+
-                        ('💥' if entry.sense_pain else '')+
-                        ('❓' if entry.sense_other else '') }}</td>
-                    <td style="white-space:normal">{{ entry.content_tags.replace(';', ', ') if entry.content_tags else '—' }}</td>
-                    <td style="white-space:normal">{{ entry.type_tags.replace(';', ', ') if entry.type_tags else '—' }}</td>
-                    <td style="white-space:normal">{{ entry.context_tags.replace(';', ', ') if entry.context_tags else '—' }}</td>
-                    <td>{{ '%0.2f'|format(entry.sleep_hours)+' hrs' if entry.sleep_hours else '—' }}</td>
-                    <td>{{ "Yes" if entry.reflection else "No" }}</td>
-                    <td>{{ '%0.2f'|format(entry.user_age) if entry.user_age else '—' }}</td>
-                    <td>{{ entry.user_gender if entry.user_gender else '—' }}</td>
-                    <td>{{ entry.user_med_conditions if entry.user_med_conditions else '—' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="margin:15px 20px">
+        <h1>View Requested Data</h1>
+        {% if total_count == 0 %}
+            <p>
+            Your dataset does not seem to contain any entries. 
+            Either they have all been deleted or marked private, or an error has occurred.
+            </p>
         {% else %}
-            <p>No entries found.</p>
-        {% endif %}
+            <p>
+                You currently have access to <strong>{{ total_count }}</strong> public dream entr{{ "y" if total_count == 1 else "ies" }},
+                based on your request at <strong>{{request_dt.strftime('%I:%M %p')}}</strong> on <strong>{{request_dt.strftime('%Y-%m-%d')}}</strong>.<br>
+                Dream entries created after that date and time are not accessible, even if they match your filters.
+            </p>
 
-        <br>
-        <div>
-            {% if page > 1 %}
-                <a href="/research/data?page={{ page - 1 }}&per_page={{ per_page }}">&#8592; Previous</a>
+            <div>
+                <strong>Entries per page:</strong>
+                {% for n in [10, 25, 50] %}
+                    {% set n_pages = (total_count - 1) // n + 1 if total_count > 0 else 1 %}
+                    {% if n == per_page %}
+                        <strong class="active-button-link" style="padding: 7px 7px 9px 7px;">[{{ n }}]</strong> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
+                    {% else %}
+                        <a href="/research/data?page=1&per_page={{ n }}" class="button-link" style="padding: 7px 7px 9px 7px;">[{{ n }}]</a> ({{ n_pages }} page{{ "s" if n_pages != 1 }})
+                    {% endif %}
+                    {% if not loop.last %}&nbsp;|&nbsp;{% endif %}
+                {% endfor %}
+            </div>
+            <br>
+
+            {% if entries %}
+                <table border="1" cellpadding="6" cellspacing="0" class="table table-bordered table-hover rounded-4 overflow-hidden" style="white-space:nowrap;margin-bottom:0px">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>At Home</th>
+                            <th>Senses</th>
+                            <th>Content Tags</th>
+                            <th>Type Tags</th>
+                            <th>Context Tags</th>
+                            <th>Sleep Time</th>
+                            <th>Reflection</th>
+                            <th>U. Age</th>
+                            <th>U. Gender</th>
+                            <th>Med. Conditions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr style="cursor:pointer;font-size:14px" onclick="window.location='/my-dreams/{{ entry.entry_id }}'">
+                            <td>{{ entry.title }}</td>
+                            <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') if (entry.city or entry.state or entry.country) else '—' }}</td>
+                            <td style="white-space:normal">{{"No" if entry.not_at_home else "Yes"}}</td>
+                            <td>{{ '—' if entry.sense_sight == None else 
+                                ('👁️' if entry.sense_sight else '')+
+                                ('👂' if entry.sense_sound else '')+
+                                ('🫳' if entry.sense_touch else '')+
+                                ('👃' if entry.sense_smell else '') }}<br>
+                                {{ ('👅' if entry.sense_taste else '')+
+                                ('💥' if entry.sense_pain else '')+
+                                ('❓' if entry.sense_other else '') }}</td>
+                            <td style="white-space:normal">{{ entry.content_tags.replace(';', ', ') if entry.content_tags else '—' }}</td>
+                            <td style="white-space:normal">{{ entry.type_tags.replace(';', ', ') if entry.type_tags else '—' }}</td>
+                            <td style="white-space:normal">{{ entry.context_tags.replace(';', ', ') if entry.context_tags else '—' }}</td>
+                            <td>{{ '%0.2f'|format(entry.sleep_hours)+' hrs' if entry.sleep_hours else '—' }}</td>
+                            <td>{{ "Yes" if entry.reflection else "No" }}</td>
+                            <td>{{ '%0.2f'|format(entry.user_age) if entry.user_age else '—' }}</td>
+                            <td>{{ entry.user_gender if entry.user_gender else '—' }}</td>
+                            <td>{{ entry.user_med_conditions if entry.user_med_conditions else '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% else %}
-                <span style="color:gray">&#8592; Previous</span>
+                <p>No entries found.</p>
             {% endif %}
 
-            &nbsp;
-            {% for p in page_range %}
-                {% if p == -1 %}
-                    <span>&hellip;</span>
-                {% elif p == page %}
-                    <strong>{{ p }}</strong>
+            <br>
+            <div>
+                {% if page > 1 %}
+                    <a href="/research/data?page={{ page - 1 }}&per_page={{ per_page }}" class="button-link">&#8592; Previous</a>
                 {% else %}
-                    <a href="/research/data?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
+                    <span class="active-button-link" style="background-color:#DFDFF5;color:gray">&#8592; Previous</span>
                 {% endif %}
-            {% endfor %}
-            &nbsp;
 
-            {% if page < total_pages %}
-                <a href="/research/data?page={{ page + 1 }}&per_page={{ per_page }}">Next &#8594;</a>
-            {% else %}
-                <span style="color:gray">Next &#8594;</span>
-            {% endif %}
+                &nbsp;
+                {% for p in page_range %}
+                    {% if p == -1 %}
+                        <span>&hellip;</span>
+                    {% elif p == page %}
+                        <strong class="active-button-link">{{ p }}</strong>
+                    {% else %}
+                        <a href="/research/data?page={{ p }}&per_page={{ per_page }}" class="button-link">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+                &nbsp;
 
-            <span style="color:gray; margin-left:12px">Page {{ page }} of {{ total_pages }}</span>
-        </div>
+                {% if page < total_pages %}
+                    <a href="/research/data?page={{ page + 1 }}&per_page={{ per_page }}" class="button-link">Next &#8594;</a>
+                {% else %}
+                    <span class="active-button-link" style="background-color:#DFDFF5;color:gray">Next &#8594;</span>
+                {% endif %}
 
-        <div style="margin-top:8px">
-            <form method="get" action="/research/data" style="display:inline">
-                <input type="hidden" name="per_page" value="{{ per_page }}">
-                <label for="goto_page">Go to page:</label>
-                <input type="number" id="goto_page" name="page" min="1" max="{{ total_pages }}"
-                    value="{{ page }}" style="width:60px">
-                <button type="submit">Go</button>
-            </form>
-        </div>
-    {% endif %}
-
-    <p>
-        <a href="/research">Request new data</a> |
-        <a href="/research/download">Download your data</a>
-    </p>
+                <span style="margin-left:12px">Page {{ page }} of {{ total_pages }}</span>
+            </div>
+            
+            <div style="margin-top:15px">
+                <form method="get" action="/research/data" style="display:inline">
+                    <input type="hidden" name="per_page" value="{{ per_page }}">
+                    <label for="goto_page">Go to page:</label>
+                    <input type="number" class="form-control" id="goto_page" name="page" min="1" 
+                        max="{{ total_pages }}" value="{{ page }}" style="width:60px;display:inline">
+                    <button type="submit" class="btn btn-secondary" style="margin-bottom:4px;height:35px">Go</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

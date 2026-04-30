@@ -1,24 +1,31 @@
 {% extends "base.html" %}
 {% block body %}
-    {% if ok %}
-        <h1>Data Succesfully Requested</h1>
-        <p>
-            Congratulations! You now have access to <strong>{{rows}}</strong> dream entries. 
-            You can view your data directly in the Nyctograph website, or download it as a CSV file to process it yourself.
-        </p>
-        <p>
-            <a href="/research/data">View your data online</a> |
-            <a href="/research/download">Download your data</a>
-        </p>
-    {% else %}
-        <h1>Data Request Error</h1>
-        <p>
-            Your request for <strong>{{rows}}</strong> dream entries has not yet been processed. 
-            This may be a result of server issues or other problems on our end. 
-        </p>
-        <p>
-            If your requested data does not arrive within a minute or so, 
-            please reach out to us at <strong>support@nyctograph.org</strong> for further assistance.
-        </p>
-    {% endif %}
+    <div class="mx-auto main-column">
+        {% if ok %}
+            <h1>Data Succesfully Requested</h1>
+            <hr>
+            <p style="margin-top:15px">
+                Congratulations! You now have access to <strong>{{rows}}</strong> dream entries. 
+                You can view your data directly in the Nyctograph website, or download it as a CSV file to process it yourself.
+            </p>
+            <br>
+            <p>
+                <a href="/research/data" class="button-link">View your data online</a> |
+                <a href="/research/download" class="button-link">Download your data</a>
+            </p>
+        {% else %}
+            <h1>Data Request Error</h1>
+            <hr>
+            <div class="alert alert-danger">
+                <p>
+                    Your request for <strong>{{rows}}</strong> dream entries has not yet been processed. 
+                    This may be a result of server issues, or other problems on our end. 
+                </p>
+                <p style="margin-bottom:0px;">
+                    If your requested data does not arrive within a minute or so, 
+                    please reach out to us at <strong>support@nyctograph.org</strong> for further assistance.
+                </p>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

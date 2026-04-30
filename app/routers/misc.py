@@ -19,7 +19,7 @@ def admin_page(request: Request, dbSes: DbSesDep, user: UserDep, res: Researcher
         flash(request, "You do not have permission to access this page!", "warn")
         return RedirectResponse("/", status_code=303)
     
-    requests = dbSes.scalars(select(ResearchRequest)).all()
+    requests = dbSes.scalars(select(ResearchRequest).order_by(ResearchRequest.id)).all()
 
     return templates.TemplateResponse(request, "admin.html", {"requests": requests})
 

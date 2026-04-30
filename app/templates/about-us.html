@@ -1,137 +1,142 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/about_us.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>About Nyctograph</h1>
+    <div class="mx-auto main-column-wide">
+        <h1>About Nyctograph</h1>
 
-    <section>
-        <h2>What is Nyctograph?</h2>
-        <p>
-            Nyctograph is a dream recording and research platform designed to help users document, analyze, and understand their dreams.
-        </p>
-        <p>
-            Whether you're curious about your own dreams, want to explore patterns in your subconscious, or wish to contribute data to dream science research,
-            Nyctograph provides a secure and convenient platform for you.
-        </p>
-    </section>
+        <section>
+            <h2>What is Nyctograph?</h2>
+            <p>
+                Nyctograph is a dream recording and research platform designed to help users document, analyze, and understand their dreams.
+            </p>
+            <p>
+                Whether you're curious about your own dreams, want to explore patterns in your subconscious, or wish to contribute data to dream science research,
+                Nyctograph provides a secure and convenient platform for you.
+            </p>
+        </section>
 
-    <section>
-        <h2>Platform Features</h2>
-        <p>Nyctograph offers the following core features:</p>
-        <ul>
-            <li><strong>Dream Recording</strong>: Document your dreams in detail, including descriptions, sensory experiences, sleep duration, and more</li>
-            <li><strong>Follow-up Reflections</strong>: Return to your dream entries later to add new thoughts, insights, or interpretations as your understanding evolves</li>
-            <li><strong>Tagging System</strong>: Use rich tags to categorize your dreams, including content, types (like lucid dreams, nightmares), and real-life context</li>
-            <li><strong>Personal Statistics</strong>: View your dream patterns and trends to understand your sleep and dream cycles</li>
-            <li><strong>Global Statistics</strong>: Explore anonymized dream data from all users to discover common dream phenomena and patterns</li>
-            <li><strong>Privacy Controls</strong>: Maintain complete control over your data, choosing whether to make dreams public or keep them private</li>
-        </ul>
-    </section>
+        <section>
+            <h2>Platform Features</h2>
+            <p>Nyctograph offers the following core features:</p>
+            <ul>
+                <li><strong>Dream Recording</strong>: Document your dreams in detail, including descriptions, sensory experiences, sleep duration, and more</li>
+                <li><strong>Follow-up Reflections</strong>: Return to your dream entries later to add new thoughts, insights, or interpretations as your understanding evolves</li>
+                <li><strong>Tagging System</strong>: Use rich tags to categorize your dreams, including content, types (like lucid dreams, nightmares), and real-life context</li>
+                <li><strong>Personal Statistics</strong>: View your dream patterns and trends to understand your sleep and dream cycles</li>
+                <li><strong>Global Statistics</strong>: Explore anonymized dream data from all users to discover common dream phenomena and patterns</li>
+                <li><strong>Privacy Controls</strong>: Maintain complete control over your data, choosing whether to make dreams public or keep them private</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>How It Works</h2>
-        <p><strong>Regular User Accounts:</strong></p>
-        <ul>
-            <li>After registering, you can begin recording your dreams</li>
-            <li>Each dream entry can include a title, detailed description, sensory experiences, sleep duration, geographic location, and more</li>
-            <li>Add multiple tags to each dream for easy searching and analysis</li>
-            <li>Return to any dream entry later to add follow-up reflections as new insights emerge</li>
-            <li>View all your records and personal statistics on the "My Dreams" page</li>
-            <li>In account settings, choose whether to allow your dream data to be anonymized for global statistics and research</li>
-        </ul>
+        <section>
+            <h2>How It Works</h2>
+            <p><strong>Regular User Accounts:</strong></p>
+            <ul>
+                <li>After registering, you can begin recording your dreams</li>
+                <li>Each dream entry can include a title, detailed description, sensory experiences, sleep duration, geographic location, and more</li>
+                <li>Add multiple tags to each dream for easy searching and analysis</li>
+                <li>Return to any dream entry later to add follow-up reflections as new insights emerge</li>
+                <li>View all your records and personal statistics on the "My Dreams" page</li>
+                <li>In account settings, choose whether to allow your dream data to be anonymized for global statistics and research</li>
+            </ul>
 
-        <p><strong>Research Institution Accounts:</strong></p>
-        <ul>
-            <li>Research institutions can register dedicated accounts to access and analyze anonymized dream data</li>
-            <li>Research accounts cannot record dreams but can use advanced filtering to view qualifying data</li>
-            <li>All data provided to research institutions is strictly anonymized</li>
-        </ul>
-    </section>
+            <p><strong>Research Institution Accounts:</strong></p>
+            <ul>
+                <li>Research institutions can register dedicated accounts to access and analyze anonymized dream data</li>
+                <li>Research accounts cannot record dreams but can use advanced filtering to view qualifying data</li>
+                <li>All data provided to research institutions is strictly anonymized</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>Privacy Policy</h2>
-        
-        <h3>Data Collection</h3>
-        <p>We collect the following types of information:</p>
-        <ul>
-            <li><strong>Account Information</strong>: Username, email, password (encrypted)</li>
-            <li><strong>Profile Information</strong> (optional): Birth date, gender, medical conditions, geographic location</li>
-            <li><strong>Dream Data</strong>: All dream content, tags, sensory experiences, etc. that you record</li>
-        </ul>
+        <section>
+            <h2>Privacy Policy</h2>
+            
+            <h3>Data Collection</h3>
+            <p>We collect the following types of information:</p>
+            <ul>
+                <li><strong>Account Information</strong>: Username, email, password (encrypted)</li>
+                <li><strong>Profile Information</strong> (optional): Birth date, gender, medical conditions, geographic location</li>
+                <li><strong>Dream Data</strong>: All dream content, tags, sensory experiences, etc. that you record</li>
+            </ul>
 
-        <h3>Data Usage</h3>
-        <p>How your data is used depends on your privacy settings:</p>
-        <ul>
-            <li><strong>Private Dreams</strong>: Only visible to you, not used for any statistics or research</li>
-            <li><strong>Public Dreams</strong> (must be enabled in account settings):
-                <ul>
-                    <li>Included in global statistics after anonymization</li>
-                    <li>Accessible to research institutions after removing all personally identifiable information</li>
-                    <li>Used for academic research and the advancement of dream science</li>
-                </ul>
-            </li>
-        </ul>
+            <h3>Data Usage</h3>
+            <p>How your data is used depends on your privacy settings:</p>
+            <ul>
+                <li><strong>Private Dreams</strong>: Only visible to you, not used for any statistics or research</li>
+                <li><strong>Public Dreams</strong> (must be enabled in account settings):
+                    <ul>
+                        <li>Included in global statistics after anonymization</li>
+                        <li>Accessible to research institutions after removing all personally identifiable information</li>
+                        <li>Used for academic research and the advancement of dream science</li>
+                    </ul>
+                </li>
+            </ul>
 
-        <h3>Data Security</h3>
-        <p>Your data belongs to you, and we are committed to protecting it:</p>
-        <ul>
-            <li>We will never share, sell, or misuse your personal information</li>
-            <li>Your data is stored securely and protected from unauthorized access</li>
-            <li>You maintain complete control over your data at all times</li>
-            <li>You can modify your privacy settings whenever you want</li>
-            <li>You can choose whether each dream entry is public or private</li>
-            <li>If you disable public data sharing, your dreams are immediately removed from global statistics and research data</li>
-            <li>You can edit or delete your dream entries at any time</li>
-        </ul>
-    </section>
+            <h3>Data Security</h3>
+            <p>Your data belongs to you, and we are committed to protecting it:</p>
+            <ul>
+                <li>We will never share, sell, or misuse your personal information</li>
+                <li>Your data is stored securely and protected from unauthorized access</li>
+                <li>You maintain complete control over your data at all times</li>
+                <li>You can modify your privacy settings whenever you want</li>
+                <li>You can choose whether each dream entry is public or private</li>
+                <li>If you disable public data sharing, your dreams are immediately removed from global statistics and research data</li>
+                <li>You can edit or delete your dream entries at any time</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>Research and Data Usage</h2>
-        
-        <h3>Research Purpose</h3>
-        <p>
-            Public dream data will be used to advance dream science research, including but not limited to:
-        </p>
-        <ul>
-            <li>Research on correlations between dream content and real-life events</li>
-            <li>Analysis of dream patterns and characteristics across different populations</li>
-            <li>Distribution and patterns of sensory experiences in dreams</li>
-            <li>Research on conditions affecting special dream types (such as lucid dreams and nightmares)</li>
-        </ul>
+        <section>
+            <h2>Research and Data Usage</h2>
+            
+            <h3>Research Purpose</h3>
+            <p>
+                Public dream data will be used to advance dream science research, including but not limited to:
+            </p>
+            <ul>
+                <li>Research on correlations between dream content and real-life events</li>
+                <li>Analysis of dream patterns and characteristics across different populations</li>
+                <li>Distribution and patterns of sensory experiences in dreams</li>
+                <li>Research on conditions affecting special dream types (such as lucid dreams and nightmares)</li>
+            </ul>
 
-        <h3>Anonymization Process</h3>
-        <p>
-            All data provided to research institutions undergoes strict anonymization:
-        </p>
-        <ul>
-            <li>Removal of all personally identifiable information (usernames, emails, etc.)</li>
-            <li>Geographic location information generalized to city level</li>
-            <li>Birth dates converted to age ranges</li>
-            <li>Dream content does not include any identifiers linking to specific users</li>
-        </ul>
+            <h3>Anonymization Process</h3>
+            <p>
+                All data provided to research institutions undergoes strict anonymization:
+            </p>
+            <ul>
+                <li>Removal of all personally identifiable information (usernames, emails, etc.)</li>
+                <li>Geographic location information generalized to city level</li>
+                <li>Birth dates converted to age ranges</li>
+                <li>Dream content does not include any identifiers linking to specific users</li>
+            </ul>
 
-        <h3>Data Access Rules</h3>
-        <p>Research institutions accessing data must follow these rules:</p>
-        <ul>
-            <li>Can only access dream data that users have explicitly allowed to be public</li>
-            <li>Must not attempt to reverse-identify or link specific users</li>
-            <li>Data may only be used for academic research and scientific analysis, not commercial purposes</li>
-            <li>Must comply with relevant data protection regulations and ethical guidelines</li>
-        </ul>
-    </section>
+            <h3>Data Access Rules</h3>
+            <p>Research institutions accessing data must follow these rules:</p>
+            <ul>
+                <li>Can only access dream data that users have explicitly allowed to be public</li>
+                <li>Must not attempt to reverse-identify or link specific users</li>
+                <li>Data may only be used for academic research and scientific analysis, not commercial purposes</li>
+                <li>Must comply with relevant data protection regulations and ethical guidelines</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>Contact Us</h2>
-        <p>
-            If you have any questions, suggestions, or feedback about Nyctograph, please contact us:
-        </p>
-        <p>
-            <strong>Email:</strong> contact@nyctograph.com<br>
-            <strong>Issue Reporting:</strong> If you encounter any problems while using the platform, please contact us at the above email
-        </p>
-    </section>
+        <section>
+            <h2>Contact Us</h2>
+            <p>
+                If you have any questions, suggestions, or feedback about Nyctograph, please contact us:
+            </p>
+            <p>
+                <strong>Email:</strong> contact@nyctograph.com<br>
+                <strong>Issue Reporting:</strong> If you encounter any problems while using the platform, please contact us at the above email
+            </p>
+        </section>
 
-    <section style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #ccc;">
-        <p style="font-size: 0.9em; color: #666;">
-            <em>Last updated: April 2026</em>
-        </p>
-    </section>
+        <section style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #ccc;">
+            <p style="font-size: 0.9em; color: #666;">
+                <em>Last updated: April 2026</em>
+            </p>
+        </section>
+    </div>
 {% endblock %}

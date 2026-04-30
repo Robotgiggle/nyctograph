@@ -1,151 +1,218 @@
 {% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', path='/page_styles/global_stats.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block body %}
-    <h1>Global dream statistics</h1>
-
-    <section>
-        <form action="" method="get">
-            <label for="time_slice">Time range:</label>
-            <select id="time_slice" name="time_slice">
-                <option value="all" {%if time_slice == "all"%}selected{%endif%}>All time</option>
-                <option value="day" {%if time_slice == "day"%}selected{%endif%}>Past day</option>
-                <option value="week" {%if time_slice == "week"%}selected{%endif%}>Past week</option>
-                <option value="month" {%if time_slice == "month"%}selected{%endif%}>Past month</option>
-            </select>
-            <label for="age_bracket">Age bracket:</label>
-            <select id="age_bracket" name="age_bracket">
-                <option value="all" {%if age_bracket == "all"%}selected{%endif%}>All ages</option>
-                <option value="13-29" {%if age_bracket == "13-29"%}selected{%endif%}>13-29</option>
-                <option value="30-49" {%if age_bracket == "30-49"%}selected{%endif%}>30-49</option>
-                <option value="50+" {%if age_bracket == "50+"%}selected{%endif%}>50+</option>
-            </select>
-            <input type="submit" value="Filter Statistics">
-        </form>
-    </section>
-
-    {% if stats.total_entries %}
-        <section>
-            <h2>General Info</h2>
-            <p>These statistics were generated from <strong>{{ stats.total_entries }}</strong> total dream entries.</p>
-            <p>The average user gets about <strong>{{ stats.avg_sleep_duration|round(2) }}</strong> hours of sleep per recorded dream.</p>
-        </section>
-
-        <section>
-            <h2>Sensory Experiences</h2>
-            <p><strong>{{ (stats.sight_rate*100)|round(2) }}%</strong> of dreams involve visual sensations.</p>
-            <p><strong>{{ (stats.sound_rate*100)|round(2) }}%</strong> of dreams involve auditory sensations.</p>
-            <p><strong>{{ (stats.touch_rate*100)|round(2) }}%</strong> of dreams involve tactile sensations.</p>
-            <p><strong>{{ (stats.smell_rate*100)|round(2) }}%</strong> of dreams involve olfactory sensations.</p>
-            <p><strong>{{ (stats.taste_rate*100)|round(2) }}%</strong> of dreams involve gustatory sensations.</p>
-            <p><strong>{{ (stats.pain_rate*100)|round(2) }}%</strong> of dreams involve painful sensations.</p>
-            <p><strong>{{ (stats.other_rate*100)|round(2) }}%</strong> of dreams involve some other type of sensation.</p>
-        </section>
-
-        <section>
-            <h2>Special Dream Types</h2>
-            {% if totals.dream_type %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Entries</th>
-                            <th>% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for tagTotal in totals.dream_type %}
-                            <tr>
-                                <td>{{ tagTotal[0] }}</td>
-                                <td>{{ tagTotal[1] }}</td>
-                                <td>{{ (100*tagTotal[1]/stats.total_entries)|round(2) }}%</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No special dream types recorded.</p>
-            {% endif %}
-        </section>
-
-        <section>
-            <h2>Dream Entry Tags</h2>
-            <div style="display:flex;">
-                {% for cat in ["dream_content", "irl_context"] %}
-                    {% if totals[cat] %}
-                        <div>
-                            {% if cat == "dream_content" %}
-                                <strong>Dream Content</strong>
-                            {% else %}
-                                <strong>Real-World Context</strong>
-                            {% endif %}
-                            <div style="height:250px; overflow:auto;">
-                                <table>
-                                    <thead style="position:sticky; top:0">
-                                        <tr>
-                                            <th>Tag</th>
-                                            <th>Entries</th>
-                                            <th>% of Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for tag_total in totals[cat] %}
-                                            <tr>
-                                                <td>{{ tag_total[0] }}</td>
-                                                <td>{{ tag_total[1] }}</td>
-                                                <td>{{ (100*tag_total[1]/stats.total_entries)|round(2) }}%</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    {% else %}
-                        {% if cat == "dream_content" %}
-                            <p>No dream content tags found.</p>
-                        {% else %}
-                            <p>No real-world context tags found.</p>
-                        {% endif %}
+    <div class="mx-auto main-column-wide">
+        <div class="layer-box">
+            <h1>Global Statistics</h1>
+            <form action="" method="get" class="filter-form" style="display:flex;align-items:center;flex-wrap:wrap">
+                <label for="time_slice" style="margin-right:4px">Time range:</label>
+                <select class="form-select" style="width:130px" id="time_slice" name="time_slice">
+                    <option value="all" {%if time_slice == "all"%}selected{%endif%}>All time</option>
+                    <option value="day" {%if time_slice == "day"%}selected{%endif%}>Past day</option>
+                    <option value="week" {%if time_slice == "week"%}selected{%endif%}>Past week</option>
+                    <option value="month" {%if time_slice == "month"%}selected{%endif%}>Past month</option>
+                </select>
+                <label for="age_bracket" style="margin:0px 4px">Age bracket:</label>
+                <select class="form-select" style="width:130px" id="age_bracket" name="age_bracket">
+                    <option value="all" {%if age_bracket == "all"%}selected{%endif%}>All ages</option>
+                    <option value="13-29" {%if age_bracket == "13-29"%}selected{%endif%}>13-29</option>
+                    <option value="30-49" {%if age_bracket == "30-49"%}selected{%endif%}>30-49</option>
+                    <option value="50+" {%if age_bracket == "50+"%}selected{%endif%}>50+</option>
+                </select>
+                <input class="btn btn-secondary" style="height:35px;margin-left:4px" type="submit" value="Filter Statistics">
+            </form>
+        </div>
+        <hr>
+        {% if not stats or stats.total_entries == 0 %}
+            <p>There are no public entries matching these filters.</p>
+        {% else %}
+            <div class="layer-box">
+                <section>
+                    <h2>General Info</h2>
+                    <p>These statistics were generated from <strong>{{ stats.total_entries }}</strong> total dream entries.</p>
+                    <p>The average user got about <strong>{{ stats.avg_sleep_duration|round(2) }}</strong> hours of sleep per recorded dream.</p>
+                    <p>A total of <strong>{{ tagCount }}</strong> dream tags were applied, with an average of <strong>{{(tagCount/stats.total_entries)|round(1)}}</strong> per entry.</p>
+                    {% if totals.dream_content %}
+                        <p>The most popular dream content tag was <span class="tag" style="background-color:#EBD1EB">{{ totals.dream_content[0][0] }}</span>.</p>
                     {% endif %}
-                {% endfor %}
+                    {% if totals.irl_content %}
+                        <p style="margin-bottom:0px">The most popular real-world context tag was <span class="tag" style="background-color:#D1EBD1">{{ totals.irl_context[0][0] }}</span>.</p>
+                    {% endif %}
+                </section>
+                <hr class="mobile-show">
+                <section style="width:30%">
+                    <h2>Special Dream Types</h2>
+                    {% if totals.dream_type %}
+                        <table class="tag-table" style="margin-top: -4px;">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Entries</th>
+                                    <th>Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tagTotal in totals.dream_type %}
+                                    <tr>
+                                        <td class="tag" style="background-color:#EBEBD1;width:140px">{{ tagTotal[0] }}</td>
+                                        <td>{{ tagTotal[1] }}</td>
+                                        <td>{{ (100*tagTotal[1]/stats.total_entries)|round(2) }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No special dream types recorded.</p>
+                    {% endif %}
+                </section>
             </div>
-        </section>
-
-        <section>
-            <h2>Tag Associations</h2>
-            {% if associations|length %}
-                <ul style='height:250px; overflow:auto;'>
-                    {% for asso in associations %}
-                        <li>
-                            <strong>{{ (asso.association_rate*100)|round(1) }}%</strong> of entries with <strong>{{ asso.tag_val_a }}</strong> also have <strong>{{ asso.tag_val_b }}</strong>. 
-                            This is
-                            {% if asso.association_strength > 0.5 %} 
-                                a <strong>much higher</strong>
-                            {% elif asso.association_strength > 0.1 %} 
-                                a <strong>higher</strong>
-                            {% elif asso.association_strength >= -0.1 %} 
-                                <strong>about the same</strong>
-                            {% elif asso.association_strength >= -0.5 %} 
-                                a <strong>lower</strong>
-                            {% else %} 
-                                a <strong>much lower</strong>
-                            {% endif %}
-                            rate (association strength <strong>{{ asso.association_strength|round(2) }}</strong>) 
-                            {% if asso.association_strength|abs <= 0.1 %}
-                                as
+            <hr>
+            <div class="layer-box">
+                <section style="width:100%">
+                    <h2>Sensory Experience Rates</h2>
+                    <div class="sense-table-wrapper"><table>
+                        <tr class="senses">
+                            <td>
+                                <div id="sight-pie" class="pie">
+                                    <p class="emoji">👁️</p>
+                                </div>
+                                <p>Sight: {{"%.1f"|format(stats.sight_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="sound-pie" class="pie">
+                                    <p class="emoji">👂</p>
+                                </div>
+                                <p>Sound: {{"%.1f"|format(stats.sound_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="touch-pie" class="pie">
+                                    <p class="emoji">🫳</p>
+                                </div>
+                                <p>Touch: {{"%.1f"|format(stats.touch_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="smell-pie" class="pie">
+                                    <p class="emoji">👃</p>
+                                </div>
+                                <p>Smell: {{"%.1f"|format(stats.smell_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="taste-pie" class="pie">
+                                    <p class="emoji">👅</p>
+                                </div>
+                                <p>Taste: {{"%.1f"|format(stats.taste_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="pain-pie" class="pie">
+                                    <p class="emoji">💥</p>
+                                </div>
+                                <p>Pain: {{"%.1f"|format(stats.pain_rate * 100)}}%</p>
+                            </td>
+                            <td>
+                                <div id="other-pie" class="pie">
+                                    <p class="emoji">❓</p>
+                                </div>
+                                <p>Other: {{"%.1f"|format(stats.other_rate * 100)}}%</p>
+                            </td>
+                        </tr>
+                    </table></div>
+                    <script>
+                        {% for sense in ['sight', 'sound', 'touch', 'smell', 'taste', 'pain', 'other'] %}
+                            $("#{{sense}}-pie").css({ "background-image": "conic-gradient(#D1EBD1 {{stats[sense+'_rate'] * 100}}%, #D1D1EB {{stats[sense+'_rate'] * 100}}%)" });
+                        {% endfor %}
+                    </script>
+                </section>
+            </div>
+            <hr>
+            <div class="layer-box">
+                {% set tag_colors = {"dream_content":"EBD1EB", "dream_type":"EBEBD1", "irl_context":"D1EBD1", "calculated":"D0E4F7"} %}
+                <section style="width:52%">
+                    <h2>Dream Entry Tags</h2>
+                    <div style="display:flex;">
+                        {% for cat in ["dream_content", "irl_context"] %}
+                            {% if totals[cat] %}
+                                <div style="margin-right:15px">
+                                    {% if cat == "dream_content" %}
+                                        <strong>Dream Content</strong>
+                                    {% else %}
+                                        <strong>Real-World Context</strong>
+                                    {% endif %}
+                                    <div class="tag-table">
+                                        <div style="height:250px;width:fit-content">
+                                            <table >
+                                                <thead style="position:sticky;top:0;background-color:#DADAF0;">
+                                                    <tr>
+                                                        <th>Tag</th>
+                                                        <th>Entries</th>
+                                                        <th>Rate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for tag_total in totals[cat] %}
+                                                        <tr>
+                                                            <td class="tag" style="background-color:#{{tag_colors[cat]}}">{{ tag_total[0] }}</td>
+                                                            <td>{{ tag_total[1] }}</td>
+                                                            <td>{{ (100*tag_total[1]/stats.total_entries)|round(2) }}%</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             {% else %}
-                                than
+                                {% if cat == "dream_content" %}
+                                    <p style="margin-right:15px">No dream content tags found.</p>
+                                {% else %}
+                                    <p>No real-world context tags found.</p>
+                                {% endif %}
                             {% endif %}
-                            the general prevalence of <strong>{{ asso.tag_val_b }}</strong>.
-                        </li>   
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No tag associations found.</p>
-            {% endif %}
-        </section>
-    {% else %}
-        <section>
-            <h2>General Info</h2>
-            <p>There are no public entries matching this set of filters!</p>
-        </section>
-    {% endif %}
+                        {% endfor %}
+                    </div>
+                </section>
+                <hr class="mobile-show">
+                <section style="width:48%">
+                    <h2>Tag Associations</h2>
+                    {% if not associations or associations|length == 0 %}
+                        <p>No tag associations found.</p>
+                    {% else %}
+                        <div class="tag-table">
+                            <ul style='height:266px;text-align:left;margin:4px'>
+                                {% for asso in associations %}
+                                    <li style="margin-bottom:10px">
+                                        <span class="tag" style="background-color:#{{tag_colors[asso.tag_a.category]}}">{{asso.tag_val_a}}</span>
+                                        ➔
+                                        <span class="tag" style="background-color:#{{tag_colors[asso.tag_b.category]}}">{{asso.tag_val_b}}</span>
+                                        <strong>{{ (asso.association_rate*100)|round(1) }}%</strong><span class="mobile-hide"> association</span>
+                                        <br>
+                                        {#<strong>{{ (asso.association_rate*100)|round(1) }}%</strong> of entries with <strong>{{ asso.tag_val_a }}</strong> also have <strong>{{ asso.tag_val_b }}</strong>.#} 
+                                        {% if asso.association_strength > 0.5 %} 
+                                            <strong>Much higher</strong>
+                                        {% elif asso.association_strength > 0.1 %} 
+                                            <strong>Higher</strong>
+                                        {% elif asso.association_strength >= -0.1 %} 
+                                            <strong>About the same</strong>
+                                        {% elif asso.association_strength >= -0.5 %} 
+                                            <strong>Lower</strong>
+                                        {% else %} 
+                                            <strong>Much lower</strong>
+                                        {% endif %}
+                                        {% if asso.association_strength|abs <= 0.1 %}
+                                            as
+                                        {% else %}
+                                            than
+                                        {% endif %}
+                                        the base rate of
+                                        <span class="tag" style="background-color:#{{tag_colors[asso.tag_b.category]}}">{{asso.tag_val_b}}</span>
+                                    </li>   
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </section>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -1,7 +1,8 @@
 {% extends "email/email_base.html" %}
+{% block notif %}Data Access Notification{% endblock %}
 {% block body %}
     <p>
-        One or more of your dream entries was just included in a research dataset containing {{count}} total entries.<br>
+        One or more of your dream entries was just included in a research dataset containing {{count}} total entries.
         The dataset was requested by a researcher at <a href="{{instURL}}">{{instName}}</a>.
     </p>
     <p>You can learn more about what we do with your data <a href="{{domain}}/about-us">here</a>.</p>

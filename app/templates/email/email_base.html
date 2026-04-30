@@ -9,7 +9,7 @@
             padding: 10px;
             padding-left: 15px;
             border-radius: 8px;
-            width: 650px;
+            width: 550px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -27,6 +27,8 @@
 </head>
 <body class="bg">
     <div class="wrapper">
+        <h2 style="text-align:center">Nyctograph - {% block notif %}Email Notification{% endblock %}</h2>
+        <hr>
         <p class="name">Dear {{name}},</p>
         {% block body %}{% endblock %}
     </div>

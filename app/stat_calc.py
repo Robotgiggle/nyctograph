@@ -52,7 +52,6 @@ async def calculate_general_stats(dbSes: Session):
         func.count().filter(DreamEntry.sense_taste == True), 
         func.count().filter(DreamEntry.sense_pain == True), 
         func.count().filter(DreamEntry.sense_other == True), 
-        #func.coalesce(func.avg(avgSleepSubq.c.per_user), 0)
     ).join(User).where(DreamEntry.public == True)
 
     # calculate new global stats, across four time periods and four age brackets

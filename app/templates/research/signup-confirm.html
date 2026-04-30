@@ -1,29 +1,35 @@
 {% extends "base.html" %}
 {% block body %}
-    <h1>Create a research institution account</h1>
-    <p>
-        Nyctograph stores your credentials in our database so you can use the service. We also store a record of any user data you request from us.<br>
-        By marking the consent box below, you confirm that you understand this and agree to our storage of this information.
-    </p>
-    <form action="" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required minlength="3" maxlength="64" autocomplete="username">
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
-        <br>
-        <label for="password_confirm">Confirm password:</label>
-        <input type="password" id="password_confirm" name="password_confirm" required minlength="8" autocomplete="new-password">
-        <br><br>
-        <label>
-            <input type="checkbox" name="consent_data_storage" value="yes" required>
-            I consent to Nyctograph storing my account information as described above.
-        </label>
-        <br><br>
-        <input type="hidden" name="token" value="{{token}}">
-        <input type="submit" value="Create research account">
-    </form>
-    <p>
-        <a href="/login">Log in</a> | <a href="/signup">Standard user sign up</a>
-    </p>
+    <div class="mx-auto main-column">
+        <h1>Create a research account</h1>
+        <form action="" method="post">
+            <label for="name" class="form-label">Name:</label>
+            <input type="name" class="form-control" id="name" name="name" value="{{name}}" required disabled>
+            
+            <label for="username" class="form-label" style="margin-top:10px">Username:</label>
+            <input type="text" class="form-control" id="username" name="username" required minlength="3" maxlength="64" autocomplete="username">
+            
+            <label for="email" class="form-label" style="margin-top:10px">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{email}}" required disabled>
+
+            <label for="password" class="form-label" style="margin-top:10px">Password:</label>
+            <input type="password" class="form-control" id="password" name="password" required minlength="8" autocomplete="new-password">
+            
+            <label for="password_confirm" class="form-label" style="margin-top:10px">Confirm password:</label>
+            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required minlength="8" autocomplete="new-password">
+
+            <p style="font-size:small; margin-top: 1rem;margin-bottom: 0;">
+                Nyctograph stores your name and credentials in our database so you can use the service. We also store a record of any user data you request from us.
+                By marking the consent box below, you confirm that you understand this and agree to our storage of this information.
+            </p>
+            <input type="checkbox" class="form-check-input" name="consent_data_storage" id="consent_data_storage" value="yes" required>
+            <label for="consent_data_storage" class="form-check-label">
+                I consent to Nyctograph storing my account information as described above.
+            </label>
+
+            <br><br>
+            <input type="hidden" name="token" value="{{token}}">
+            <input type="submit" class="btn btn-primary" value="Create research account">
+        </form>
+    </div>
 {% endblock %}

@@ -96,8 +96,17 @@ def research_signup_action(
     return RedirectResponse("/signup/research", status_code=303)
 
 @router.get("/signup/research/confirm")
-def research_confirmation_form(request: Request, token: str = ""):
-    return templates.TemplateResponse(request, "research/signup-confirm.html", {"token": token})
+def research_confirmation_form(request: Request, dbSes: DbSesDep, token: str = ""):
+    req = dbSes.scalar(select(ResearchRequest).where(ResearchRequest.token == token))
+    if req is None:
+        flash(request, "Invalid account token. You must request a research account and be approved before you can create the account.", "warn")
+        return RedirectResponse("/signup/research", status_code=303)
+    context = {
+        "token": token,
+        "name": req.name,
+        "email": req.email
+    }
+    return templates.TemplateResponse(request, "research/signup-confirm.html", context)
 
 @router.post("/signup/research/confirm")
 def research_confirmation_action(

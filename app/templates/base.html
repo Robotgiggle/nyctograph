@@ -2,49 +2,76 @@
 <html lang="en">
     <head>
         <title>Nyctograph</title>
-        <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', path='/general.css') }}" rel="stylesheet" type="text/css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link href="{{ url_for('static', path='/bootstrap-multiselect.min.css') }}" rel="stylesheet" type="text/css"/>
+        <script src="{{ url_for('static', path='/jquery-4.0.0.min.js') }}" type="text/javascript"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', path='/bootstrap-multiselect.min.js') }}" type="text/javascript"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% block head %}{% endblock %}
     </head>
-    <body>
-        <header style="display: flex; justify-content: space-between;">
-            <span>
-                Nyctograph |
-                {% if login_status != 2 %}
-                    <a href="/">Record a dream</a> |
-                {% endif %}
-                {% if login_status == 1 %}
-                    <a href="/my-dreams">My dreams</a> |
-                    <a href="/personal-stats">Personal stats</a> |
-                {% endif %}
-                {% if login_status == 2 %}
-                    <a href="/research">Request data</a> |
-                    <a href="/research/data">View data</a> |
-                    <a href="/research/download">Download CSV</a> |
-                {% endif %}
-                <a href="/global-stats">Global stats</a> |
-                <a href="/about-us">About us</a>
-            </span>
-            {% if uname %}
-                <span>
-                    Logged in as {{uname}}{% if login_status == 2 %} (research){% endif %}
-                    ({% if login_status == 1 %}<a href="/account">Account</a> | {% endif %}<a href="/logout">Log out</a>)
-                </span>
-            {% else %}
-                <span>
-                    <a href="/login">Log in</a> |
-                    <a href="/signup">Sign up</a> |
-                    <a href="/signup/research">Research sign up</a>
-                </span>
-            {% endif %}
-        </header>
+    <body style="background-color:lavender">
+        <nav class="navbar navbar-expand-lg sticky-top" style="background-color:#D8CEF0">
+            <div class="container-fluid">
+                <a href="{{'/research' if login_status == 2 else '/'}}" class="navbar-brand">Nyctograph</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navLinks">
+                    <div class="navbar-nav me-auto mb-2 mb-lg-0">
+                        {% if login_status != 2 %}
+                            <a href="/" class="nav-link{{' active' if request.path == '/'}}">Record a dream</a>
+                        {% endif %}
+                        {% if login_status == 1 %}
+                            <a href="/my-dreams" class="nav-link{{' active' if request.path == '/my-dreams'}}">My dreams</a>
+                            <a href="/personal-stats" class="nav-link{{' active' if request.path == '/personal-stats'}}">Personal stats</a>
+                        {% endif %}
+                        {% if login_status == 2 %}
+                            <a href="/research" class="nav-link{{' active' if request.path == '/research'}}">Request data</a>
+                            <a href="/research/data" class="nav-link{{' active' if request.path == '/research/data'}}">View data</a>
+                            <a href="/research/download" class="nav-link{{' active' if request.path == '/research/download'}}">Download CSV</a>
+                        {% endif %}
+                        <a href="/global-stats" class="nav-link{{' active' if request.path == '/global-stats'}}">Global stats</a>
+                        <a href="/about-us" class="nav-link{{' active' if request.path == '/about-us'}}">About us</a>
+                    </div>
+                    <div class="navbar-nav">
+                        {% if uname %}
+                            {% if login_status == 2 %}
+                                <div class="navbar-text">
+                                    <span style="padding:3px 6px;border-radius:5px;font-weight:500;background-color:#9E80E0">Research Account</span>
+                                </div>
+                            {% endif %}
+                            <div class="dropdown" style="vertical-align:middle">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Logged in as {{uname}}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    {% if login_status == 1 %}
+                                        <li><a class="dropdown-item" href="/account">Account Settings</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item" href="/logout">Log Out</a></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <a href="/login" class="nav-link{{' active' if request.path == '/login'}}">Log in</a>
+                            <a href="/signup" class="nav-link{{' active' if request.path == '/signup'}}">Sign up</a>
+                            <a href="/signup/research" class="nav-link{{' active' if request.path == '/signup/research'}}">Research</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
         {% for msg, type in flash %}
             {% if type == "info" %}
-                <p class="flash-info">{{msg}}</p>
+                <p class="alert alert-info">{{msg}}</p>
             {% endif %}
             {% if type == "warn" %}
-                <p class="flash-warn">{{msg}}</p>
+                <p class="alert alert-danger">{{msg}}</p>
             {% endif %}
             {% if type == "success" %}
-                <p class="flash-success">{{msg}}</p>
+                <p class="alert alert-success">{{msg}}</p>
             {% endif %}
         {% endfor %}
         {% block body %}{% endblock %}
