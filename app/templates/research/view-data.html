@@ -56,7 +56,7 @@
                             <td>{{ entry.title }}</td>
                             <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
                             <td style="white-space:normal">{{ [entry.city, entry.state, entry.country]|reject('none')|join(', ') if (entry.city or entry.state or entry.country) else '—' }}</td>
-                            <td style="white-space:normal">{{"No" if entry.not_at_home else "Yes"}}</td>
+                            <td style="white-space:normal">{{'—' if entry.not_at_home == None else ("No" if entry.not_at_home else "Yes")}}</td>
                             <td>{{ '—' if entry.sense_sight == None else 
                                 ('👁️' if entry.sense_sight else '')+
                                 ('👂' if entry.sense_sound else '')+

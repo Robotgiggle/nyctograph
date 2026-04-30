@@ -39,7 +39,7 @@ class ResearchEntry(Base):
     country: Mapped[str|None]
     state: Mapped[str|None]
     city: Mapped[str|None]
-    not_at_home: Mapped[bool]
+    not_at_home: Mapped[bool|None]
 
     reflection: Mapped[str|None]
     rfln_timestamp: Mapped[datetime|None]
